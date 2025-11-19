@@ -1,3 +1,4 @@
+// app/api/auth/signup/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { createUser, findUserByEmail } from '@/lib/auth_service';
 import { createToken, setSession } from '@/lib/jwt';
@@ -5,20 +6,20 @@ import { createToken, setSession } from '@/lib/jwt';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { 
-      email, 
-      password, 
-      phone, 
-      name, 
-      role, 
+    const {
+      email,
+      password,
+      phone,
+      name,
+      role: requestedRole, // user might send this
       birthYear,
       gender,
       languages,
-      country, 
-      nic 
+      country,
+      nic,
     } = body;
 
-    // Basic validation
+    // === Basic required fields ===
     if (!email || !password || !phone || !name) {
       return NextResponse.json(
         { error: 'Missing required fields: email, password, phone, name' },
@@ -26,65 +27,44 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // New fields validation
-    if (!birthYear || !gender || !languages || languages.length === 0) {
+    if (!birthYear || !gender || !languages || !Array.isArray(languages) || languages.length === 0) {
       return NextResponse.json(
-        { error: 'Missing required fields: birthYear, gender, languages' },
+        { error: 'birthYear, gender, and at least one language are required' },
         { status: 400 }
       );
     }
 
-    // Validate birth year
+    // === Age validation ===
     const currentYear = new Date().getFullYear();
-    if (birthYear < currentYear - 120 || birthYear > currentYear - 18) {
+    const age = currentYear - birthYear;
+    if (age < 18 || age > 120) {
       return NextResponse.json(
-        { error: 'Invalid birth year. Must be between 18 and 120 years old' },
+        { error: 'You must be between 18 and 120 years old' },
         { status: 400 }
       );
     }
 
-    // Validate gender
-    const validGenders = ['MALE', 'FEMALE', 'OTHER', 'PREFER_NOT_TO_SAY'];
+    // === Gender validation ===
+    const validGenders = ['MALE', 'FEMALE', 'OTHER', 'PREFER_NOT_TO_SAY'] as const;
     if (!validGenders.includes(gender)) {
-      return NextResponse.json(
-        { error: 'Invalid gender value' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid gender' }, { status: 400 });
     }
 
-    // Validate languages array
-    if (!Array.isArray(languages) || languages.length === 0) {
+    // === ADMIN ROLE LOGIC (Critical Fix) ===
+    let role: 'TRAVELER' | 'GUIDE' | 'ADMIN' = 'TRAVELER';
+
+    if (email.endsWith('@hl.com')) {
+      role = 'ADMIN'; // Auto-promote @hl.com to ADMIN
+    } else if (requestedRole === 'ADMIN') {
       return NextResponse.json(
-        { error: 'At least one language is required' },
-        { status: 400 }
+        { error: 'Only @hl.com emails can register as Admin' },
+        { status: 403 }
       );
+    } else {
+      role = requestedRole === 'GUIDE' ? 'GUIDE' : 'TRAVELER';
     }
 
-    // Admin email validation
-    if (email.endsWith('@trysl.com')) {
-      if (role !== 'ADMIN') {
-        return NextResponse.json(
-          { error: '@trysl.com emails can only register as ADMIN' },
-          { status: 400 }
-        );
-      }
-    } else if (role === 'ADMIN') {
-      return NextResponse.json(
-        { error: 'Admin accounts must use @trysl.com email' },
-        { status: 400 }
-      );
-    }
-
-    // Check if user exists
-    const existingUser = await findUserByEmail(email);
-    if (existingUser) {
-      return NextResponse.json(
-        { error: 'Email already registered' },
-        { status: 400 }
-      );
-    }
-
-    // Role-specific validation
+    // === Role-specific validations ===
     if (role === 'TRAVELER' && !country) {
       return NextResponse.json(
         { error: 'Country is required for travelers' },
@@ -93,43 +73,46 @@ export async function POST(request: NextRequest) {
     }
 
     if (role === 'GUIDE') {
-      if (!nic) {
+      if (!country || !nic) {
         return NextResponse.json(
-          { error: 'NIC is required for guides' },
-          { status: 400 }
-        );
-      }
-      if (!country) {
-        return NextResponse.json(
-          { error: 'Country is required for guides' },
+          { error: 'Country and NIC are required for guides' },
           { status: 400 }
         );
       }
     }
 
-    // Validate password strength
+    // === Password strength ===
     if (password.length < 6) {
       return NextResponse.json(
-        { error: 'Password must be at least 6 characters long' },
+        { error: 'Password must be at least 6 characters' },
         { status: 400 }
       );
     }
 
-    // Create user
+    // === Check if email already exists ===
+    const existingUser = await findUserByEmail(email);
+    if (existingUser) {
+      return NextResponse.json(
+        { error: 'Email already registered' },
+        { status: 400 }
+      );
+    }
+
+    // === Create user ===
     const user = await createUser({
       email,
       password,
       phone,
       name,
-      role: role || 'TRAVELER',
-      birthYear: parseInt(birthYear),
+      role,
+      birthYear: Number(birthYear),
       gender,
       languages,
-      country,
-      nic,
+      country: country || undefined,
+      nic: nic || undefined,
     });
 
-    // Create token and set session
+    // === Generate JWT & set session ===
     const token = await createToken({
       userId: user.id,
       email: user.email,
@@ -139,15 +122,18 @@ export async function POST(request: NextRequest) {
 
     await setSession(token);
 
-    return NextResponse.json({ 
-      success: true, 
-      user: { 
-        id: user.id, 
-        email: user.email, 
-        role: user.role,
-        name: user.name 
-      } 
-    });
+    return NextResponse.json(
+      {
+        success: true,
+        user: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          role: user.role,
+        },
+      },
+      { status: 201 }
+    );
   } catch (error: any) {
     console.error('Signup error:', error);
     return NextResponse.json(

@@ -112,7 +112,7 @@ export default function SignInPage() {
             </p>
             
             <p className="text-center text-xs text-muted-foreground/60">
-              Admin? Use email ending with @trysl.com
+              Admin? Use email ending with @hl.com
             </p>
           </CardFooter>
         </Card>

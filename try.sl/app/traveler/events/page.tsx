@@ -30,24 +30,8 @@ import {
   ExternalLink,
   Ticket
 } from "lucide-react";
+import { EventItem } from "@/lib/types";
 
-// ------------------------------
-// Types
-// ------------------------------
-type EventItem = {
-  id: string;
-  title: string;
-  description: string;
-  date: string;
-  place: string;
-  price: string;
-  phone: string;
-  organizer: string;
-  ticketCount: number;
-  images: string[];
-  lat: number;
-  lng: number;
-};
 
 export default function EventsPage() {
   const [events, setEvents] = useState<EventItem[]>([]);
@@ -97,7 +81,14 @@ export default function EventsPage() {
           <h1 className="text-3xl font-bold text-black mb-8">Upcoming Events</h1>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {events.map(event => (
+            {events.length === 0 && (
+              <div className="col-span-full flex items-center justify-center py-20">
+                <p className="text-gray-500 text-lg">No events available at the moment</p>
+              </div>
+            )}
+
+
+            {events.length > 0 && events.map(event => (
               <div
                 key={event.id}
                 className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-all bg-white"
