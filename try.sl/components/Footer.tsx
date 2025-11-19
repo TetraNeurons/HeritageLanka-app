@@ -8,10 +8,10 @@ export default function Footer() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
 
         {/* Bottom */}
-        <div className="mt-12 pt-8 border-t border-border/40">
+        <div className="border-t border-border/40">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <p className="text-sm text-muted-foreground">
-              © {currentYear} try-sl. All rights reserved.
+              © {currentYear} Heritage Lanka. All rights reserved.
             </p>
             <div className="flex items-center space-x-6">
               <Link href="#twitter" className="text-muted-foreground hover:text-foreground transition-colors">

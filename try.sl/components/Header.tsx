@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Menu, X, LogOut, LayoutDashboard } from "lucide-react"
+import { Menu, X, LayoutDashboard } from "lucide-react"
 import { useState, useEffect } from "react"
 import axiosInstance from "@/lib/axios"
 
@@ -51,7 +51,7 @@ const response = await axiosInstance.get('/api/auth/validate')
             <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
               <span className="text-lg font-bold">T</span>
             </div>
-            <span className="text-xl font-semibold tracking-tight">try-sl</span>
+            <span className="text-xl font-semibold tracking-tight">Heritage Lanka</span>
           </Link>
 
           {/* Desktop Navigation */}

@@ -133,6 +133,26 @@ export const guidesRelations = relations(guides, ({ one, many }) => ({
   reviews: many(reviews),
 }));
 
+// Events table
+export const events = pgTable('events', {
+  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+  title: text('title').notNull(),
+  images: text('images').array().notNull(), // Array of Firebase Storage URLs
+  date: text('date').notNull(), // e.g., "Aug 14–24, 2025"
+  price: text('price').notNull(), // e.g., "Free" or "$35 – $120"
+  place: text('place').notNull(),
+  lat: real('lat').notNull(),
+  lng: real('lng').notNull(),
+  phone: text('phone').notNull(),
+  organizer: text('organizer').notNull(),
+  description: text('description').notNull(),
+  ticketCount: integer('ticket_count').default(0).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+export const eventsRelations = relations(events, ({ many }) => ({}));
+
 export const tripsRelations = relations(trips, ({ one, many }) => ({
   traveler: one(travelers, {
     fields: [trips.travelerId],
