@@ -1,0 +1,9 @@
+# Heritage Lanka - Robots.txt
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin/
+Disallow: /auth/
+
+# Sitemap location
+Sitemap: https://heritagelanka.com/sitemap.xml

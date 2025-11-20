@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import Header from "@/components/Header"
 import Footer from "@/components/Footer"
+import StructuredData from "@/components/StructuredData"
 import { 
   ArrowRight, 
   Zap, 
@@ -75,6 +76,7 @@ export default function Home() {
 
   return (
     <div className="flex min-h-screen flex-col overflow-x-hidden">
+      <StructuredData />
       <Header />
 
       {/* Hero Section */}
