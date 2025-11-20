@@ -189,7 +189,7 @@ export default function GuiderDashboardPage() {
 
             {/* Stats Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
-              <Card className="shadow-sm border-gray-100">
+              <Card className="shadow-sm border-gray-100 hover:shadow-md hover:-translate-y-1 transition-all duration-300 animate-fadeIn" style={{ animationDelay: '0.1s', animationFillMode: 'both' }}>
                 <CardContent className="p-4 sm:p-6">
                   <div className="flex items-center justify-between">
                     <div>
@@ -203,7 +203,7 @@ export default function GuiderDashboardPage() {
                 </CardContent>
               </Card>
 
-              <Card className="shadow-sm border-gray-100">
+              <Card className="shadow-sm border-gray-100 hover:shadow-md hover:-translate-y-1 transition-all duration-300 animate-fadeIn" style={{ animationDelay: '0.2s', animationFillMode: 'both' }}>
                 <CardContent className="p-4 sm:p-6">
                   <div className="flex items-center justify-between">
                     <div>
@@ -217,7 +217,7 @@ export default function GuiderDashboardPage() {
                 </CardContent>
               </Card>
 
-              <Card className="shadow-sm border-gray-100">
+              <Card className="shadow-sm border-gray-100 hover:shadow-md hover:-translate-y-1 transition-all duration-300 animate-fadeIn" style={{ animationDelay: '0.3s', animationFillMode: 'both' }}>
                 <CardContent className="p-4 sm:p-6">
                   <div className="flex items-center justify-between">
                     <div>
@@ -233,7 +233,7 @@ export default function GuiderDashboardPage() {
                 </CardContent>
               </Card>
 
-              <Card className="shadow-sm border-gray-100">
+              <Card className="shadow-sm border-gray-100 hover:shadow-md hover:-translate-y-1 transition-all duration-300 animate-fadeIn" style={{ animationDelay: '0.4s', animationFillMode: 'both' }}>
                 <CardContent className="p-4 sm:p-6">
                   <div className="flex items-center justify-between">
                     <div>
@@ -250,7 +250,7 @@ export default function GuiderDashboardPage() {
 
             {/* Current Trip (if any) */}
             {stats?.currentTrip && (
-              <Card className="mb-4 sm:mb-6 shadow-md border-blue-200 bg-gradient-to-br from-blue-50 to-white">
+              <Card className="mb-4 sm:mb-6 shadow-md border-blue-200 bg-gradient-to-br from-blue-50 to-white hover:shadow-lg transition-shadow duration-300">
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
                     <div className="bg-blue-600 p-1.5 rounded-md">
@@ -375,7 +375,7 @@ export default function GuiderDashboardPage() {
                             <Button
                               onClick={() => handleAcceptTrip(trip.id)}
                               disabled={actionLoading === trip.id}
-                              className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                              className="flex-1 bg-green-600 hover:bg-green-700 hover:scale-105 active:scale-98 text-white transition-all duration-200"
                             >
                               {actionLoading === trip.id ? (
                                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -390,7 +390,7 @@ export default function GuiderDashboardPage() {
                               onClick={() => handleDeclineTrip(trip.id)}
                               disabled={actionLoading === trip.id}
                               variant="outline"
-                              className="flex-1"
+                              className="flex-1 hover:scale-105 active:scale-98 transition-all duration-200"
                             >
                               <XCircle className="h-4 w-4 mr-2" />
                               Decline
