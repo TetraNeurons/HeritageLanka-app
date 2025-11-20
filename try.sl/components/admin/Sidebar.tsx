@@ -36,8 +36,8 @@ export function AppSidebar() {
   async function handleSignOut() {
     try {
       setLoading(true);
-      await axios.post("/api/auth/logout");
-      window.location.href = "/login";
+      await axios.post("/api/auth/signout");
+      window.location.href = "/auth/signin";
     } finally {
       setLoading(false);
     }
