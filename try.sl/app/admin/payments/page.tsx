@@ -25,6 +25,7 @@ import {
   CheckCircle,
   Clock,
   DollarSign,
+  Ticket,
 } from "lucide-react";
 
 interface Payment {
@@ -33,12 +34,13 @@ interface Payment {
   status: string;
   paidAt: string | null;
   createdAt: string;
+  type?: 'trip' | 'event';
   traveler: {
     id: string;
     name: string;
     email: string;
-  };
-  trip: {
+  } | null;
+  trip?: {
     id: string;
     fromDate: string;
     toDate: string;
@@ -46,25 +48,34 @@ interface Payment {
     status: string;
     numberOfPeople: number;
     totalDistance: number | null;
-  };
+  } | null;
+  event?: {
+    id: string;
+    title: string;
+    date: string;
+    place: string;
+  } | null;
+  ticketQuantity?: number;
 }
 
 export default function AdminPaymentsPage() {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [typeFilter, setTypeFilter] = useState<string>("all");
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
 
   useEffect(() => {
     fetchPayments();
-  }, [statusFilter, fromDate, toDate]);
+  }, [statusFilter, typeFilter, fromDate, toDate]);
 
   const fetchPayments = async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams();
       if (statusFilter !== "all") params.append("status", statusFilter);
+      if (typeFilter !== "all") params.append("type", typeFilter);
       if (fromDate) params.append("fromDate", fromDate);
       if (toDate) params.append("toDate", toDate);
 
@@ -212,6 +223,16 @@ export default function AdminPaymentsPage() {
                       <SelectItem value="PENDING">Pending</SelectItem>
                     </SelectContent>
                   </Select>
+                  <Select value={typeFilter} onValueChange={setTypeFilter}>
+                    <SelectTrigger className="w-full lg:w-[180px]">
+                      <SelectValue placeholder="Filter by type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Types</SelectItem>
+                      <SelectItem value="trip">Trip Payments</SelectItem>
+                      <SelectItem value="event">Event Tickets</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="flex gap-2">
                   <div className="flex-1">
@@ -258,9 +279,10 @@ export default function AdminPaymentsPage() {
                     <Table>
                       <TableHeader>
                         <TableRow>
+                          <TableHead>Type</TableHead>
                           <TableHead>Traveler</TableHead>
-                          <TableHead>Trip Details</TableHead>
-                          <TableHead>Trip Dates</TableHead>
+                          <TableHead>Details</TableHead>
+                          <TableHead>Date/Quantity</TableHead>
                           <TableHead>Amount</TableHead>
                           <TableHead>Status</TableHead>
                           <TableHead>Payment Date</TableHead>
@@ -270,30 +292,67 @@ export default function AdminPaymentsPage() {
                         {payments.map((payment) => (
                           <TableRow key={payment.id}>
                             <TableCell>
-                              <div>
-                                <div className="font-medium">{payment.traveler.name}</div>
-                                <div className="text-xs text-gray-500">{payment.traveler.email}</div>
-                              </div>
+                              {payment.type === 'event' ? (
+                                <Badge variant="secondary" className="flex items-center gap-1 w-fit">
+                                  <Ticket className="h-3 w-3" />
+                                  Event
+                                </Badge>
+                              ) : (
+                                <Badge variant="outline" className="flex items-center gap-1 w-fit">
+                                  <MapPin className="h-3 w-3" />
+                                  Trip
+                                </Badge>
+                              )}
                             </TableCell>
                             <TableCell>
-                              <div className="flex items-center gap-2">
-                                <MapPin className="h-4 w-4 text-blue-600" />
+                              {payment.traveler && (
                                 <div>
-                                  <div className="font-medium">{payment.trip.country}</div>
-                                  <div className="text-xs text-gray-500">
-                                    {payment.trip.numberOfPeople} {payment.trip.numberOfPeople === 1 ? "person" : "people"}
-                                    {payment.trip.totalDistance && ` • ${Math.round(payment.trip.totalDistance)} km`}
+                                  <div className="font-medium">{payment.traveler.name}</div>
+                                  <div className="text-xs text-gray-500">{payment.traveler.email}</div>
+                                </div>
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              {payment.type === 'event' && payment.event ? (
+                                <div className="flex items-center gap-2">
+                                  <Ticket className="h-4 w-4 text-purple-600" />
+                                  <div>
+                                    <div className="font-medium">{payment.event.title}</div>
+                                    <div className="text-xs text-gray-500">{payment.event.place}</div>
                                   </div>
                                 </div>
-                              </div>
+                              ) : payment.trip ? (
+                                <div className="flex items-center gap-2">
+                                  <MapPin className="h-4 w-4 text-blue-600" />
+                                  <div>
+                                    <div className="font-medium">{payment.trip.country}</div>
+                                    <div className="text-xs text-gray-500">
+                                      {payment.trip.numberOfPeople} {payment.trip.numberOfPeople === 1 ? "person" : "people"}
+                                      {payment.trip.totalDistance && ` • ${Math.round(payment.trip.totalDistance)} km`}
+                                    </div>
+                                  </div>
+                                </div>
+                              ) : null}
                             </TableCell>
                             <TableCell>
-                              <div className="flex items-center gap-1 text-sm">
-                                <Calendar className="h-3 w-3 text-gray-400" />
-                                <span>
-                                  {formatDate(payment.trip.fromDate)} - {formatDate(payment.trip.toDate)}
-                                </span>
-                              </div>
+                              {payment.type === 'event' && payment.event ? (
+                                <div>
+                                  <div className="flex items-center gap-1 text-sm">
+                                    <Calendar className="h-3 w-3 text-gray-400" />
+                                    <span>{payment.event.date}</span>
+                                  </div>
+                                  <div className="text-xs text-gray-500 mt-1">
+                                    {payment.ticketQuantity} {payment.ticketQuantity === 1 ? "ticket" : "tickets"}
+                                  </div>
+                                </div>
+                              ) : payment.trip ? (
+                                <div className="flex items-center gap-1 text-sm">
+                                  <Calendar className="h-3 w-3 text-gray-400" />
+                                  <span>
+                                    {formatDate(payment.trip.fromDate)} - {formatDate(payment.trip.toDate)}
+                                  </span>
+                                </div>
+                              ) : null}
                             </TableCell>
                             <TableCell>
                               <div className="flex items-center gap-1">
@@ -330,24 +389,63 @@ export default function AdminPaymentsPage() {
                         {/* Header */}
                         <div className="flex items-start justify-between">
                           <div>
-                            <div className="font-semibold text-gray-900">{payment.traveler.name}</div>
-                            <div className="text-xs text-gray-500">{payment.traveler.email}</div>
+                            {payment.traveler && (
+                              <>
+                                <div className="font-semibold text-gray-900">{payment.traveler.name}</div>
+                                <div className="text-xs text-gray-500">{payment.traveler.email}</div>
+                              </>
+                            )}
                           </div>
-                          {getStatusBadge(payment.status)}
+                          <div className="flex flex-col gap-1 items-end">
+                            {getStatusBadge(payment.status)}
+                            {payment.type === 'event' ? (
+                              <Badge variant="secondary" className="text-xs">
+                                <Ticket className="h-3 w-3 mr-1" />
+                                Event
+                              </Badge>
+                            ) : (
+                              <Badge variant="outline" className="text-xs">
+                                <MapPin className="h-3 w-3 mr-1" />
+                                Trip
+                              </Badge>
+                            )}
+                          </div>
                         </div>
 
-                        {/* Trip Details */}
+                        {/* Details */}
                         <div className="space-y-2 text-sm">
-                          <div className="flex items-center gap-2 text-gray-600">
-                            <MapPin className="h-4 w-4 text-blue-600" />
-                            <span className="font-medium">{payment.trip.country}</span>
-                          </div>
-                          <div className="flex items-center gap-2 text-gray-600">
-                            <Calendar className="h-4 w-4" />
-                            <span>
-                              {formatDate(payment.trip.fromDate)} - {formatDate(payment.trip.toDate)}
-                            </span>
-                          </div>
+                          {payment.type === 'event' && payment.event ? (
+                            <>
+                              <div className="flex items-center gap-2 text-gray-600">
+                                <Ticket className="h-4 w-4 text-purple-600" />
+                                <span className="font-medium">{payment.event.title}</span>
+                              </div>
+                              <div className="flex items-center gap-2 text-gray-600">
+                                <MapPin className="h-4 w-4" />
+                                <span>{payment.event.place}</span>
+                              </div>
+                              <div className="flex items-center gap-2 text-gray-600">
+                                <Calendar className="h-4 w-4" />
+                                <span>{payment.event.date}</span>
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                {payment.ticketQuantity} {payment.ticketQuantity === 1 ? "ticket" : "tickets"}
+                              </div>
+                            </>
+                          ) : payment.trip ? (
+                            <>
+                              <div className="flex items-center gap-2 text-gray-600">
+                                <MapPin className="h-4 w-4 text-blue-600" />
+                                <span className="font-medium">{payment.trip.country}</span>
+                              </div>
+                              <div className="flex items-center gap-2 text-gray-600">
+                                <Calendar className="h-4 w-4" />
+                                <span>
+                                  {formatDate(payment.trip.fromDate)} - {formatDate(payment.trip.toDate)}
+                                </span>
+                              </div>
+                            </>
+                          ) : null}
                         </div>
 
                         {/* Payment Info */}

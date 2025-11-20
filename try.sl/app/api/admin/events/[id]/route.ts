@@ -3,9 +3,10 @@ import { db } from '@/db/drizzle';
 import { events } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const event = await db.select().from(events).where(eq(events.id, params.id)).limit(1);
+    const { id } = await params;
+    const event = await db.select().from(events).where(eq(events.id, id)).limit(1);
     
     if (!event.length) {
       return NextResponse.json({ error: 'Event not found' }, { status: 404 });
@@ -17,8 +18,9 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const body = await request.json();
     const { title, images, date, price, place, lat, lng, phone, organizer, description, ticketCount } = body;
 
@@ -37,7 +39,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
         ticketCount,
         updatedAt: new Date(),
       })
-      .where(eq(events.id, params.id))
+      .where(eq(events.id, id))
       .returning();
 
     if (!updated.length) {
@@ -50,9 +52,10 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const deleted = await db.delete(events).where(eq(events.id, params.id)).returning();
+    const { id } = await params;
+    const deleted = await db.delete(events).where(eq(events.id, id)).returning();
 
     if (!deleted.length) {
       return NextResponse.json({ error: 'Event not found' }, { status: 404 });

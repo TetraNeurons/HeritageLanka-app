@@ -7,7 +7,7 @@ export const userRoleEnum = pgEnum('user_role', ['TRAVELER', 'GUIDE', 'ADMIN']);
 export const genderEnum = pgEnum('gender', ['MALE', 'FEMALE', 'OTHER', 'PREFER_NOT_TO_SAY']);
 export const tripPreferenceEnum = pgEnum('trip_preference', ['RELIGIOUS', 'CASUAL', 'ADVENTURE']);
 export const bookingStatusEnum = pgEnum('booking_status', ['PENDING', 'ACCEPTED', 'CONFIRMED', 'COMPLETED', 'CANCELLED']);
-export const paymentStatusEnum = pgEnum('payment_status', ['PENDING', 'PAID', 'RELEASED']);
+export const paymentStatusEnum = pgEnum('payment_status', ['PENDING', 'PAID', 'RELEASED', 'CANCELLED']);
 export const planningModeEnum = pgEnum('planning_mode', ['MANUAL', 'AI_GENERATED']);
 export const tripStatusEnum = pgEnum('trip_status', ['PLANNING', 'CONFIRMED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED']);
 
@@ -118,10 +118,16 @@ export const places = pgTable('places', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
-// Payments table
+// Payments table - Updated to support both trip and event payments
 export const payments = pgTable('payments', {
   id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
-  tripId: text('trip_id').notNull().references(() => trips.id, { onDelete: 'cascade' }).unique(),
+  // Either tripId OR eventId must be set (not both, not neither)
+  tripId: text('trip_id').references(() => trips.id, { onDelete: 'cascade' }),
+  eventId: text('event_id').references(() => events.id, { onDelete: 'cascade' }),
+  // For event payments, store the traveler who made the purchase
+  travelerId: text('traveler_id').references(() => travelers.id, { onDelete: 'cascade' }),
+  // For event payments, store the ticket quantity
+  ticketQuantity: integer('ticket_quantity'),
   amount: real('amount').notNull(),
   status: paymentStatusEnum('status').default('PENDING').notNull(),
   stripeSessionId: text('stripe_session_id').unique(),
@@ -157,6 +163,14 @@ export const events = pgTable('events', {
   ticketCount: integer('ticket_count').default(0).notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+// Guide Declinations table - Tracks which guides have declined which trips
+export const guideDeclinations = pgTable('guide_declinations', {
+  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+  guideId: text('guide_id').notNull().references(() => guides.id, { onDelete: 'cascade' }),
+  tripId: text('trip_id').notNull().references(() => trips.id, { onDelete: 'cascade' }),
+  declinedAt: timestamp('declined_at').defaultNow().notNull(),
 });
 
 // Relations
@@ -218,6 +232,10 @@ export const paymentsRelations = relations(payments, ({ one }) => ({
     fields: [payments.tripId],
     references: [trips.id],
   }),
+  event: one(events, {
+    fields: [payments.eventId],
+    references: [events.id],
+  }),
 }));
 
 export const reviewsRelations = relations(reviews, ({ one }) => ({
@@ -231,6 +249,21 @@ export const reviewsRelations = relations(reviews, ({ one }) => ({
   }),
   trip: one(trips, {
     fields: [reviews.tripId],
+    references: [trips.id],
+  }),
+}));
+
+export const eventsRelations = relations(events, ({ many }) => ({
+  payments: many(payments),
+}));
+
+export const guideDeclinationsRelations = relations(guideDeclinations, ({ one }) => ({
+  guide: one(guides, {
+    fields: [guideDeclinations.guideId],
+    references: [guides.id],
+  }),
+  trip: one(trips, {
+    fields: [guideDeclinations.tripId],
     references: [trips.id],
   }),
 }));

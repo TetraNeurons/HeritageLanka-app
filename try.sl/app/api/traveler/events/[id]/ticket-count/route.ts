@@ -3,8 +3,9 @@ import { db } from '@/db/drizzle';
 import { events } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
-export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const body = await request.json();
     const { ticketCount } = body;
 
@@ -17,7 +18,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
         ticketCount,
         updatedAt: new Date(),
       })
-      .where(eq(events.id, params.id))
+      .where(eq(events.id, id))
       .returning();
 
     if (!updated.length) {

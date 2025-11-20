@@ -6,15 +6,14 @@ import { getSession } from '@/lib/jwt';
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id: userId } = await params;
   const session = await getSession();
 
   if (!session || session.role !== 'ADMIN') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
-
-  const userId = params.id;
 
   // Prevent self-deletion
   if (session.userId === userId) {

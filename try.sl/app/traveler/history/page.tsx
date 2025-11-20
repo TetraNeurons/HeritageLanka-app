@@ -22,14 +22,16 @@ import {
   Receipt,
   CheckCircle,
   Clock,
+  Ticket,
 } from "lucide-react";
 
-interface Payment {
+interface TripPayment {
   id: string;
   amount: number;
   status: string;
   paidAt: string | null;
   createdAt: string;
+  type: 'trip';
   trip: {
     id: string;
     fromDate: string;
@@ -40,6 +42,24 @@ interface Payment {
     totalDistance: number | null;
   };
 }
+
+interface EventPayment {
+  id: string;
+  amount: number;
+  status: string;
+  paidAt: string | null;
+  createdAt: string;
+  type: 'event';
+  event: {
+    id: string;
+    title: string;
+    date: string;
+    place: string;
+    ticketQuantity: number;
+  };
+}
+
+type Payment = TripPayment | EventPayment;
 
 export default function PaymentHistoryPage() {
   const [payments, setPayments] = useState<Payment[]>([]);
@@ -131,7 +151,7 @@ export default function PaymentHistoryPage() {
                 </div>
                 <div>
                   <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Payment History</h1>
-                  <p className="text-gray-600 mt-1">Track all your trip payments</p>
+                  <p className="text-gray-600 mt-1">Track all your trip payments and event tickets</p>
                 </div>
               </div>
             </div>
@@ -158,9 +178,9 @@ export default function PaymentHistoryPage() {
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead>Trip Details</TableHead>
-                          <TableHead>Dates</TableHead>
-                          <TableHead>People</TableHead>
+                          <TableHead>Type</TableHead>
+                          <TableHead>Details</TableHead>
+                          <TableHead>Date/Info</TableHead>
                           <TableHead>Amount</TableHead>
                           <TableHead>Status</TableHead>
                           <TableHead>Payment Date</TableHead>
@@ -170,29 +190,59 @@ export default function PaymentHistoryPage() {
                         {payments.map((payment) => (
                           <TableRow key={payment.id}>
                             <TableCell>
-                              <div className="flex items-center gap-2">
-                                <MapPin className="h-4 w-4 text-blue-600" />
-                                <div>
-                                  <div className="font-medium">{payment.trip.country}</div>
-                                  <div className="text-xs text-gray-500">
-                                    Trip Status: {payment.trip.status}
+                              {payment.type === 'trip' ? (
+                                <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                                  Trip
+                                </Badge>
+                              ) : (
+                                <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
+                                  Event
+                                </Badge>
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              {payment.type === 'trip' ? (
+                                <div className="flex items-center gap-2">
+                                  <MapPin className="h-4 w-4 text-blue-600" />
+                                  <div>
+                                    <div className="font-medium">{payment.trip.country}</div>
+                                    <div className="text-xs text-gray-500">
+                                      Status: {payment.trip.status}
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
+                              ) : (
+                                <div className="flex items-center gap-2">
+                                  <Calendar className="h-4 w-4 text-purple-600" />
+                                  <div>
+                                    <div className="font-medium">{payment.event.title}</div>
+                                    <div className="text-xs text-gray-500">
+                                      {payment.event.place}
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
                             </TableCell>
                             <TableCell>
-                              <div className="flex items-center gap-1 text-sm">
-                                <Calendar className="h-3 w-3 text-gray-400" />
-                                <span>
-                                  {formatDate(payment.trip.fromDate)} - {formatDate(payment.trip.toDate)}
-                                </span>
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex items-center gap-1 text-sm">
-                                <Users className="h-3 w-3 text-gray-400" />
-                                <span>{payment.trip.numberOfPeople}</span>
-                              </div>
+                              {payment.type === 'trip' ? (
+                                <div className="flex items-center gap-1 text-sm">
+                                  <Calendar className="h-3 w-3 text-gray-400" />
+                                  <span>
+                                    {formatDate(payment.trip.fromDate)} - {formatDate(payment.trip.toDate)}
+                                  </span>
+                                </div>
+                              ) : (
+                                <div className="space-y-1">
+                                  <div className="flex items-center gap-1 text-sm">
+                                    <Calendar className="h-3 w-3 text-gray-400" />
+                                    <span>{payment.event.date}</span>
+                                  </div>
+                                  <div className="flex items-center gap-1 text-sm text-gray-600">
+                                    <Users className="h-3 w-3 text-gray-400" />
+                                    <span>{payment.event.ticketQuantity} ticket(s)</span>
+                                  </div>
+                                </div>
+                              )}
                             </TableCell>
                             <TableCell>
                               <span className="font-semibold text-gray-900">
@@ -223,37 +273,77 @@ export default function PaymentHistoryPage() {
                   {payments.map((payment) => (
                     <Card key={payment.id}>
                       <CardContent className="p-4 space-y-3">
-                        {/* Trip Info */}
+                        {/* Payment Type Badge */}
                         <div className="flex items-start justify-between">
                           <div className="flex items-center gap-2">
-                            <MapPin className="h-5 w-5 text-blue-600" />
-                            <div>
-                              <div className="font-semibold text-gray-900">
-                                {payment.trip.country}
-                              </div>
-                              <div className="text-xs text-gray-500">
-                                {payment.trip.status}
-                              </div>
-                            </div>
+                            {payment.type === 'trip' ? (
+                              <>
+                                <MapPin className="h-5 w-5 text-blue-600" />
+                                <div>
+                                  <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 mb-1">
+                                    Trip
+                                  </Badge>
+                                  <div className="font-semibold text-gray-900">
+                                    {payment.trip.country}
+                                  </div>
+                                  <div className="text-xs text-gray-500">
+                                    {payment.trip.status}
+                                  </div>
+                                </div>
+                              </>
+                            ) : (
+                              <>
+                                <Calendar className="h-5 w-5 text-purple-600" />
+                                <div>
+                                  <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200 mb-1">
+                                    Event
+                                  </Badge>
+                                  <div className="font-semibold text-gray-900">
+                                    {payment.event.title}
+                                  </div>
+                                  <div className="text-xs text-gray-500">
+                                    {payment.event.place}
+                                  </div>
+                                </div>
+                              </>
+                            )}
                           </div>
                           {getStatusBadge(payment.status)}
                         </div>
 
-                        {/* Trip Details */}
+                        {/* Details */}
                         <div className="space-y-2 text-sm">
-                          <div className="flex items-center gap-2 text-gray-600">
-                            <Calendar className="h-4 w-4" />
-                            <span>
-                              {formatDate(payment.trip.fromDate)} - {formatDate(payment.trip.toDate)}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-2 text-gray-600">
-                            <Users className="h-4 w-4" />
-                            <span>
-                              {payment.trip.numberOfPeople}{" "}
-                              {payment.trip.numberOfPeople === 1 ? "person" : "people"}
-                            </span>
-                          </div>
+                          {payment.type === 'trip' ? (
+                            <>
+                              <div className="flex items-center gap-2 text-gray-600">
+                                <Calendar className="h-4 w-4" />
+                                <span>
+                                  {formatDate(payment.trip.fromDate)} - {formatDate(payment.trip.toDate)}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-2 text-gray-600">
+                                <Users className="h-4 w-4" />
+                                <span>
+                                  {payment.trip.numberOfPeople}{" "}
+                                  {payment.trip.numberOfPeople === 1 ? "person" : "people"}
+                                </span>
+                              </div>
+                            </>
+                          ) : (
+                            <>
+                              <div className="flex items-center gap-2 text-gray-600">
+                                <Calendar className="h-4 w-4" />
+                                <span>{payment.event.date}</span>
+                              </div>
+                              <div className="flex items-center gap-2 text-gray-600">
+                                <Users className="h-4 w-4" />
+                                <span>
+                                  {payment.event.ticketQuantity}{" "}
+                                  {payment.event.ticketQuantity === 1 ? "ticket" : "tickets"}
+                                </span>
+                              </div>
+                            </>
+                          )}
                         </div>
 
                         {/* Payment Info */}

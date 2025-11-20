@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db/drizzle';
-import { trips, travelers, tripLocations, payments } from '@/db/schema';
+import { trips, travelers, tripLocations, payments, guides, users } from '@/db/schema';
 import { eq, desc } from 'drizzle-orm';
 import { getSession } from '@/lib/jwt';
 
@@ -41,6 +41,7 @@ export async function GET(request: NextRequest) {
         bookingStatus: trips.bookingStatus,
         totalDistance: trips.totalDistance,
         needsGuide: trips.needsGuide,
+        guideId: trips.guideId,
         planDescription: trips.planDescription,
         aiSummary: trips.aiSummary,
         createdAt: trips.createdAt,
@@ -50,7 +51,7 @@ export async function GET(request: NextRequest) {
       .where(eq(trips.travelerId, traveler.id))
       .orderBy(desc(trips.createdAt));
 
-    // Fetch locations and payments for each trip
+    // Fetch locations, payments, and guide info for each trip
     const tripsWithDetails = await Promise.all(
       travelerTrips.map(async (trip) => {
         // Get trip locations
@@ -67,10 +68,46 @@ export async function GET(request: NextRequest) {
           .where(eq(payments.tripId, trip.id))
           .limit(1);
 
+        // Get guide info if assigned
+        let guideInfo = null;
+        if (trip.needsGuide && trip.status !== 'PLANNING') {
+          const [guideData] = await db
+            .select({
+              guideId: guides.id,
+              userId: guides.userId,
+            })
+            .from(guides)
+            .innerJoin(users, eq(guides.userId, users.id))
+            .where(eq(guides.id, trip.guideId!))
+            .limit(1);
+
+          if (guideData) {
+            const [guideUser] = await db
+              .select({
+                name: users.name,
+                phone: users.phone,
+                languages: users.languages,
+              })
+              .from(users)
+              .where(eq(users.id, guideData.userId))
+              .limit(1);
+
+            if (guideUser) {
+              guideInfo = {
+                name: guideUser.name,
+                languages: guideUser.languages,
+                // Only include phone if trip is IN_PROGRESS
+                ...(trip.status === 'IN_PROGRESS' && { phone: guideUser.phone }),
+              };
+            }
+          }
+        }
+
         return {
           ...trip,
           locations,
           payment: payment || null,
+          guide: guideInfo,
         };
       })
     );

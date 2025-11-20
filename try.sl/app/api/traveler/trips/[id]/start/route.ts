@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db/drizzle';
-import { trips, travelers, payments } from '@/db/schema';
+import { trips, travelers, payments, guides, users } from '@/db/schema';
 import { eq, and } from 'drizzle-orm';
 import { getSession } from '@/lib/jwt';
 
@@ -109,28 +109,64 @@ export async function POST(
       );
     }
 
-    // Update trip status to IN_PROGRESS and bookingStatus to ACCEPTED
-    await db
-      .update(trips)
-      .set({
-        status: 'IN_PROGRESS',
-        bookingStatus: 'ACCEPTED',
-        updatedAt: new Date(),
-      })
-      .where(eq(trips.id, tripId));
+    // Use transaction to update trip, traveler, and guide atomically
+    const result = await db.transaction(async (tx) => {
+      // Update trip status to IN_PROGRESS and bookingStatus to ACCEPTED
+      await tx
+        .update(trips)
+        .set({
+          status: 'IN_PROGRESS',
+          bookingStatus: 'ACCEPTED',
+          updatedAt: new Date(),
+        })
+        .where(eq(trips.id, tripId));
 
-    // Update traveler.tripInProgress to true
-    await db
-      .update(travelers)
-      .set({ tripInProgress: true })
-      .where(eq(travelers.id, traveler.id));
+      // Update traveler.tripInProgress to true
+      await tx
+        .update(travelers)
+        .set({ tripInProgress: true })
+        .where(eq(travelers.id, traveler.id));
 
-    // Return success response
+      // If trip has a guide, update guide.tripInProgress to true
+      if (trip.guideId) {
+        await tx
+          .update(guides)
+          .set({ tripInProgress: true })
+          .where(eq(guides.id, trip.guideId));
+      }
+
+      return { success: true };
+    });
+
+    // Get guide phone number if guide is assigned
+    let guidePhone = null;
+    if (trip.guideId) {
+      const [guide] = await db
+        .select({ userId: guides.userId })
+        .from(guides)
+        .where(eq(guides.id, trip.guideId))
+        .limit(1);
+
+      if (guide) {
+        const [guideUser] = await db
+          .select({ phone: users.phone })
+          .from(users)
+          .where(eq(users.id, guide.userId))
+          .limit(1);
+
+        if (guideUser) {
+          guidePhone = guideUser.phone;
+        }
+      }
+    }
+
+    // Return success response with guide phone
     return NextResponse.json(
       {
         success: true,
         message: 'Trip started successfully',
         tripId: tripId,
+        guidePhone: guidePhone,
       },
       { status: 200 }
     );

@@ -56,6 +56,11 @@ interface Trip {
     status: string;
     paidAt: string | null;
   } | null;
+  guide?: {
+    name: string;
+    languages: string[];
+    phone?: string;
+  } | null;
 }
 
 export default function TravelerPlansPage() {
@@ -370,6 +375,32 @@ export default function TravelerPlansPage() {
                         </p>
                       )}
 
+                      {/* Guide Info */}
+                      {trip.guide && trip.status !== 'PLANNING' && (
+                        <div className="pt-2 border-t space-y-1">
+                          <div className="flex items-center gap-2 text-sm">
+                            <Users className="h-4 w-4 text-blue-600" />
+                            <span className="font-medium">Guide: {trip.guide.name}</span>
+                          </div>
+                          <div className="flex items-center gap-1 flex-wrap ml-6">
+                            <Globe className="h-3 w-3 text-gray-400" />
+                            {trip.guide.languages.map((lang) => (
+                              <Badge key={lang} variant="secondary" className="text-xs">
+                                {lang}
+                              </Badge>
+                            ))}
+                          </div>
+                          {trip.guide.phone && trip.status === 'IN_PROGRESS' && (
+                            <div className="flex items-center gap-2 text-sm ml-6">
+                              <Phone className="h-3 w-3 text-gray-400" />
+                              <a href={`tel:${trip.guide.phone}`} className="text-blue-600 hover:underline">
+                                {trip.guide.phone}
+                              </a>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
                       {/* Locations Count */}
                       {trip.locations.length > 0 && (
                         <div className="text-xs text-gray-500">
@@ -605,6 +636,51 @@ export default function TravelerPlansPage() {
                     </div>
                   </div>
                 </div>
+
+                {/* Guide Information */}
+                {selectedTrip.guide && selectedTrip.status !== 'PLANNING' && (
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <h3 className="font-semibold text-sm mb-3 flex items-center gap-2">
+                      <Users className="h-4 w-4 text-blue-600" />
+                      Your Guide
+                    </h3>
+                    <div className="space-y-2">
+                      <div>
+                        <span className="text-xs text-gray-500">Name:</span>
+                        <p className="font-medium">{selectedTrip.guide.name}</p>
+                      </div>
+                      <div>
+                        <span className="text-xs text-gray-500">Languages:</span>
+                        <div className="flex items-center gap-1 flex-wrap mt-1">
+                          {selectedTrip.guide.languages.map((lang) => (
+                            <Badge key={lang} variant="secondary" className="text-xs">
+                              {lang}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                      {selectedTrip.guide.phone && selectedTrip.status === 'IN_PROGRESS' && (
+                        <div>
+                          <span className="text-xs text-gray-500">Contact:</span>
+                          <div className="flex items-center gap-2 mt-1">
+                            <Phone className="h-4 w-4 text-gray-400" />
+                            <a 
+                              href={`tel:${selectedTrip.guide.phone}`} 
+                              className="text-blue-600 hover:underline font-medium"
+                            >
+                              {selectedTrip.guide.phone}
+                            </a>
+                          </div>
+                        </div>
+                      )}
+                      {selectedTrip.status === 'CONFIRMED' && (
+                        <p className="text-xs text-gray-500 italic mt-2">
+                          Contact information will be available when you start the trip
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
 
                 {/* Description */}
                 {(selectedTrip.aiSummary || selectedTrip.planDescription) && (

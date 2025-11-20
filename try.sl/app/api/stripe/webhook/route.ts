@@ -1,9 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db/drizzle';
-import { payments } from '@/db/schema';
+import { payments, events } from '@/db/schema';
 import { eq } from 'drizzle-orm';
-import { stripe } from '@/lib/stripe';
 import Stripe from 'stripe';
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: '2025-11-17.clover',
+});
+
+const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,84 +16,127 @@ export async function POST(request: NextRequest) {
     const signature = request.headers.get('stripe-signature');
 
     if (!signature) {
+      console.error('No Stripe signature found');
       return NextResponse.json(
-        { success: false, error: 'Missing stripe-signature header' },
+        { error: 'No signature' },
         { status: 400 }
       );
     }
 
-    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
-    if (!webhookSecret) {
-      console.error('STRIPE_WEBHOOK_SECRET is not configured');
-      return NextResponse.json(
-        { success: false, error: 'Webhook secret not configured' },
-        { status: 500 }
-      );
-    }
-
-    // Verify Stripe webhook signature
+    // Verify webhook signature
     let event: Stripe.Event;
     try {
       event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
     } catch (err: any) {
       console.error('Webhook signature verification failed:', err.message);
       return NextResponse.json(
-        { success: false, error: `Webhook signature verification failed: ${err.message}` },
+        { error: 'Invalid signature' },
         { status: 400 }
       );
     }
 
-    // Handle checkout.session.completed event
-    if (event.type === 'checkout.session.completed') {
-      const session = event.data.object as Stripe.Checkout.Session;
+    console.log('Webhook event received:', event.type);
 
-      // Find payment by Stripe session ID
-      const [payment] = await db
-        .select()
-        .from(payments)
-        .where(eq(payments.stripeSessionId, session.id))
-        .limit(1);
+    // Handle the event
+    switch (event.type) {
+      case 'checkout.session.completed':
+        await handleCheckoutSessionCompleted(event.data.object as Stripe.Checkout.Session);
+        break;
 
-      if (payment) {
-        // Update payment status to PAID and record paidAt timestamp
-        await db
-          .update(payments)
-          .set({
-            status: 'PAID',
-            paidAt: new Date(),
-          })
-          .where(eq(payments.id, payment.id));
+      case 'checkout.session.expired':
+        console.log('Checkout session expired:', event.data.object.id);
+        // Payment remains PENDING
+        break;
 
-        console.log(`Payment ${payment.id} marked as PAID for session ${session.id}`);
-      } else {
-        console.warn(`No payment found for Stripe session ${session.id}`);
-      }
+      default:
+        console.log(`Unhandled event type: ${event.type}`);
     }
 
-    // Handle checkout.session.expired event
-    if (event.type === 'checkout.session.expired') {
-      const session = event.data.object as Stripe.Checkout.Session;
-
-      // Find payment by Stripe session ID
-      const [payment] = await db
-        .select()
-        .from(payments)
-        .where(eq(payments.stripeSessionId, session.id))
-        .limit(1);
-
-      if (payment) {
-        // Keep payment as PENDING (user can retry)
-        console.log(`Checkout session expired for payment ${payment.id}, session ${session.id}`);
-      }
-    }
-
-    // Return 200 response to Stripe
-    return NextResponse.json({ received: true }, { status: 200 });
+    return NextResponse.json({ received: true });
   } catch (error: any) {
-    console.error('Webhook processing error:', error);
+    console.error('Webhook error:', error);
     return NextResponse.json(
-      { success: false, error: 'Webhook processing failed', details: error.message },
+      { error: 'Webhook handler failed' },
       { status: 500 }
     );
+  }
+}
+
+async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {
+  const paymentId = session.metadata?.paymentId;
+
+  if (!paymentId) {
+    console.error('No paymentId in session metadata');
+    return;
+  }
+
+  console.log('Processing payment:', paymentId);
+
+  try {
+    // Use transaction for atomic updates
+    await db.transaction(async (tx) => {
+      // Get the payment record
+      const payment = await tx
+        .select()
+        .from(payments)
+        .where(eq(payments.id, paymentId))
+        .limit(1);
+
+      if (!payment || payment.length === 0) {
+        throw new Error('Payment not found');
+      }
+
+      const paymentData = payment[0];
+
+      // Check if already processed (idempotency)
+      if (paymentData.status === 'PAID') {
+        console.log('Payment already processed:', paymentId);
+        return;
+      }
+
+      // Update payment status to PAID
+      await tx
+        .update(payments)
+        .set({
+          status: 'PAID',
+          paidAt: new Date(),
+        })
+        .where(eq(payments.id, paymentId));
+
+      // If this is an event payment, decrement ticket count
+      if (paymentData.eventId && paymentData.ticketQuantity) {
+        console.log(
+          `Decrementing ticket count for event ${paymentData.eventId} by ${paymentData.ticketQuantity}`
+        );
+
+        // Lock the event row and decrement ticket count
+        const event = await tx
+          .select()
+          .from(events)
+          .where(eq(events.id, paymentData.eventId))
+          .for('update');
+
+        if (event && event.length > 0) {
+          const newTicketCount = event[0].ticketCount - paymentData.ticketQuantity;
+
+          await tx
+            .update(events)
+            .set({
+              ticketCount: Math.max(0, newTicketCount), // Ensure non-negative
+              updatedAt: new Date(),
+            })
+            .where(eq(events.id, paymentData.eventId));
+
+          console.log(
+            `Ticket count updated: ${event[0].ticketCount} -> ${newTicketCount}`
+          );
+        }
+      }
+
+      console.log('Payment processed successfully:', paymentId);
+    });
+  } catch (error: any) {
+    console.error('Error processing payment:', error);
+    throw error;
   }
 }

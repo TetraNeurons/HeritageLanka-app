@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db/drizzle';
-import { payments, trips, travelers } from '@/db/schema';
-import { eq, desc } from 'drizzle-orm';
+import { payments, trips, travelers, events } from '@/db/schema';
+import { eq, desc, or } from 'drizzle-orm';
 import { getSession } from '@/lib/jwt';
 
 export async function GET(request: NextRequest) {
@@ -29,16 +29,17 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Query payments for authenticated traveler's trips
-    // Join with trips table for trip details
-    const travelerPayments = await db
+    // Query trip payments for authenticated traveler
+    const tripPayments = await db
       .select({
         id: payments.id,
         amount: payments.amount,
         status: payments.status,
         paidAt: payments.paidAt,
         createdAt: payments.createdAt,
-        tripId: trips.id,
+        tripId: payments.tripId,
+        eventId: payments.eventId,
+        ticketQuantity: payments.ticketQuantity,
         tripFromDate: trips.fromDate,
         tripToDate: trips.toDate,
         tripCountry: trips.country,
@@ -51,13 +52,34 @@ export async function GET(request: NextRequest) {
       .where(eq(trips.travelerId, traveler.id))
       .orderBy(desc(payments.createdAt));
 
-    // Return payment history with trip information
-    const formattedPayments = travelerPayments.map((payment) => ({
+    // Query event payments for authenticated traveler
+    const eventPayments = await db
+      .select({
+        id: payments.id,
+        amount: payments.amount,
+        status: payments.status,
+        paidAt: payments.paidAt,
+        createdAt: payments.createdAt,
+        tripId: payments.tripId,
+        eventId: payments.eventId,
+        ticketQuantity: payments.ticketQuantity,
+        eventTitle: events.title,
+        eventDate: events.date,
+        eventPlace: events.place,
+      })
+      .from(payments)
+      .innerJoin(events, eq(payments.eventId, events.id))
+      .where(eq(payments.travelerId, traveler.id))
+      .orderBy(desc(payments.createdAt));
+
+    // Format trip payments
+    const formattedTripPayments = tripPayments.map((payment) => ({
       id: payment.id,
       amount: payment.amount,
       status: payment.status,
       paidAt: payment.paidAt,
       createdAt: payment.createdAt,
+      type: 'trip' as const,
       trip: {
         id: payment.tripId,
         fromDate: payment.tripFromDate,
@@ -69,10 +91,32 @@ export async function GET(request: NextRequest) {
       },
     }));
 
+    // Format event payments
+    const formattedEventPayments = eventPayments.map((payment) => ({
+      id: payment.id,
+      amount: payment.amount,
+      status: payment.status,
+      paidAt: payment.paidAt,
+      createdAt: payment.createdAt,
+      type: 'event' as const,
+      event: {
+        id: payment.eventId,
+        title: payment.eventTitle,
+        date: payment.eventDate,
+        place: payment.eventPlace,
+        ticketQuantity: payment.ticketQuantity,
+      },
+    }));
+
+    // Combine and sort all payments by creation date
+    const allPayments = [...formattedTripPayments, ...formattedEventPayments].sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+
     return NextResponse.json(
       {
         success: true,
-        payments: formattedPayments,
+        payments: allPayments,
       },
       { status: 200 }
     );

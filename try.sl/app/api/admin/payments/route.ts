@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db/drizzle';
-import { payments, trips, travelers, users } from '@/db/schema';
-import { eq, and, gte, lte, desc } from 'drizzle-orm';
+import { payments, trips, travelers, users, events } from '@/db/schema';
+import { eq, and, gte, lte, desc, isNotNull, or } from 'drizzle-orm';
 import { getSession } from '@/lib/jwt';
 
 export async function GET(request: NextRequest) {
@@ -25,6 +25,7 @@ export async function GET(request: NextRequest) {
     // Get query parameters for filtering
     const { searchParams } = new URL(request.url);
     const statusFilter = searchParams.get('status');
+    const typeFilter = searchParams.get('type'); // 'trip', 'event', or null for all
     const fromDate = searchParams.get('fromDate');
     const toDate = searchParams.get('toDate');
 
@@ -36,6 +37,13 @@ export async function GET(request: NextRequest) {
       conditions.push(eq(payments.status, statusFilter as any));
     }
 
+    // Support type filter
+    if (typeFilter === 'event') {
+      conditions.push(isNotNull(payments.eventId));
+    } else if (typeFilter === 'trip') {
+      conditions.push(isNotNull(payments.tripId));
+    }
+
     // Support date range filters (fromDate, toDate)
     if (fromDate) {
       conditions.push(gte(payments.createdAt, new Date(fromDate)));
@@ -44,55 +52,88 @@ export async function GET(request: NextRequest) {
       conditions.push(lte(payments.createdAt, new Date(toDate)));
     }
 
-    // Query all payments from all travelers
-    // Join with trips, travelers, and users tables
-    const allPayments = await db
-      .select({
-        id: payments.id,
-        amount: payments.amount,
-        status: payments.status,
-        paidAt: payments.paidAt,
-        createdAt: payments.createdAt,
-        tripId: trips.id,
-        tripFromDate: trips.fromDate,
-        tripToDate: trips.toDate,
-        tripCountry: trips.country,
-        tripStatus: trips.status,
-        numberOfPeople: trips.numberOfPeople,
-        totalDistance: trips.totalDistance,
-        travelerId: travelers.id,
-        travelerName: users.name,
-        travelerEmail: users.email,
-      })
+    // Get all payments
+    const allPaymentsData = await db
+      .select()
       .from(payments)
-      .innerJoin(trips, eq(payments.tripId, trips.id))
-      .innerJoin(travelers, eq(trips.travelerId, travelers.id))
-      .innerJoin(users, eq(travelers.userId, users.id))
       .where(conditions.length > 0 ? and(...conditions) : undefined)
       .orderBy(desc(payments.createdAt));
 
-    // Return complete payment information with traveler details
-    const formattedPayments = allPayments.map((payment) => ({
-      id: payment.id,
-      amount: payment.amount,
-      status: payment.status,
-      paidAt: payment.paidAt,
-      createdAt: payment.createdAt,
-      traveler: {
-        id: payment.travelerId,
-        name: payment.travelerName,
-        email: payment.travelerEmail,
-      },
-      trip: {
-        id: payment.tripId,
-        fromDate: payment.tripFromDate,
-        toDate: payment.tripToDate,
-        country: payment.tripCountry,
-        status: payment.tripStatus,
-        numberOfPeople: payment.numberOfPeople,
-        totalDistance: payment.totalDistance,
-      },
-    }));
+    // Format payments with trip or event details
+    const formattedPayments = await Promise.all(
+      allPaymentsData.map(async (payment) => {
+        // Get traveler info
+        const [travelerData] = await db
+          .select({
+            travelerId: travelers.id,
+            travelerName: users.name,
+            travelerEmail: users.email,
+          })
+          .from(travelers)
+          .innerJoin(users, eq(travelers.userId, users.id))
+          .where(eq(travelers.id, payment.travelerId!))
+          .limit(1);
+
+        const basePayment = {
+          id: payment.id,
+          amount: payment.amount,
+          status: payment.status,
+          paidAt: payment.paidAt,
+          createdAt: payment.createdAt,
+          traveler: travelerData ? {
+            id: travelerData.travelerId,
+            name: travelerData.travelerName,
+            email: travelerData.travelerEmail,
+          } : null,
+        };
+
+        // If trip payment
+        if (payment.tripId) {
+          const [tripData] = await db
+            .select()
+            .from(trips)
+            .where(eq(trips.id, payment.tripId))
+            .limit(1);
+
+          return {
+            ...basePayment,
+            type: 'trip' as const,
+            trip: tripData ? {
+              id: tripData.id,
+              fromDate: tripData.fromDate,
+              toDate: tripData.toDate,
+              country: tripData.country,
+              status: tripData.status,
+              numberOfPeople: tripData.numberOfPeople,
+              totalDistance: tripData.totalDistance,
+            } : null,
+          };
+        }
+
+        // If event payment
+        if (payment.eventId) {
+          const [eventData] = await db
+            .select()
+            .from(events)
+            .where(eq(events.id, payment.eventId))
+            .limit(1);
+
+          return {
+            ...basePayment,
+            type: 'event' as const,
+            event: eventData ? {
+              id: eventData.id,
+              title: eventData.title,
+              date: eventData.date,
+              place: eventData.place,
+            } : null,
+            ticketQuantity: payment.ticketQuantity,
+          };
+        }
+
+        return basePayment;
+      })
+    );
 
     return NextResponse.json(
       {
