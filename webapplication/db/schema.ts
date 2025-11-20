@@ -12,6 +12,7 @@ export const planningModeEnum = pgEnum('planning_mode', ['MANUAL', 'AI_GENERATED
 export const tripStatusEnum = pgEnum('trip_status', ['PLANNING', 'CONFIRMED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED']);
 export const adStatusEnum = pgEnum('ad_status', ['PENDING', 'ACTIVE', 'INACTIVE', 'REJECTED']);
 export const workflowTypeEnum = pgEnum('workflow_type', ['GENERATE_AI_PLAN', 'CREATE_MANUAL_PLAN']);
+export const reviewerTypeEnum = pgEnum('reviewer_type', ['TRAVELER', 'GUIDE']);
 
 // Users table
 export const users = pgTable('users', {
@@ -33,6 +34,8 @@ export const travelers = pgTable('travelers', {
   id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
   userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }).unique(),
   country: text('country').notNull(),
+  rating: real('rating').default(0).notNull(),
+  totalReviews: integer('total_reviews').default(0).notNull(),
   tripInProgress: boolean('trip_in_progress').default(false).notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
@@ -141,12 +144,14 @@ export const payments = pgTable('payments', {
 // Reviews table
 export const reviews = pgTable('reviews', {
   id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
-  travelerId: text('traveler_id').notNull().references(() => travelers.id, { onDelete: 'cascade' }),
-  guideId: text('guide_id').notNull().references(() => guides.id, { onDelete: 'cascade' }),
+  reviewerId: text('reviewer_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  revieweeId: text('reviewee_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   tripId: text('trip_id').references(() => trips.id, { onDelete: 'set null' }),
   rating: integer('rating').notNull(),
   comment: text('comment'),
+  reviewerType: reviewerTypeEnum('reviewer_type').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
 // Events table
@@ -285,13 +290,15 @@ export const paymentsRelations = relations(payments, ({ one }) => ({
 }));
 
 export const reviewsRelations = relations(reviews, ({ one }) => ({
-  traveler: one(travelers, {
-    fields: [reviews.travelerId],
-    references: [travelers.id],
+  reviewer: one(users, {
+    fields: [reviews.reviewerId],
+    references: [users.id],
+    relationName: 'reviewer',
   }),
-  guide: one(guides, {
-    fields: [reviews.guideId],
-    references: [guides.id],
+  reviewee: one(users, {
+    fields: [reviews.revieweeId],
+    references: [users.id],
+    relationName: 'reviewee',
   }),
   trip: one(trips, {
     fields: [reviews.tripId],

@@ -6,6 +6,8 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { ReviewForm } from "@/components/reviews/ReviewForm";
+import axios from "axios";
 import {
   Dialog,
   DialogContent,
@@ -57,6 +59,7 @@ interface Trip {
     paidAt: string | null;
   } | null;
   guide?: {
+    userId: string;
     name: string;
     languages: string[];
     phone?: string;
@@ -75,11 +78,22 @@ export default function TravelerPlansPage() {
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [touristData, setTouristData] = useState<any[]>([]);
   const [fuseInstance, setFuseInstance] = useState<Fuse<any> | null>(null);
+  const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
+  const [reviewEligibility, setReviewEligibility] = useState<Record<string, any>>({});
 
   useEffect(() => {
     fetchTrips();
     loadTouristData();
   }, []);
+
+  useEffect(() => {
+    // Check review eligibility for all trips
+    trips.forEach((trip) => {
+      if ((trip.status === 'COMPLETED' || trip.status === 'CANCELLED') && trip.guide) {
+        checkReviewEligibility(trip.id);
+      }
+    });
+  }, [trips]);
 
   const loadTouristData = async () => {
     try {
@@ -281,6 +295,63 @@ export default function TravelerPlansPage() {
   const handleViewDetails = (trip: Trip) => {
     setSelectedTrip(trip);
     setDetailsDialogOpen(true);
+  };
+
+  const checkReviewEligibility = async (tripId: string) => {
+    try {
+      const response = await axios.get(`/api/traveler/trips/${tripId}/review-eligibility`);
+      if (response.data.success) {
+        setReviewEligibility((prev) => ({
+          ...prev,
+          [tripId]: response.data.eligibility,
+        }));
+      }
+    } catch (error) {
+      console.error("Error checking review eligibility:", error);
+    }
+  };
+
+  const handleReviewClick = (trip: Trip) => {
+    setSelectedTrip(trip);
+    setReviewDialogOpen(true);
+  };
+
+  const handleReviewSubmit = async (rating: number, comment: string) => {
+    if (!selectedTrip || !selectedTrip.guide) return;
+
+    try {
+      // Get the guide's user ID from the trip
+      const response = await axios.post("/api/traveler/reviews", {
+        tripId: selectedTrip.id,
+        revieweeId: selectedTrip.guide.userId,
+        rating,
+        comment,
+      });
+
+      if (response.data.success) {
+        // Refresh eligibility
+        await checkReviewEligibility(selectedTrip.id);
+        // Close dialog after a short delay
+        setTimeout(() => {
+          setReviewDialogOpen(false);
+          setSelectedTrip(null);
+        }, 2000);
+      }
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || "Failed to submit review");
+    }
+  };
+
+  const canReview = (trip: Trip) => {
+    if (!trip.guide) return false;
+    if (trip.status !== 'COMPLETED' && trip.status !== 'CANCELLED') return false;
+    const eligibility = reviewEligibility[trip.id];
+    return eligibility?.canReview === true;
+  };
+
+  const hasReviewed = (trip: Trip) => {
+    const eligibility = reviewEligibility[trip.id];
+    return eligibility?.hasReviewed === true;
   };
 
   if (loading) {
@@ -503,8 +574,29 @@ export default function TravelerPlansPage() {
                           </Button>
                         )}
 
+                        {/* Review Button */}
+                        {canReview(trip) && (
+                          <Button
+                            variant="default"
+                            size="sm"
+                            onClick={() => handleReviewClick(trip)}
+                            className="flex-1 bg-yellow-500 hover:bg-yellow-600"
+                          >
+                            <Star className="h-4 w-4 mr-1" />
+                            Write Review
+                          </Button>
+                        )}
+
+                        {/* Review Submitted Badge */}
+                        {hasReviewed(trip) && (
+                          <div className="flex-1 flex items-center justify-center gap-2 text-sm text-green-600 bg-green-50 rounded px-3 py-2">
+                            <CheckCircle className="h-4 w-4" />
+                            Review Submitted
+                          </div>
+                        )}
+
                         {/* Read-only indicator */}
-                        {isReadOnly(trip) && !canStart(trip) && (
+                        {isReadOnly(trip) && !canStart(trip) && !canReview(trip) && !hasReviewed(trip) && (
                           <div className="w-full text-center text-xs text-gray-500 py-2">
                             {trip.status === "IN_PROGRESS" && "Trip is currently in progress"}
                             {trip.status === "COMPLETED" && "Trip completed"}
@@ -811,6 +903,29 @@ export default function TravelerPlansPage() {
               Close
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Review Dialog */}
+      <Dialog open={reviewDialogOpen} onOpenChange={setReviewDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Star className="h-5 w-5 text-yellow-500" />
+              Review Your Guide
+            </DialogTitle>
+            <DialogDescription>
+              Share your experience with {selectedTrip?.guide?.name}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <ReviewForm
+            onSubmit={handleReviewSubmit}
+            onCancel={() => {
+              setReviewDialogOpen(false);
+              setSelectedTrip(null);
+            }}
+          />
         </DialogContent>
       </Dialog>
     </SidebarProvider>

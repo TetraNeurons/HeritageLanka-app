@@ -1,16 +1,19 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { Trash2, Users, UserCheck, MapPin, Mail, Phone, BarChart3 } from 'lucide-react';
+import { Trash2, Users, UserCheck, MapPin, Mail, Phone, BarChart3, Star } from 'lucide-react';
 import { AppSidebar } from '@/components/admin/Sidebar';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { User,Stats } from '@/lib/types';
+import { ReviewDetailModal } from '@/components/admin/ReviewDetailModal';
 
 export default function UsersManagementPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [stats, setStats] = useState<Stats>({ totalUsers: 0, totalTravelers: 0, totalGuides: 0, totalAdmins: 0 });
   const [loading, setLoading] = useState(true);
   const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<{ id: string; name: string } | null>(null);
 
   useEffect(() => {
     fetchUsers();
@@ -53,6 +56,17 @@ export default function UsersManagementPage() {
     } finally {
       setDeleteLoading(null);
     }
+  };
+
+  const getRatingColor = (rating: number) => {
+    if (rating >= 4.0) return 'text-green-600';
+    if (rating >= 3.0) return 'text-yellow-600';
+    return 'text-red-600';
+  };
+
+  const handleViewReviews = (userId: string, userName: string) => {
+    setSelectedUser({ id: userId, name: userName });
+    setReviewModalOpen(true);
   };
 
   const chartData = [
@@ -156,12 +170,82 @@ export default function UsersManagementPage() {
                             <Phone className="h-4 w-4 text-gray-400" />
                             {user.phone || '—'}
                           </td>
-                          <td className="px-6 py-4 text-sm text-gray-600">
-                            {user.role === 'TRAVELER' && user.travelerData && <div>Country: {user.travelerData.country}</div>}
+                          <td className="px-6 py-4 text-sm">
+                            {user.role === 'TRAVELER' && user.travelerData && (
+                              <div className="space-y-2">
+                                <div className="text-gray-600">Country: {user.travelerData.country}</div>
+                                {user.travelerData.totalReviews > 0 ? (
+                                  <button 
+                                    onClick={() => handleViewReviews(user.id, user.name)}
+                                    className="space-y-2 text-left hover:bg-gray-50 p-2 rounded transition-colors w-full"
+                                  >
+                                    <div className="flex items-center gap-2">
+                                      <Star className="h-4 w-4 text-yellow-500" />
+                                      <span className={`font-semibold ${getRatingColor(user.travelerData.rating)}`}>
+                                        {user.travelerData.rating.toFixed(1)}
+                                      </span>
+                                      <span className="text-gray-500">({user.travelerData.totalReviews} reviews)</span>
+                                    </div>
+                                    {user.travelerData.positiveReviews !== undefined && user.travelerData.negativeReviews !== undefined && (
+                                      <div className="w-full">
+                                        <div className="flex items-center gap-2 text-xs mb-1">
+                                          <span className="text-green-600">{user.travelerData.positiveReviews} positive</span>
+                                          <span className="text-red-600">{user.travelerData.negativeReviews} negative</span>
+                                        </div>
+                                        <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden flex">
+                                          <div 
+                                            className="bg-green-500 h-full" 
+                                            style={{ width: `${(user.travelerData.positiveReviews / user.travelerData.totalReviews) * 100}%` }}
+                                          />
+                                          <div 
+                                            className="bg-red-500 h-full" 
+                                            style={{ width: `${(user.travelerData.negativeReviews / user.travelerData.totalReviews) * 100}%` }}
+                                          />
+                                        </div>
+                                      </div>
+                                    )}
+                                  </button>
+                                ) : (
+                                  <div className="text-gray-400 text-xs">No reviews yet</div>
+                                )}
+                              </div>
+                            )}
                             {user.role === 'GUIDE' && user.guideData && (
-                              <div>
-                                <div>Rating: {user.guideData.rating.toFixed(1)} stars</div>
-                                <div>Reviews: {user.guideData.totalReviews}</div>
+                              <div className="space-y-2">
+                                {user.guideData.totalReviews > 0 ? (
+                                  <button 
+                                    onClick={() => handleViewReviews(user.id, user.name)}
+                                    className="space-y-2 text-left hover:bg-gray-50 p-2 rounded transition-colors w-full"
+                                  >
+                                    <div className="flex items-center gap-2">
+                                      <Star className="h-4 w-4 text-yellow-500" />
+                                      <span className={`font-semibold ${getRatingColor(user.guideData.rating)}`}>
+                                        {user.guideData.rating.toFixed(1)}
+                                      </span>
+                                      <span className="text-gray-500">({user.guideData.totalReviews} reviews)</span>
+                                    </div>
+                                    {user.guideData.positiveReviews !== undefined && user.guideData.negativeReviews !== undefined && (
+                                      <div className="w-full">
+                                        <div className="flex items-center gap-2 text-xs mb-1">
+                                          <span className="text-green-600">{user.guideData.positiveReviews} positive</span>
+                                          <span className="text-red-600">{user.guideData.negativeReviews} negative</span>
+                                        </div>
+                                        <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden flex">
+                                          <div 
+                                            className="bg-green-500 h-full" 
+                                            style={{ width: `${(user.guideData.positiveReviews / user.guideData.totalReviews) * 100}%` }}
+                                          />
+                                          <div 
+                                            className="bg-red-500 h-full" 
+                                            style={{ width: `${(user.guideData.negativeReviews / user.guideData.totalReviews) * 100}%` }}
+                                          />
+                                        </div>
+                                      </div>
+                                    )}
+                                  </button>
+                                ) : (
+                                  <div className="text-gray-400 text-xs">No reviews yet</div>
+                                )}
                               </div>
                             )}
                             {user.role === 'ADMIN' && <span className="text-gray-400">—</span>}
@@ -188,6 +272,16 @@ export default function UsersManagementPage() {
           </div>
         </div>
       </div>
+
+      {/* Review Detail Modal */}
+      {selectedUser && (
+        <ReviewDetailModal
+          open={reviewModalOpen}
+          onOpenChange={setReviewModalOpen}
+          userId={selectedUser.id}
+          userName={selectedUser.name}
+        />
+      )}
     </SidebarProvider>
   );
 }

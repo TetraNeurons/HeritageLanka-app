@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/db/drizzle';
-import { users, travelers, guides } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { users, travelers, guides, reviews } from '@/db/schema';
+import { eq, and, gte, sql } from 'drizzle-orm';
 import { getSession } from '@/lib/jwt'; // ← your file above
 
 // GET /api/admin/users
@@ -26,6 +26,8 @@ export async function GET() {
 
         // Optional traveler data
         travelerCountry: travelers.country,
+        travelerRating: travelers.rating,
+        travelerTotalReviews: travelers.totalReviews,
 
         // Optional guide data
         guideRating: guides.rating,
@@ -36,21 +38,57 @@ export async function GET() {
       .leftJoin(guides, eq(guides.userId, users.id))
       .orderBy(users.createdAt);
 
+    // Fetch review sentiment data for all users
+    const reviewSentimentPromises = allUsers.map(async (u) => {
+      const positiveReviews = await db
+        .select({ count: sql<number>`COUNT(*)` })
+        .from(reviews)
+        .where(and(eq(reviews.revieweeId, u.id), gte(reviews.rating, 4)));
+      
+      const negativeReviews = await db
+        .select({ count: sql<number>`COUNT(*)` })
+        .from(reviews)
+        .where(and(eq(reviews.revieweeId, u.id), sql`${reviews.rating} < 4`));
+      
+      return {
+        userId: u.id,
+        positiveCount: positiveReviews[0]?.count || 0,
+        negativeCount: negativeReviews[0]?.count || 0,
+      };
+    });
+
+    const reviewSentiments = await Promise.all(reviewSentimentPromises);
+    const sentimentMap = new Map(reviewSentiments.map(s => [s.userId, s]));
+
     // Transform + calculate stats
-    const transformedUsers = allUsers.map((u) => ({
-      id: u.id,
-      name: u.name,
-      email: u.email,
-      phone: u.phone,
-      role: u.role,
-      gender: u.gender ?? undefined,
-      createdAt: u.createdAt.toISOString(),
-      travelerData: u.travelerCountry ? { country: u.travelerCountry } : undefined,
-      guideData:
-        u.guideRating !== null && u.guideRating !== undefined
-          ? { rating: Number(u.guideRating), totalReviews: u.guideTotalReviews }
-          : undefined,
-    }));
+    const transformedUsers = allUsers.map((u) => {
+      const sentiment = sentimentMap.get(u.id);
+      return {
+        id: u.id,
+        name: u.name,
+        email: u.email,
+        phone: u.phone,
+        role: u.role,
+        gender: u.gender ?? undefined,
+        createdAt: u.createdAt.toISOString(),
+        travelerData: u.travelerCountry ? { 
+          country: u.travelerCountry,
+          rating: Number(u.travelerRating ?? 0),
+          totalReviews: u.travelerTotalReviews ?? 0,
+          positiveReviews: sentiment?.positiveCount || 0,
+          negativeReviews: sentiment?.negativeCount || 0,
+        } : undefined,
+        guideData:
+          u.guideRating !== null && u.guideRating !== undefined
+            ? { 
+                rating: Number(u.guideRating), 
+                totalReviews: u.guideTotalReviews,
+                positiveReviews: sentiment?.positiveCount || 0,
+                negativeReviews: sentiment?.negativeCount || 0,
+              }
+            : undefined,
+      };
+    });
 
     const stats = transformedUsers.reduce(
       (acc, user) => {

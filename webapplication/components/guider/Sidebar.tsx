@@ -16,7 +16,7 @@ import {
   History,
   Globe,
   LogOut,
-  TicketPercent  
+  Star
 } from "lucide-react";
 
 import axios from "axios";
@@ -27,6 +27,7 @@ const menuItems = [
   { icon: Home, label: "Dashboard", href: "/dashboard" },
   { icon: PlaneTakeoff, label: "Jobs", href: "/guider/jobs" },
   { icon: History, label: "Payment History", href: "/guider/History" },
+  { icon: Star, label: "Reviews", href: "/guider/reviews" },
 ];
 
 export function AppSidebar() {

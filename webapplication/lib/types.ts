@@ -13,8 +13,19 @@ export type EventItem = {
   lng: number;
 };
 
-export interface TravelerData { country: string; }
-export interface GuideData { rating: number; totalReviews: number; }
+export interface TravelerData { 
+  country: string;
+  rating: number;
+  totalReviews: number;
+  positiveReviews?: number;
+  negativeReviews?: number;
+}
+export interface GuideData { 
+  rating: number;
+  totalReviews: number;
+  positiveReviews?: number;
+  negativeReviews?: number;
+}
 export interface User {
   id: string;
   name: string;

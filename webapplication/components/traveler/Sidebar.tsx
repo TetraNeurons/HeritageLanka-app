@@ -23,8 +23,9 @@ import {
   CarFront,
   Flame,
   Ship,
-  TicketPercent ,
-  PlaneLanding 
+  TicketPercent,
+  PlaneLanding,
+  Star
 } from "lucide-react";
 
 import axios from "axios";
@@ -44,8 +45,9 @@ const menuItems = [
   { icon: Plane, label: "Planner", href: "/traveler/plan" },
   { icon: PlaneLanding, label: "Your Plans", href: "/traveler/plans" },
   { icon: Map, label: "Places", href: "/traveler/places" },
-  { icon: TicketPercent, label: "Events & Offers", href: "/traveler/events" }, // NEW
+  { icon: TicketPercent, label: "Events & Offers", href: "/traveler/events" },
   { icon: History, label: "Payment History", href: "/traveler/history" },
+  { icon: Star, label: "Reviews", href: "/traveler/reviews" },
 ];
 
 export function AppSidebar() {
