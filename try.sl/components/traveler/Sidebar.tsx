@@ -45,7 +45,7 @@ const menuItems = [
   { icon: PlaneLanding, label: "Your Plans", href: "/traveler/plans" },
   { icon: Map, label: "Places", href: "/traveler/places" },
   { icon: TicketPercent, label: "Events & Offers", href: "/traveler/events" }, // NEW
-  { icon: History, label: "Payment History", href: "/traveler/History" },
+  { icon: History, label: "Payment History", href: "/traveler/history" },
 ];
 
 export function AppSidebar() {

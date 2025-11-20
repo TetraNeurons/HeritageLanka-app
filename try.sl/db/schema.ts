@@ -124,6 +124,7 @@ export const payments = pgTable('payments', {
   tripId: text('trip_id').notNull().references(() => trips.id, { onDelete: 'cascade' }).unique(),
   amount: real('amount').notNull(),
   status: paymentStatusEnum('status').default('PENDING').notNull(),
+  stripeSessionId: text('stripe_session_id').unique(),
   paidAt: timestamp('paid_at'),
   releasedAt: timestamp('released_at'),
   createdAt: timestamp('created_at').defaultNow().notNull(),

@@ -1,10 +1,12 @@
 "use client";
 
-import { AppSidebar } from "@/components/traveler/Sidebar";
+import { AppSidebar } from "@/components/admin/Sidebar";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -18,10 +20,11 @@ import {
   Calendar,
   CreditCard,
   MapPin,
-  Users,
   Receipt,
+  Filter,
   CheckCircle,
   Clock,
+  DollarSign,
 } from "lucide-react";
 
 interface Payment {
@@ -30,6 +33,11 @@ interface Payment {
   status: string;
   paidAt: string | null;
   createdAt: string;
+  traveler: {
+    id: string;
+    name: string;
+    email: string;
+  };
   trip: {
     id: string;
     fromDate: string;
@@ -41,18 +49,27 @@ interface Payment {
   };
 }
 
-export default function PaymentHistoryPage() {
+export default function AdminPaymentsPage() {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
 
   useEffect(() => {
     fetchPayments();
-  }, []);
+  }, [statusFilter, fromDate, toDate]);
 
   const fetchPayments = async () => {
     try {
       setLoading(true);
-      const response = await fetch("/api/traveler/payments");
+      const params = new URLSearchParams();
+      if (statusFilter !== "all") params.append("status", statusFilter);
+      if (fromDate) params.append("fromDate", fromDate);
+      if (toDate) params.append("toDate", toDate);
+
+      const url = `/api/admin/payments${params.toString() ? `?${params.toString()}` : ""}`;
+      const response = await fetch(url);
       const data = await response.json();
 
       if (data.success) {
@@ -100,6 +117,18 @@ export default function PaymentHistoryPage() {
     );
   };
 
+  const getTotalRevenue = () => {
+    return payments
+      .filter((p) => p.status === "PAID")
+      .reduce((sum, p) => sum + p.amount, 0);
+  };
+
+  const getPendingAmount = () => {
+    return payments
+      .filter((p) => p.status === "PENDING")
+      .reduce((sum, p) => sum + p.amount, 0);
+  };
+
   if (loading) {
     return (
       <SidebarProvider>
@@ -125,31 +154,102 @@ export default function PaymentHistoryPage() {
               <div className="lg:hidden mb-4">
                 <SidebarTrigger />
               </div>
-              <div className="flex items-center gap-3">
-                <div className="bg-blue-100 p-3 rounded-lg">
-                  <Receipt className="h-6 w-6 text-blue-600" />
+              <div className="flex items-center gap-3 mb-4">
+                <div className="bg-green-100 p-3 rounded-lg">
+                  <Receipt className="h-6 w-6 text-green-600" />
                 </div>
                 <div>
                   <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Payment History</h1>
-                  <p className="text-gray-600 mt-1">Track all your trip payments</p>
+                  <p className="text-gray-600 mt-1">Monitor all payment transactions</p>
+                </div>
+              </div>
+
+              {/* Stats Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="text-sm text-gray-600 mb-1">Total Payments</div>
+                    <div className="text-2xl font-bold text-gray-900">{payments.length}</div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="text-sm text-gray-600 mb-1">Completed</div>
+                    <div className="text-2xl font-bold text-green-600">
+                      {payments.filter((p) => p.status === "PAID").length}
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="text-sm text-gray-600 mb-1">Total Revenue</div>
+                    <div className="text-xl font-bold text-green-600">
+                      {formatCurrency(getTotalRevenue())}
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="text-sm text-gray-600 mb-1">Pending Amount</div>
+                    <div className="text-xl font-bold text-orange-600">
+                      {formatCurrency(getPendingAmount())}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Filters */}
+              <div className="flex flex-col lg:flex-row gap-3">
+                <div className="flex items-center gap-2 flex-1">
+                  <Filter className="h-4 w-4 text-gray-400" />
+                  <Select value={statusFilter} onValueChange={setStatusFilter}>
+                    <SelectTrigger className="w-full lg:w-[180px]">
+                      <SelectValue placeholder="Filter by status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Status</SelectItem>
+                      <SelectItem value="PAID">Paid</SelectItem>
+                      <SelectItem value="PENDING">Pending</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex gap-2">
+                  <div className="flex-1">
+                    <Input
+                      type="date"
+                      value={fromDate}
+                      onChange={(e) => setFromDate(e.target.value)}
+                      placeholder="From date"
+                      className="w-full"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <Input
+                      type="date"
+                      value={toDate}
+                      onChange={(e) => setToDate(e.target.value)}
+                      placeholder="To date"
+                      className="w-full"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Empty State */}
+            {/* Payments Table */}
             {payments.length === 0 ? (
               <Card className="border-dashed">
                 <CardContent className="flex flex-col items-center justify-center py-12">
                   <CreditCard className="h-16 w-16 text-gray-300 mb-4" />
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">No payment history</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">No payments found</h3>
                   <p className="text-gray-600 text-center">
-                    Your payment transactions will appear here
+                    No payments match the selected filters
                   </p>
                 </CardContent>
               </Card>
             ) : (
               <>
-                {/* Desktop Table View */}
+                {/* Desktop Table */}
                 <Card className="hidden lg:block">
                   <CardHeader>
                     <CardTitle className="text-lg">All Payments ({payments.length})</CardTitle>
@@ -158,9 +258,9 @@ export default function PaymentHistoryPage() {
                     <Table>
                       <TableHeader>
                         <TableRow>
+                          <TableHead>Traveler</TableHead>
                           <TableHead>Trip Details</TableHead>
-                          <TableHead>Dates</TableHead>
-                          <TableHead>People</TableHead>
+                          <TableHead>Trip Dates</TableHead>
                           <TableHead>Amount</TableHead>
                           <TableHead>Status</TableHead>
                           <TableHead>Payment Date</TableHead>
@@ -170,12 +270,19 @@ export default function PaymentHistoryPage() {
                         {payments.map((payment) => (
                           <TableRow key={payment.id}>
                             <TableCell>
+                              <div>
+                                <div className="font-medium">{payment.traveler.name}</div>
+                                <div className="text-xs text-gray-500">{payment.traveler.email}</div>
+                              </div>
+                            </TableCell>
+                            <TableCell>
                               <div className="flex items-center gap-2">
                                 <MapPin className="h-4 w-4 text-blue-600" />
                                 <div>
                                   <div className="font-medium">{payment.trip.country}</div>
                                   <div className="text-xs text-gray-500">
-                                    Trip Status: {payment.trip.status}
+                                    {payment.trip.numberOfPeople} {payment.trip.numberOfPeople === 1 ? "person" : "people"}
+                                    {payment.trip.totalDistance && ` • ${Math.round(payment.trip.totalDistance)} km`}
                                   </div>
                                 </div>
                               </div>
@@ -189,15 +296,12 @@ export default function PaymentHistoryPage() {
                               </div>
                             </TableCell>
                             <TableCell>
-                              <div className="flex items-center gap-1 text-sm">
-                                <Users className="h-3 w-3 text-gray-400" />
-                                <span>{payment.trip.numberOfPeople}</span>
+                              <div className="flex items-center gap-1">
+                                <DollarSign className="h-4 w-4 text-green-600" />
+                                <span className="font-semibold text-gray-900">
+                                  {formatCurrency(payment.amount)}
+                                </span>
                               </div>
-                            </TableCell>
-                            <TableCell>
-                              <span className="font-semibold text-gray-900">
-                                {formatCurrency(payment.amount)}
-                              </span>
                             </TableCell>
                             <TableCell>{getStatusBadge(payment.status)}</TableCell>
                             <TableCell>
@@ -218,23 +322,16 @@ export default function PaymentHistoryPage() {
                   </CardContent>
                 </Card>
 
-                {/* Mobile Card View */}
+                {/* Mobile Cards */}
                 <div className="lg:hidden space-y-4">
                   {payments.map((payment) => (
                     <Card key={payment.id}>
                       <CardContent className="p-4 space-y-3">
-                        {/* Trip Info */}
+                        {/* Header */}
                         <div className="flex items-start justify-between">
-                          <div className="flex items-center gap-2">
-                            <MapPin className="h-5 w-5 text-blue-600" />
-                            <div>
-                              <div className="font-semibold text-gray-900">
-                                {payment.trip.country}
-                              </div>
-                              <div className="text-xs text-gray-500">
-                                {payment.trip.status}
-                              </div>
-                            </div>
+                          <div>
+                            <div className="font-semibold text-gray-900">{payment.traveler.name}</div>
+                            <div className="text-xs text-gray-500">{payment.traveler.email}</div>
                           </div>
                           {getStatusBadge(payment.status)}
                         </div>
@@ -242,16 +339,13 @@ export default function PaymentHistoryPage() {
                         {/* Trip Details */}
                         <div className="space-y-2 text-sm">
                           <div className="flex items-center gap-2 text-gray-600">
+                            <MapPin className="h-4 w-4 text-blue-600" />
+                            <span className="font-medium">{payment.trip.country}</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-gray-600">
                             <Calendar className="h-4 w-4" />
                             <span>
                               {formatDate(payment.trip.fromDate)} - {formatDate(payment.trip.toDate)}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-2 text-gray-600">
-                            <Users className="h-4 w-4" />
-                            <span>
-                              {payment.trip.numberOfPeople}{" "}
-                              {payment.trip.numberOfPeople === 1 ? "person" : "people"}
                             </span>
                           </div>
                         </div>
@@ -279,36 +373,6 @@ export default function PaymentHistoryPage() {
                     </Card>
                   ))}
                 </div>
-
-                {/* Summary Card */}
-                <Card className="mt-6 bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
-                  <CardContent className="p-6">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div>
-                        <div className="text-sm text-gray-600 mb-1">Total Payments</div>
-                        <div className="text-2xl font-bold text-gray-900">
-                          {payments.length}
-                        </div>
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-600 mb-1">Completed</div>
-                        <div className="text-2xl font-bold text-green-600">
-                          {payments.filter((p) => p.status === "PAID").length}
-                        </div>
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-600 mb-1">Total Spent</div>
-                        <div className="text-2xl font-bold text-gray-900">
-                          {formatCurrency(
-                            payments
-                              .filter((p) => p.status === "PAID")
-                              .reduce((sum, p) => sum + p.amount, 0)
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
               </>
             )}
           </main>
