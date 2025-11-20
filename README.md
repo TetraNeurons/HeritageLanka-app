@@ -56,6 +56,9 @@ NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_firebase_storage_bucket
 NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_firebase_messaging_sender_id
 NEXT_PUBLIC_FIREBASE_APP_ID=your_firebase_app_id
 
+# Serper 
+SERPER_API_KEY=your_serper_api_key
+
 # Google Gemini AI
 GEMINI_API_KEY=your_gemini_api_key
 
