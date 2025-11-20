@@ -10,6 +10,7 @@ export const bookingStatusEnum = pgEnum('booking_status', ['PENDING', 'ACCEPTED'
 export const paymentStatusEnum = pgEnum('payment_status', ['PENDING', 'PAID', 'RELEASED', 'CANCELLED']);
 export const planningModeEnum = pgEnum('planning_mode', ['MANUAL', 'AI_GENERATED']);
 export const tripStatusEnum = pgEnum('trip_status', ['PLANNING', 'CONFIRMED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED']);
+export const adStatusEnum = pgEnum('ad_status', ['PENDING', 'ACTIVE', 'INACTIVE', 'REJECTED']);
 
 // Users table
 export const users = pgTable('users', {
@@ -188,6 +189,21 @@ export const apiUsageLogs = pgTable('api_usage_logs', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
+// Advertisements table - Tracks advertisement submissions and display
+export const advertisements = pgTable('advertisements', {
+  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+  imageUrl: text('image_url').notNull(),
+  description: text('description').notNull(),
+  redirectUrl: text('redirect_url').notNull(),
+  paymentReference: text('payment_reference').notNull().unique(),
+  status: adStatusEnum('status').default('PENDING').notNull(),
+  viewCount: integer('view_count').default(0).notNull(),
+  submittedAt: timestamp('submitted_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  approvedAt: timestamp('approved_at'),
+  approvedBy: text('approved_by').references(() => users.id, { onDelete: 'set null' }),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ one }) => ({
   traveler: one(travelers, {
@@ -286,6 +302,13 @@ export const guideDeclinationsRelations = relations(guideDeclinations, ({ one })
 export const apiUsageLogsRelations = relations(apiUsageLogs, ({ one }) => ({
   user: one(users, {
     fields: [apiUsageLogs.userId],
+    references: [users.id],
+  }),
+}));
+
+export const advertisementsRelations = relations(advertisements, ({ one }) => ({
+  approver: one(users, {
+    fields: [advertisements.approvedBy],
     references: [users.id],
   }),
 }));

@@ -3,8 +3,11 @@
 import { useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Label } from "@/components/ui/label"
 import Header from "@/components/Header"
 import Footer from "@/components/Footer"
 import { 
@@ -15,11 +18,60 @@ import {
   Calendar, 
   Users, 
   MapPin, 
-  Star 
+  Star,
+  Megaphone,
+  Copy,
+  Check
 } from "lucide-react"
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<"traveler" | "guide">("traveler")
+  
+  // Advertisement form state
+  const [adForm, setAdForm] = useState({
+    imageUrl: "",
+    description: "",
+    redirectUrl: "",
+  })
+  const [adSubmitting, setAdSubmitting] = useState(false)
+  const [adSuccess, setAdSuccess] = useState(false)
+  const [paymentRef, setPaymentRef] = useState("")
+  const [adError, setAdError] = useState("")
+  const [copied, setCopied] = useState(false)
+
+  const handleAdSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setAdSubmitting(true)
+    setAdError("")
+
+    try {
+      const response = await fetch("/api/public/advertisements", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(adForm),
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        setAdSuccess(true)
+        setPaymentRef(data.paymentReference)
+        setAdForm({ imageUrl: "", description: "", redirectUrl: "" })
+      } else {
+        setAdError(data.message || "Failed to submit advertisement")
+      }
+    } catch (error) {
+      setAdError("An error occurred. Please try again.")
+    } finally {
+      setAdSubmitting(false)
+    }
+  }
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(paymentRef)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
 
   return (
     <div className="flex min-h-screen flex-col overflow-x-hidden">
@@ -218,6 +270,151 @@ export default function Home() {
               </CardContent>
             </Card>
           </div>
+        </div>
+      </section>
+
+      {/* Advertise With Us Section */}
+      <section className="py-16 px-6 md:px-8 lg:px-12 bg-background">
+        <div className="container mx-auto max-w-4xl">
+          <div className="text-center mb-12">
+            <div className="flex justify-center mb-4">
+              <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Megaphone className="h-6 w-6 text-primary" />
+              </div>
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Advertise With Us</h2>
+            <p className="text-muted-foreground text-lg">
+              Reach thousands of travelers exploring Sri Lanka. Only 50 LKR per day!
+            </p>
+          </div>
+
+          {!adSuccess ? (
+            <Card>
+              <CardHeader>
+                <CardTitle>Submit Your Advertisement</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleAdSubmit} className="space-y-4">
+                  <div>
+                    <Label htmlFor="imageUrl">Image URL *</Label>
+                    <Input
+                      id="imageUrl"
+                      type="url"
+                      placeholder="https://example.com/image.jpg"
+                      value={adForm.imageUrl}
+                      onChange={(e) => setAdForm({ ...adForm, imageUrl: e.target.value })}
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="description">Description * (Max 500 characters)</Label>
+                    <Textarea
+                      id="description"
+                      placeholder="Describe your advertisement..."
+                      value={adForm.description}
+                      onChange={(e) => setAdForm({ ...adForm, description: e.target.value })}
+                      maxLength={500}
+                      rows={4}
+                      required
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {adForm.description.length}/500 characters
+                    </p>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="redirectUrl">Redirect URL *</Label>
+                    <Input
+                      id="redirectUrl"
+                      type="url"
+                      placeholder="https://your-website.com"
+                      value={adForm.redirectUrl}
+                      onChange={(e) => setAdForm({ ...adForm, redirectUrl: e.target.value })}
+                      required
+                    />
+                  </div>
+
+                  {adError && (
+                    <div className="p-3 bg-red-50 border border-red-200 rounded-md text-red-600 text-sm">
+                      {adError}
+                    </div>
+                  )}
+
+                  <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
+                    <h4 className="font-semibold text-sm mb-2">Payment Instructions</h4>
+                    <ul className="text-sm text-muted-foreground space-y-1">
+                      <li>• Price: 50 LKR per day</li>
+                      <li>• Payment via bank transfer</li>
+                      <li>• Include the payment reference ID in your transfer description</li>
+                      <li>• Your ad will be reviewed and activated after payment verification</li>
+                    </ul>
+                  </div>
+
+                  <Button type="submit" className="w-full" disabled={adSubmitting}>
+                    {adSubmitting ? "Submitting..." : "Submit Advertisement"}
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card className="border-green-200 bg-green-50">
+              <CardContent className="pt-6">
+                <div className="text-center space-y-4">
+                  <div className="flex justify-center">
+                    <div className="h-16 w-16 rounded-full bg-green-100 flex items-center justify-center">
+                      <Check className="h-8 w-8 text-green-600" />
+                    </div>
+                  </div>
+                  <h3 className="text-2xl font-bold text-green-900">Advertisement Submitted!</h3>
+                  <p className="text-green-700">
+                    Your advertisement has been submitted successfully. Please complete the payment to activate it.
+                  </p>
+
+                  <div className="bg-white border border-green-200 rounded-lg p-4">
+                    <p className="text-sm font-medium text-gray-700 mb-2">Your Payment Reference ID:</p>
+                    <div className="flex items-center gap-2 justify-center">
+                      <code className="text-lg font-mono font-bold text-green-600 bg-green-100 px-4 py-2 rounded">
+                        {paymentRef}
+                      </code>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={copyToClipboard}
+                        className="flex items-center gap-2"
+                      >
+                        {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                        {copied ? "Copied!" : "Copy"}
+                      </Button>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-3">
+                      Include this reference ID in your bank transfer description
+                    </p>
+                  </div>
+
+                  <div className="text-left bg-white border border-green-200 rounded-lg p-4">
+                    <h4 className="font-semibold text-sm mb-2">Next Steps:</h4>
+                    <ol className="text-sm text-muted-foreground space-y-1 list-decimal list-inside">
+                      <li>Make a bank transfer of 50 LKR per day</li>
+                      <li>Include the reference ID <strong>{paymentRef}</strong> in the description</li>
+                      <li>Your ad will be reviewed and activated within 24 hours</li>
+                      <li>Check your ad status at <Link href="/check-ad" className="text-primary underline">/check-ad</Link></li>
+                    </ol>
+                  </div>
+
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setAdSuccess(false)
+                      setPaymentRef("")
+                    }}
+                  >
+                    Submit Another Advertisement
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </section>
 

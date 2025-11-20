@@ -7,6 +7,7 @@ import { formatInTimeZone, toZonedTime } from "date-fns-tz";
 import { getSriLankaNews } from "@/app/actions";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/traveler/Sidebar";
+import { AdDisplay } from "@/components/traveler/AdDisplay";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -203,6 +204,7 @@ export default function DashboardPage() {
         <AppSidebar />
 
         <div className="flex-1 flex flex-col overflow-hidden">
+          <AdDisplay />
           <main className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-6">
             {/* Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-4 sm:mb-6 gap-3">

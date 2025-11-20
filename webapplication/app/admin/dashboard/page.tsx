@@ -27,6 +27,8 @@ import {
   TrendingUp,
   Clock,
   AlertTriangle,
+  Megaphone,
+  Eye,
 } from "lucide-react";
 
 interface Trip {
@@ -78,6 +80,14 @@ interface RecentError {
   userName: string;
 }
 
+interface AdAnalytics {
+  totalAds: number;
+  activeAds: number;
+  pendingAds: number;
+  totalViews: number;
+  revenueEstimate: number;
+}
+
 export default function AdminDashboardPage() {
   const [trips, setTrips] = useState<Trip[]>([]);
   const [loading, setLoading] = useState(true);
@@ -88,10 +98,13 @@ export default function AdminDashboardPage() {
   const [recentErrors, setRecentErrors] = useState<RecentError[]>([]);
   const [timeRange, setTimeRange] = useState<string>("24h");
   const [apiLoading, setApiLoading] = useState(true);
+  const [adAnalytics, setAdAnalytics] = useState<AdAnalytics | null>(null);
+  const [adLoading, setAdLoading] = useState(true);
 
   useEffect(() => {
     fetchTrips();
     fetchAPIUsage();
+    fetchAdAnalytics();
   }, [filter, timeRange]);
 
   const fetchTrips = async () => {
@@ -134,6 +147,30 @@ export default function AdminDashboardPage() {
       console.error("Error fetching API usage:", error);
     } finally {
       setApiLoading(false);
+    }
+  };
+
+  const fetchAdAnalytics = async () => {
+    try {
+      setAdLoading(true);
+      const response = await fetch("/api/admin/advertisements/analytics");
+      const data = await response.json();
+
+      if (data.success) {
+        setAdAnalytics({
+          totalAds: data.totalAds,
+          activeAds: data.activeAds,
+          pendingAds: data.pendingAds,
+          totalViews: data.totalViews,
+          revenueEstimate: data.revenueEstimate,
+        });
+      } else {
+        console.error("Failed to fetch ad analytics:", data.error);
+      }
+    } catch (error) {
+      console.error("Error fetching ad analytics:", error);
+    } finally {
+      setAdLoading(false);
     }
   };
 
@@ -330,6 +367,53 @@ export default function AdminDashboardPage() {
                 ) : (
                   <div className="text-center py-8 text-gray-500">
                     No API usage data available
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Advertisement Analytics Card */}
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Megaphone className="h-5 w-5 text-purple-600" />
+                  Advertisement Analytics
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {adLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="h-6 w-6 animate-spin text-purple-600" />
+                  </div>
+                ) : adAnalytics ? (
+                  <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+                    <div className="bg-purple-50 p-4 rounded-lg">
+                      <div className="text-sm text-purple-600 mb-1">Total Ads</div>
+                      <div className="text-2xl font-bold text-purple-900">{adAnalytics.totalAds}</div>
+                    </div>
+                    <div className="bg-green-50 p-4 rounded-lg">
+                      <div className="text-sm text-green-600 mb-1">Active Ads</div>
+                      <div className="text-2xl font-bold text-green-900">{adAnalytics.activeAds}</div>
+                    </div>
+                    <div className="bg-yellow-50 p-4 rounded-lg">
+                      <div className="text-sm text-yellow-600 mb-1">Pending</div>
+                      <div className="text-2xl font-bold text-yellow-900">{adAnalytics.pendingAds}</div>
+                    </div>
+                    <div className="bg-blue-50 p-4 rounded-lg">
+                      <div className="text-sm text-blue-600 mb-1 flex items-center gap-1">
+                        <Eye className="h-3 w-3" />
+                        Total Views
+                      </div>
+                      <div className="text-2xl font-bold text-blue-900">{adAnalytics.totalViews}</div>
+                    </div>
+                    <div className="bg-emerald-50 p-4 rounded-lg">
+                      <div className="text-sm text-emerald-600 mb-1">Est. Revenue</div>
+                      <div className="text-2xl font-bold text-emerald-900">{adAnalytics.revenueEstimate} LKR</div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    No advertisement data available
                   </div>
                 )}
               </CardContent>

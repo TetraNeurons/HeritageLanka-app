@@ -18,7 +18,8 @@ import {
   LogOut,
   TicketPercent,
   Plane,
-  Receipt
+  Receipt,
+  Megaphone
 } from "lucide-react";
 
 import axios from "axios";
@@ -31,6 +32,7 @@ const menuItems = [
   { icon: Plane, label: "Trips Overview", href: "/admin/trips" },
   { icon: Receipt, label: "Payment History", href: "/admin/payments" },
   { icon: TicketPercent, label: "Events & Offers", href: "/admin/events" },
+  { icon: Megaphone, label: "Advertisements", href: "/admin/advertisements" },
 ];
 
 export function AppSidebar() {
