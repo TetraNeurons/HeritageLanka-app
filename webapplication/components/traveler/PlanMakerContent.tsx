@@ -220,11 +220,13 @@ export default function PlanMakerContent() {
   function MapResizer() {
     const map = useMap();
     useEffect(() => {
-      // Small delay to ensure dialog is fully rendered
-      const timer = setTimeout(() => {
-        map.invalidateSize();
-      }, 100);
-      return () => clearTimeout(timer);
+      // Multiple attempts to ensure map renders correctly
+      const timers = [
+        setTimeout(() => map.invalidateSize(), 100),
+        setTimeout(() => map.invalidateSize(), 300),
+        setTimeout(() => map.invalidateSize(), 500),
+      ];
+      return () => timers.forEach(timer => clearTimeout(timer));
     }, [map]);
     return null;
   }
@@ -811,6 +813,7 @@ export default function PlanMakerContent() {
                 <div className="w-full lg:w-1/2 h-[400px] lg:h-full relative" style={{ zIndex: 1 }}>
                   {validLocations.length > 0 ? (
                     <MapContainer
+                      key={`dialog-map-${showPlanPreview}`}
                       center={[validLocations[0].lat, validLocations[0].lng]}
                       zoom={7}
                       className="h-full w-full"
