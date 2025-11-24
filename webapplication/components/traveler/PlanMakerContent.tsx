@@ -13,6 +13,7 @@ import { Trash2, Sparkles, MapPin, Calendar, Loader2, X } from "lucide-react";
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMapEvents, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
+import { toast } from "sonner";
 
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -144,7 +145,7 @@ export default function PlanMakerContent() {
           const latlng = e.latlng;
           
           if (latlng.lat < 5.9 || latlng.lat > 9.9 || latlng.lng < 79.4 || latlng.lng > 82.0) {
-            alert('Please select a location within Sri Lanka');
+            toast.error('Please select a location within Sri Lanka');
             return;
           }
 
@@ -201,7 +202,7 @@ export default function PlanMakerContent() {
         }
         setSearch("");
       } else {
-        alert('Location not found in Sri Lanka. Please try another search term.');
+        toast.error('Location not found in Sri Lanka. Please try another search term.');
       }
     } catch (err) {
       console.error("Search failed:", err);
@@ -222,7 +223,7 @@ export default function PlanMakerContent() {
 
   const handleAIGeneration = async () => {
     if (!fromDate || !toDate || preferences.length === 0) {
-      alert('Please fill in dates and select at least one preference for AI planning');
+      toast.error('Please fill in dates and select at least one preference for AI planning');
       return;
     }
 
@@ -284,11 +285,11 @@ export default function PlanMakerContent() {
           setFlyToLoc(aiLocations[0]);
         }
       } else {
-        alert('Failed to generate plan: ' + (data.error || 'Unknown error'));
+        toast.error('Failed to generate plan: ' + (data.error || 'Unknown error'));
       }
     } catch (error) {
       console.error('AI generation failed:', error);
-      alert('Failed to generate AI plan. Please try again.');
+      toast.error('Failed to generate AI plan. Please try again.');
     } finally {
       setIsGenerating(false);
     }
@@ -319,15 +320,15 @@ export default function PlanMakerContent() {
       const data = await response.json();
       
       if (data.success) {
-        alert('Travel plan accepted and saved successfully!');
+        toast.success('Travel plan accepted and saved successfully!');
         setShowPlanPreview(false);
         resetForm();
       } else {
-        alert('Failed to save plan: ' + data.error);
+        toast.error('Failed to save plan: ' + data.error);
       }
     } catch (error) {
       console.error('Accept plan failed:', error);
-      alert('Failed to save plan. Please try again.');
+      toast.error('Failed to save plan. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -343,7 +344,7 @@ export default function PlanMakerContent() {
     e.preventDefault();
     
     if (locations.length === 0) {
-      alert('Please add at least one location to visit');
+      toast.error('Please add at least one location to visit');
       return;
     }
 
@@ -367,14 +368,14 @@ export default function PlanMakerContent() {
       const data = await response.json();
       
       if (data.success) {
-        alert('Travel plan created successfully!');
+        toast.success('Travel plan created successfully!');
         resetForm();
       } else {
-        alert('Failed to create plan: ' + data.error);
+        toast.error('Failed to create plan: ' + data.error);
       }
     } catch (error) {
       console.error('Manual plan creation failed:', error);
-      alert('Failed to create plan. Please try again.');
+      toast.error('Failed to create plan. Please try again.');
     } finally {
       setIsSubmitting(false);
     }

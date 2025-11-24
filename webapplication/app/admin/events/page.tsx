@@ -7,6 +7,7 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Plus, Edit, Trash2, MapPin, Calendar, Ticket } from "lucide-react";
 import { EventItem } from "@/lib/types";
+import { toast } from "sonner";
 
 export default function AdminEventsPage() {
   const router = useRouter();
@@ -39,12 +40,13 @@ export default function AdminEventsPage() {
 
       if (res.ok) {
         setEvents(events.filter(e => e.id !== id));
+        toast.success('Event deleted successfully');
       } else {
-        alert('Failed to delete event');
+        toast.error('Failed to delete event');
       }
     } catch (error) {
       console.error('Error deleting event:', error);
-      alert('Failed to delete event');
+      toast.error('Failed to delete event');
     }
   };
 

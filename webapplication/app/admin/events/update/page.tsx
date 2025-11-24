@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Upload, X, Trash2 } from "lucide-react";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from "@/lib/firebase";
+import { toast } from "sonner";
 
 export default function UpdateEventPage() {
   const router = useRouter();
@@ -71,7 +72,7 @@ export default function UpdateEventPage() {
     const totalImages = existingImages.length + newImages.length + files.length;
     
     if (totalImages > 3) {
-      alert("Maximum 3 images allowed");
+      toast.error("Maximum 3 images allowed");
       return;
     }
 
@@ -107,7 +108,7 @@ export default function UpdateEventPage() {
     e.preventDefault();
     
     if (existingImages.length + newImages.length === 0) {
-      alert("Please have at least one image");
+      toast.error("Please have at least one image");
       return;
     }
 
@@ -130,13 +131,14 @@ export default function UpdateEventPage() {
       });
 
       if (res.ok) {
+        toast.success('Event updated successfully');
         router.push('/admin/events');
       } else {
-        alert('Failed to update event');
+        toast.error('Failed to update event');
       }
     } catch (error) {
       console.error('Error updating event:', error);
-      alert('Failed to update event');
+      toast.error('Failed to update event');
     } finally {
       setLoading(false);
     }
@@ -153,13 +155,14 @@ export default function UpdateEventPage() {
       });
 
       if (res.ok) {
+        toast.success('Event deleted successfully');
         router.push('/admin/events');
       } else {
-        alert('Failed to delete event');
+        toast.error('Failed to delete event');
       }
     } catch (error) {
       console.error('Error deleting event:', error);
-      alert('Failed to delete event');
+      toast.error('Failed to delete event');
     } finally {
       setDeleting(false);
     }

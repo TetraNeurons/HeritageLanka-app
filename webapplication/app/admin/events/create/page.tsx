@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Upload, X } from "lucide-react";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from "@/lib/firebase";
+import { toast } from "sonner";
 
 export default function CreateEventPage() {
   const router = useRouter();
@@ -34,7 +35,7 @@ export default function CreateEventPage() {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (images.length + files.length > 3) {
-      alert("Maximum 3 images allowed");
+      toast.error("Maximum 3 images allowed");
       return;
     }
 
@@ -66,7 +67,7 @@ export default function CreateEventPage() {
     e.preventDefault();
     
     if (images.length === 0) {
-      alert("Please upload at least one image");
+      toast.error("Please upload at least one image");
       return;
     }
 
@@ -88,13 +89,14 @@ export default function CreateEventPage() {
       });
 
       if (res.ok) {
+        toast.success('Event created successfully');
         router.push('/admin/events');
       } else {
-        alert('Failed to create event');
+        toast.error('Failed to create event');
       }
     } catch (error) {
       console.error('Error creating event:', error);
-      alert('Failed to create event');
+      toast.error('Failed to create event');
     } finally {
       setLoading(false);
     }

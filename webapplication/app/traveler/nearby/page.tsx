@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { NearbyPlacesState } from '@/lib/types';
 import { Hotel, Utensils, Film, Hospital, Loader2, Search, ArrowUpDown } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { toast } from 'sonner';
 import {
   Select,
   SelectContent,
@@ -97,11 +98,11 @@ function NearbyPlacesContent() {
           selectedCategory: null,
         }));
       } else {
-        alert('Location not found. Please try another search term.');
+        toast.error('Location not found. Please try another search term.');
       }
     } catch (error) {
       console.error('Location search failed:', error);
-      alert('Failed to search location. Please try again.');
+      toast.error('Failed to search location. Please try again.');
     }
   };
 

@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, MapPin, Calendar, Users, Star, CheckCircle, XCircle, Phone, Globe } from "lucide-react";
+import { toast } from "sonner";
 
 interface TripLocation {
   id: string;
@@ -114,12 +115,13 @@ export default function GuiderDashboardPage() {
       if (data.success) {
         // Refresh dashboard data
         await fetchDashboardData();
+        toast.success("Trip accepted successfully!");
       } else {
-        alert(data.error || "Failed to accept trip");
+        toast.error(data.error || "Failed to accept trip");
       }
     } catch (error) {
       console.error("Failed to accept trip:", error);
-      alert("Failed to accept trip");
+      toast.error("Failed to accept trip");
     } finally {
       setActionLoading(null);
     }

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ReviewForm } from "@/components/reviews/ReviewForm";
 import axios from "axios";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -163,15 +164,15 @@ export default function TravelerPlansPage() {
 
       if (data.success) {
         // Show success message
-        alert("Trip deleted successfully!");
+        toast.success("Trip deleted successfully!");
         // Refresh trip list
         await fetchTrips();
       } else {
-        alert(`Failed to delete trip: ${data.error}`);
+        toast.error(`Failed to delete trip: ${data.error}`);
       }
     } catch (error) {
       console.error("Error deleting trip:", error);
-      alert("Failed to delete trip. Please try again.");
+      toast.error("Failed to delete trip. Please try again.");
     } finally {
       setActionLoading(null);
       setDeleteDialogOpen(false);
@@ -191,12 +192,12 @@ export default function TravelerPlansPage() {
         // Redirect to Stripe Checkout
         window.location.href = data.sessionUrl;
       } else {
-        alert(`Failed to initiate payment: ${data.error}`);
+        toast.error(`Failed to initiate payment: ${data.error}`);
         setActionLoading(null);
       }
     } catch (error) {
       console.error("Error initiating payment:", error);
-      alert("Failed to initiate payment. Please try again.");
+      toast.error("Failed to initiate payment. Please try again.");
       setActionLoading(null);
     }
   };
@@ -217,14 +218,14 @@ export default function TravelerPlansPage() {
       const data = await response.json();
 
       if (data.success) {
-        alert("Trip started successfully! Enjoy your journey!");
+        toast.success("Trip started successfully! Enjoy your journey!");
         await fetchTrips();
       } else {
-        alert(`Failed to start trip: ${data.error}`);
+        toast.error(`Failed to start trip: ${data.error}`);
       }
     } catch (error) {
       console.error("Error starting trip:", error);
-      alert("Failed to start trip. Please try again.");
+      toast.error("Failed to start trip. Please try again.");
     } finally {
       setActionLoading(null);
       setStartDialogOpen(false);

@@ -6,6 +6,7 @@ import { AppSidebar } from '@/components/admin/Sidebar';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { User,Stats } from '@/lib/types';
 import { ReviewDetailModal } from '@/components/admin/ReviewDetailModal';
+import { toast } from 'sonner';
 
 export default function UsersManagementPage() {
   const [users, setUsers] = useState<User[]>([]);
@@ -47,12 +48,13 @@ export default function UsersManagementPage() {
           totalGuides: deletedUser?.role === 'GUIDE' ? prev.totalGuides - 1 : prev.totalGuides,
           totalAdmins: deletedUser?.role === 'ADMIN' ? prev.totalAdmins - 1 : prev.totalAdmins,
         }));
+        toast.success('User deleted successfully');
       } else {
-        alert('Failed to delete user');
+        toast.error('Failed to delete user');
       }
     } catch (err) {
       console.error('Error deleting user:', err);
-      alert('Failed to delete user');
+      toast.error('Failed to delete user');
     } finally {
       setDeleteLoading(null);
     }

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { AccessibilityWidget } from "@/components/accessibility/AccessibilityWidget";
+import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
   title: "Heritage Lanka - Connect with Local Guides in Sri Lanka",
@@ -67,6 +68,7 @@ export default function RootLayout({
       <body>
         {children}
         <AccessibilityWidget />
+        <Toaster position="top-right" richColors />
       </body>
     </html>
   );
