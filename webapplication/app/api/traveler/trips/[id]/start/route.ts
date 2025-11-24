@@ -130,64 +130,59 @@ export async function POST(
     // Set OTP expiration to 30 minutes from now
     const expiresAt = new Date(Date.now() + 30 * 60 * 1000);
 
-    // Use transaction to create verification record and update trip status
-    await db.transaction(async (tx) => {
-      // Check if verification already exists
-      const [existingVerification] = await tx
-        .select()
-        .from(tripVerifications)
-        .where(eq(tripVerifications.tripId, tripId))
-        .limit(1);
-      
-      if (existingVerification) {
-        // Update existing verification
-        await tx
-          .update(tripVerifications)
-          .set({
-            otp,
-            travelerGeohash,
-            guideGeohash: null,
-            verified: false,
-            verifiedAt: null,
-            expiresAt,
-          })
-          .where(eq(tripVerifications.tripId, tripId));
-      } else {
-        // Create new verification record
-        await tx.insert(tripVerifications).values({
-          tripId,
+    // Check if verification already exists
+    const [existingVerification] = await db
+      .select()
+      .from(tripVerifications)
+      .where(eq(tripVerifications.tripId, tripId))
+      .limit(1);
+    
+    if (existingVerification) {
+      // Update existing verification
+      await db
+        .update(tripVerifications)
+        .set({
           otp,
           travelerGeohash,
+          guideGeohash: null,
+          verified: false,
+          verifiedAt: null,
           expiresAt,
-        });
-      }
-
-      // Update trip status to IN_PROGRESS and bookingStatus to ACCEPTED
-      await tx
-        .update(trips)
-        .set({
-          status: 'IN_PROGRESS',
-          bookingStatus: 'ACCEPTED',
-          updatedAt: new Date(),
         })
-        .where(eq(trips.id, tripId));
+        .where(eq(tripVerifications.tripId, tripId));
+    } else {
+      // Create new verification record
+      await db.insert(tripVerifications).values({
+        tripId,
+        otp,
+        travelerGeohash,
+        expiresAt,
+      });
+    }
 
-      // Update traveler.tripInProgress to true
-      await tx
-        .update(travelers)
+    // Update trip status to IN_PROGRESS and bookingStatus to ACCEPTED
+    await db
+      .update(trips)
+      .set({
+        status: 'IN_PROGRESS',
+        bookingStatus: 'ACCEPTED',
+        updatedAt: new Date(),
+      })
+      .where(eq(trips.id, tripId));
+
+    // Update traveler.tripInProgress to true
+    await db
+      .update(travelers)
+      .set({ tripInProgress: true })
+      .where(eq(travelers.id, traveler.id));
+
+    // If trip has a guide, update guide.tripInProgress to true
+    if (trip.guideId) {
+      await db
+        .update(guides)
         .set({ tripInProgress: true })
-        .where(eq(travelers.id, traveler.id));
-
-      // If trip has a guide, update guide.tripInProgress to true
-      if (trip.guideId) {
-        await tx
-          .update(guides)
-          .set({ tripInProgress: true })
-          .where(eq(guides.id, trip.guideId));
-      }
-
-      return { success: true };
-    });
+        .where(eq(guides.id, trip.guideId));
+    }
 
     // Get guide phone number if guide is assigned
     let guidePhone = null;
