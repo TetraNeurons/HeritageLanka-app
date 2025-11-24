@@ -685,8 +685,8 @@ export default function TravelerPlansPage() {
 
       {/* Trip Details Dialog */}
       <Dialog open={detailsDialogOpen} onOpenChange={setDetailsDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh]">
-          <DialogHeader>
+        <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col p-0">
+          <DialogHeader className="px-6 pt-6 pb-4 border-b">
             <DialogTitle className="flex items-center gap-2">
               <MapPin className="h-5 w-5 text-blue-600" />
               Trip to {selectedTrip?.country}
@@ -696,9 +696,9 @@ export default function TravelerPlansPage() {
             </DialogDescription>
           </DialogHeader>
           
-          <ScrollArea className="max-h-[calc(90vh-200px)] pr-4">
+          <ScrollArea className="flex-1 px-6 overflow-y-auto" style={{ maxHeight: 'calc(90vh - 180px)' }}>
             {selectedTrip && (
-              <div className="space-y-6">
+              <div className="space-y-6 py-4">
                 {/* Trip Summary */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div className="bg-gray-50 p-3 rounded-lg">
@@ -898,7 +898,7 @@ export default function TravelerPlansPage() {
             )}
           </ScrollArea>
 
-          <DialogFooter>
+          <DialogFooter className="px-6 py-4 border-t bg-gray-50">
             <Button variant="outline" onClick={() => setDetailsDialogOpen(false)}>
               Close
             </Button>
