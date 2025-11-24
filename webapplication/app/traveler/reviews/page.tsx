@@ -6,6 +6,17 @@ import { Star, MessageSquare } from "lucide-react";
 import axios from "axios";
 import { AppSidebar } from "@/components/traveler/Sidebar";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface Review {
   id: string;
@@ -32,6 +43,9 @@ export default function TravelerReviewsPage() {
   const [reviewsReceived, setReviewsReceived] = useState<Review[]>([]);
   const [loadingGiven, setLoadingGiven] = useState(true);
   const [loadingReceived, setLoadingReceived] = useState(true);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [reviewToDelete, setReviewToDelete] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     fetchReviewsGiven();
@@ -61,6 +75,33 @@ export default function TravelerReviewsPage() {
       console.error("Error fetching reviews received:", error);
     } finally {
       setLoadingReceived(false);
+    }
+  };
+
+  const handleDeleteClick = (reviewId: string) => {
+    setReviewToDelete(reviewId);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!reviewToDelete) return;
+
+    try {
+      setDeleting(true);
+      const response = await axios.delete(`/api/reviews/${reviewToDelete}`);
+      
+      if (response.data.success) {
+        toast.success("Review deleted successfully");
+        // Refresh reviews
+        await fetchReviewsGiven();
+      }
+    } catch (error: any) {
+      console.error("Error deleting review:", error);
+      toast.error(error.response?.data?.error || "Failed to delete review");
+    } finally {
+      setDeleting(false);
+      setDeleteDialogOpen(false);
+      setReviewToDelete(null);
     }
   };
 
@@ -118,6 +159,8 @@ export default function TravelerReviewsPage() {
                           review={review}
                           showReviewer={false}
                           showReviewee={true}
+                          canDelete={true}
+                          onDelete={() => handleDeleteClick(review.id)}
                         />
                       ))}
                     </div>
@@ -187,6 +230,28 @@ export default function TravelerReviewsPage() {
           </main>
         </div>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Review</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this review? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              disabled={deleting}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {deleting ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </SidebarProvider>
   );
 }

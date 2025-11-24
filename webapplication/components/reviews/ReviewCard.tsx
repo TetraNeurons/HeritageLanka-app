@@ -1,6 +1,6 @@
 "use client";
 
-import { Star, Edit, MapPin, Calendar } from "lucide-react";
+import { Star, Edit, MapPin, Calendar, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 
@@ -27,7 +27,9 @@ interface ReviewCardProps {
   showReviewer?: boolean;
   showReviewee?: boolean;
   canEdit?: boolean;
+  canDelete?: boolean;
   onEdit?: () => void;
+  onDelete?: () => void;
 }
 
 export function ReviewCard({
@@ -35,7 +37,9 @@ export function ReviewCard({
   showReviewer = true,
   showReviewee = true,
   canEdit = false,
+  canDelete = false,
   onEdit,
+  onDelete,
 }: ReviewCardProps) {
   const displayName = showReviewer
     ? review.reviewer?.name
@@ -62,18 +66,31 @@ export function ReviewCard({
           </div>
         </div>
 
-        {/* Edit Button */}
-        {canEdit && onEdit && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onEdit}
-            className="text-gray-600 hover:text-blue-600"
-          >
-            <Edit className="h-4 w-4 mr-1" />
-            Edit
-          </Button>
-        )}
+        {/* Action Buttons */}
+        <div className="flex gap-2">
+          {canEdit && onEdit && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onEdit}
+              className="text-gray-600 hover:text-blue-600"
+            >
+              <Edit className="h-4 w-4 mr-1" />
+              Edit
+            </Button>
+          )}
+          {canDelete && onDelete && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onDelete}
+              className="text-gray-600 hover:text-red-600"
+            >
+              <Trash2 className="h-4 w-4 mr-1" />
+              Delete
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Rating */}

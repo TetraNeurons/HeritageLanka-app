@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuth } from '@/lib/auth';
-import { updateReview, ReviewValidationError } from '@/lib/review-service';
 import { db } from '@/db/drizzle';
 import { reviews } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { recalculateGuideRating, recalculateTravelerRating } from '@/lib/rating-calculator';
 
-export async function PATCH(
+export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -20,67 +19,51 @@ export async function PATCH(
       );
     }
 
-    // Check if user is a traveler or guide
-    if (authResult.user.role !== 'TRAVELER' && authResult.user.role !== 'GUIDE') {
-      return NextResponse.json(
-        { success: false, error: 'Only travelers and guides can edit reviews' },
-        { status: 403 }
-      );
-    }
-
     const userId = authResult.user.userId;
     const { id: reviewId } = await params;
-    const body = await request.json();
-    const { rating, comment } = body;
 
-    // Get the existing review to check if rating changed
-    const existingReview = await db.query.reviews.findFirst({
+    // Fetch the review to check ownership
+    const review = await db.query.reviews.findFirst({
       where: eq(reviews.id, reviewId),
     });
 
-    if (!existingReview) {
+    if (!review) {
       return NextResponse.json(
         { success: false, error: 'Review not found' },
         { status: 404 }
       );
     }
 
-    const ratingChanged = rating !== undefined && rating !== existingReview.rating;
+    // Check if user is the reviewer
+    if (review.reviewerId !== userId) {
+      return NextResponse.json(
+        { success: false, error: 'You can only delete your own reviews' },
+        { status: 403 }
+      );
+    }
 
-    // Update the review
-    const updatedReview = await updateReview(
-      {
-        reviewId,
-        rating,
-        comment,
-      },
-      userId
-    );
+    // Store reviewee info before deletion for rating recalculation
+    const revieweeId = review.revieweeId;
+    const reviewerType = review.reviewerType;
 
-    // Recalculate reviewee rating if rating changed
-    if (ratingChanged) {
-      if (existingReview.reviewerType === 'TRAVELER') {
-        await recalculateGuideRating(existingReview.revieweeId);
-      } else {
-        await recalculateTravelerRating(existingReview.revieweeId);
-      }
+    // Delete the review
+    await db.delete(reviews).where(eq(reviews.id, reviewId));
+
+    // Recalculate reviewee rating
+    if (reviewerType === 'TRAVELER') {
+      await recalculateGuideRating(revieweeId);
+    } else {
+      await recalculateTravelerRating(revieweeId);
     }
 
     return NextResponse.json({
       success: true,
-      review: updatedReview,
+      message: 'Review deleted successfully',
     });
   } catch (error) {
-    if (error instanceof ReviewValidationError) {
-      return NextResponse.json(
-        { success: false, error: error.message },
-        { status: 400 }
-      );
-    }
-
-    console.error('Error updating review:', error);
+    console.error('Error deleting review:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to update review' },
+      { success: false, error: 'Failed to delete review' },
       { status: 500 }
     );
   }
