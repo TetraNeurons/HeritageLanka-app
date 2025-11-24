@@ -49,46 +49,44 @@ export async function POST(
       );
     }
 
-    // Use transaction for atomicity
-    await db.transaction(async (tx) => {
-      // Get and verify trip is still in PLANNING status and not assigned
-      const [trip] = await tx
-        .select()
-        .from(trips)
-        .where(
-          and(
-            eq(trips.id, tripId),
-            eq(trips.status, 'PLANNING'),
-            isNull(trips.guideId)
-          )
+    // Get and verify trip is still in PLANNING status and not assigned
+    const [trip] = await db
+      .select()
+      .from(trips)
+      .where(
+        and(
+          eq(trips.id, tripId),
+          eq(trips.status, 'PLANNING'),
+          isNull(trips.guideId)
         )
-        .limit(1);
+      )
+      .limit(1);
 
-      if (!trip) {
-        throw new Error('Trip not found, already assigned, or not in PLANNING status');
-      }
+    if (!trip) {
+      return NextResponse.json(
+        { success: false, error: 'Trip not found, already assigned, or not in PLANNING status' },
+        { status: 409 }
+      );
+    }
 
-      // Update trip: assign guide, change status to CONFIRMED, update bookingStatus
-      await tx
-        .update(trips)
-        .set({
-          guideId: guide.id,
-          status: 'CONFIRMED',
-          bookingStatus: 'ACCEPTED',
-          updatedAt: new Date(),
-        })
-        .where(eq(trips.id, tripId));
+    // Update trip: assign guide, change status to CONFIRMED, update bookingStatus
+    await db
+      .update(trips)
+      .set({
+        guideId: guide.id,
+        status: 'CONFIRMED',
+        bookingStatus: 'ACCEPTED',
+        updatedAt: new Date(),
+      })
+      .where(eq(trips.id, tripId));
 
-      // Update guide tripInProgress flag
-      await tx
-        .update(guides)
-        .set({
-          tripInProgress: true,
-        })
-        .where(eq(guides.id, guide.id));
-
-      return { success: true };
-    });
+    // Update guide tripInProgress flag
+    await db
+      .update(guides)
+      .set({
+        tripInProgress: true,
+      })
+      .where(eq(guides.id, guide.id));
 
     return NextResponse.json(
       {
@@ -99,14 +97,6 @@ export async function POST(
     );
   } catch (error: any) {
     console.error('Accept trip error:', error);
-    
-    // Handle specific error cases
-    if (error.message.includes('Trip not found')) {
-      return NextResponse.json(
-        { success: false, error: error.message },
-        { status: 409 }
-      );
-    }
 
     return NextResponse.json(
       { success: false, error: 'Server error', details: error.message },
