@@ -6,18 +6,18 @@ import { verifyAuth } from "@/lib/auth";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const authResult = await verifyAuth(request);
-    if (!authResult.authenticated || authResult.user.role !== "TRAVELER") {
+    if (!authResult.success || !authResult.user || authResult.user.role !== "TRAVELER") {
       return NextResponse.json(
         { success: false, error: "Unauthorized" },
         { status: 401 }
       );
     }
 
-    const tripId = params.id;
+    const { id: tripId } = await params;
 
     // Fetch trip with guide and locations
     const [trip] = await db
