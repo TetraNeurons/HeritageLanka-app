@@ -44,7 +44,7 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL(dashboardUrl, request.url));
   }
 
-  if (pathname.startsWith('/guide') && payload.role !== 'GUIDE') {
+  if (pathname.startsWith('/guider') && payload.role !== 'GUIDE') {
     const dashboardUrl = getRoleDashboard(payload.role);
     return NextResponse.redirect(new URL(dashboardUrl, request.url));
   }
@@ -62,7 +62,7 @@ function getRoleDashboard(role: string): string {
     case 'ADMIN':
       return '/admin/dashboard';
     case 'GUIDE':
-      return '/guide/dashboard';
+      return '/guider/dashboard';
     case 'TRAVELER':
       return '/traveler/dashboard';
     default:
@@ -74,7 +74,7 @@ export const config = {
   matcher: [
     '/dashboard/:path*',
     '/admin/:path*',
-    '/guide/:path*',
+    '/guider/:path*',
     '/traveler/:path*',
     '/auth/signin',
     '/auth/signup',

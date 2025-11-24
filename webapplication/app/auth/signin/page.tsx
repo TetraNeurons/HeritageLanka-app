@@ -34,7 +34,7 @@ export default function SignInPage() {
             router.push('/admin/dashboard');
             break;
           case 'GUIDE':
-            router.push('/guide/dashboard');
+            router.push('/guider/dashboard');
             break;
           case 'TRAVELER':
           default:
