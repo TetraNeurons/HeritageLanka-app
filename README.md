@@ -19,7 +19,7 @@ The all-in-one Uber-like app for Sri Lanka travelling - connecting travelers wit
 - **Authentication**: JWT-based sessions
 - **Payments**: Stripe
 - **Storage**: Firebase Storage
-- **UI**: Radix UI, Tailwind CSS
+- **UI**: ShadCN Components, Tailwind CSS
 - **Maps**: Leaflet, React Leaflet
 
 ## Getting Started
