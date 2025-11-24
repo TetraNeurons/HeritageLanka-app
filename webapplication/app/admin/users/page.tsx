@@ -7,6 +7,16 @@ import { SidebarProvider } from '@/components/ui/sidebar';
 import { User,Stats } from '@/lib/types';
 import { ReviewDetailModal } from '@/components/admin/ReviewDetailModal';
 import { toast } from 'sonner';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function UsersManagementPage() {
   const [users, setUsers] = useState<User[]>([]);
@@ -15,6 +25,7 @@ export default function UsersManagementPage() {
   const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<{ id: string; name: string } | null>(null);
+  const [deleteUserId, setDeleteUserId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchUsers();
@@ -33,14 +44,14 @@ export default function UsersManagementPage() {
     }
   };
 
-  const handleDelete = async (userId: string) => {
-    if (!confirm('Are you sure you want to delete this user?')) return;
-    setDeleteLoading(userId);
+  const handleDelete = async () => {
+    if (!deleteUserId) return;
+    setDeleteLoading(deleteUserId);
     try {
-      const res = await fetch(`/api/admin/users/${userId}`, { method: 'DELETE' });
+      const res = await fetch(`/api/admin/users/${deleteUserId}`, { method: 'DELETE' });
       if (res.ok) {
-        const deletedUser = users.find(u => u.id === userId);
-        setUsers(users.filter(u => u.id !== userId));
+        const deletedUser = users.find(u => u.id === deleteUserId);
+        setUsers(users.filter(u => u.id !== deleteUserId));
         setStats(prev => ({
           ...prev,
           totalUsers: prev.totalUsers - 1,
@@ -57,6 +68,7 @@ export default function UsersManagementPage() {
       toast.error('Failed to delete user');
     } finally {
       setDeleteLoading(null);
+      setDeleteUserId(null);
     }
   };
 
@@ -257,7 +269,7 @@ export default function UsersManagementPage() {
                           </td>
                           <td className="px-6 py-4">
                             <button
-                              onClick={() => handleDelete(user.id)}
+                              onClick={() => setDeleteUserId(user.id)}
                               disabled={deleteLoading === user.id}
                               className="text-red-600 hover:text-red-700 disabled:opacity-50 transition-colors"
                             >
@@ -284,6 +296,24 @@ export default function UsersManagementPage() {
           userName={selectedUser.name}
         />
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!deleteUserId} onOpenChange={(open) => !open && setDeleteUserId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the user and all associated data.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </SidebarProvider>
   );
 }
