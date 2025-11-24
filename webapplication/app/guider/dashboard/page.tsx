@@ -125,28 +125,6 @@ export default function GuiderDashboardPage() {
     }
   };
 
-  const handleDeclineTrip = async (tripId: string) => {
-    setActionLoading(tripId);
-    try {
-      const res = await fetch(`/api/guider/trips/${tripId}/decline`, {
-        method: "POST",
-      });
-      const data = await res.json();
-
-      if (data.success) {
-        // Remove from available trips
-        setAvailableTrips(prev => prev.filter(t => t.id !== tripId));
-      } else {
-        alert(data.error || "Failed to decline trip");
-      }
-    } catch (error) {
-      console.error("Failed to decline trip:", error);
-      alert("Failed to decline trip");
-    } finally {
-      setActionLoading(null);
-    }
-  };
-
   const formatDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString("en-US", { 
       month: "short", 
@@ -385,15 +363,6 @@ export default function GuiderDashboardPage() {
                                   Accept
                                 </>
                               )}
-                            </Button>
-                            <Button
-                              onClick={() => handleDeclineTrip(trip.id)}
-                              disabled={actionLoading === trip.id}
-                              variant="outline"
-                              className="flex-1 hover:scale-105 active:scale-98 transition-all duration-200"
-                            >
-                              <XCircle className="h-4 w-4 mr-2" />
-                              Decline
                             </Button>
                           </div>
                         </div>

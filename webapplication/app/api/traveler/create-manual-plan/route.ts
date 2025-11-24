@@ -193,7 +193,10 @@ async function organizeManualPlanWithAI(params: any, userId: string) {
 
   try {
     const GoogleGenAI = (await import('@google/genai')).GoogleGenAI;
-    const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
+    const genAI = new GoogleGenAI({
+      apiKey: process.env.GEMINI_API_KEY || '',
+      vertexai: false // Use Gemini Developer API, not Vertex AI
+    });
 
     const prompt = `
 You are a travel planning expert. A traveler has manually selected ${locations.length} places to visit in Sri Lanka over ${totalDays} days.

@@ -50,7 +50,7 @@ export async function POST(
     }
 
     // Use transaction for atomicity
-    const result = await db.transaction(async (tx) => {
+    await db.transaction(async (tx) => {
       // Get and verify trip is still in PLANNING status and not assigned
       const [trip] = await tx
         .select()

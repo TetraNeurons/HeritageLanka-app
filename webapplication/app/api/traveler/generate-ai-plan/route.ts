@@ -6,7 +6,8 @@ import { multiServiceRateLimiter } from '@/lib/rate-limiter';
 import { createAIUsageLogger } from '@/lib/ai-logger';
 
 const genAI = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY || ''
+  apiKey: process.env.GEMINI_API_KEY || '',
+  vertexai: false // Use Gemini Developer API, not Vertex AI
 });
 
 export async function POST(request: NextRequest) {
