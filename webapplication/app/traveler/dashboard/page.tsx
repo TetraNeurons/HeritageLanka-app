@@ -207,16 +207,16 @@ export default function DashboardPage() {
           <AdDisplay />
           <main className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-6">
             {/* Header */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-4 sm:mb-6 gap-3">
-              <div className="w-full sm:w-auto">
+            <div className="flex justify-between items-start sm:items-end mb-4 sm:mb-6 gap-2 sm:gap-3">
+              <div className="flex-1 min-w-0">
                 <div className="hidden md:block mb-2"><SidebarTrigger /></div>
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-gray-900 font-poppins">
+                <h1 className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-bold tracking-tight text-gray-900 font-poppins">
                   Dashboard
                 </h1>
-                <p className="text-gray-600 text-sm sm:text-base mt-1">{currentDate}</p>
+                <p className="text-gray-600 text-xs sm:text-sm lg:text-base mt-1 truncate">{currentDate}</p>
               </div>
-              <div className="text-left sm:text-right w-full sm:w-auto">
-                <p className="text-3xl sm:text-4xl font-light text-gray-800 font-poppins">{currentTime}</p>
+              <div className="text-right flex-shrink-0">
+                <p className="text-2xl sm:text-3xl lg:text-4xl font-light text-gray-800 font-poppins">{currentTime}</p>
               </div>
             </div>
 
@@ -224,48 +224,50 @@ export default function DashboardPage() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4 lg:gap-6">
               {/* --- Currency / Timezone Converter --- */}
               <Card className="lg:col-span-7 bg-white/95 backdrop-blur-md border-2 border-gray-100 shadow-xl">
-                <CardContent className="p-5 sm:p-6 lg:p-8">
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-5 sm:mb-6 gap-3">
-                    <div>
+                <CardContent className="p-4 sm:p-5 lg:p-8">
+                  <div className="flex items-center justify-between mb-4 sm:mb-5 lg:mb-6 gap-2">
+                    <div className="flex-1 min-w-0">
                       <p className="text-xs font-semibold text-amber-600 uppercase tracking-wider">Converter</p>
-                      <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 font-poppins mt-1">
+                      <h2 className="text-base sm:text-lg lg:text-xl xl:text-2xl font-bold text-gray-900 font-poppins mt-1 truncate">
                         {isTimeZoneMode ? "Time Zone" : "Currency"}
                       </h2>
                     </div>
-                    <div className="flex items-center gap-2 sm:gap-3 bg-gray-50 p-2 rounded-lg">
-                      <span className="text-xs sm:text-sm font-medium text-gray-700">Currency</span>
+                    <div className="flex items-center gap-1.5 sm:gap-2 bg-gray-50 p-1.5 rounded-lg flex-shrink-0">
+                      <span className="text-xs font-medium text-gray-700 hidden sm:inline">Currency</span>
+                      <span className="text-xs font-medium text-gray-700 sm:hidden">Curr</span>
                       <Switch checked={isTimeZoneMode} onCheckedChange={setIsTimeZoneMode} />
-                      <span className="text-xs sm:text-sm font-medium text-gray-700">Time Zone</span>
+                      <span className="text-xs font-medium text-gray-700 hidden sm:inline">Time Zone</span>
+                      <span className="text-xs font-medium text-gray-700 sm:hidden">Zone</span>
                     </div>
                   </div>
 
                   {!isTimeZoneMode ? (
                     <>
-                      <div className="mb-5 sm:mb-6">
-                        <div className="flex flex-col sm:flex-row items-start sm:items-baseline gap-2 sm:gap-3">
-                          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 font-poppins">
+                      <div className="mb-4 sm:mb-5 lg:mb-6">
+                        <div className="flex items-center justify-center sm:justify-start gap-1.5 sm:gap-2 lg:gap-3 flex-wrap">
+                          <h2 className="text-2xl xs:text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 font-poppins break-words">
                             {amount || "1"} {fromCurrency}
                           </h2>
-                          <span className="text-2xl sm:text-3xl text-amber-500">→</span>
-                          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-amber-600 font-poppins">
+                          <span className="text-xl xs:text-2xl sm:text-3xl lg:text-4xl text-amber-500 flex-shrink-0">→</span>
+                          <h2 className="text-2xl xs:text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold text-amber-600 font-poppins break-words">
                             {convertedAmount || "0.00"} {toCurrency}
                           </h2>
                         </div>
-                        <p className="text-xs text-gray-500 mt-3 font-medium">Live rates via Frankfurter API</p>
+                        <p className="text-xs text-gray-500 mt-2 sm:mt-3 font-medium text-center sm:text-left">Live rates via Frankfurter API</p>
                       </div>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
-                        <div className="space-y-3">
-                          <label className="text-sm font-semibold text-gray-700">Amount</label>
+                      <div className="grid grid-cols-2 gap-2 sm:gap-4 lg:gap-5">
+                        <div className="space-y-2 sm:space-y-3 w-full">
+                          <label className="text-xs sm:text-sm font-semibold text-gray-700">Amount</label>
                           <Input
                             type="number"
                             value={amount}
                             onChange={(e) => setAmount(e.target.value)}
-                            className="text-base sm:text-lg font-medium h-12 sm:h-14 border-2 focus:border-amber-500"
+                            className="w-full text-sm sm:text-base lg:text-lg font-medium h-10 sm:h-12 lg:h-14 border-2 focus:border-amber-500 px-2 sm:px-3"
                             placeholder="Amount"
                           />
                           <Select value={fromCurrency} onValueChange={setFromCurrency}>
-                            <SelectTrigger className="h-12 sm:h-14 border-2">
+                            <SelectTrigger className="w-full h-10 sm:h-12 lg:h-14 border-2 text-sm sm:text-base">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
@@ -277,16 +279,16 @@ export default function DashboardPage() {
                             </SelectContent>
                           </Select>
                         </div>
-                        <div className="space-y-3">
-                          <label className="text-sm font-semibold text-gray-700">Converted</label>
+                        <div className="space-y-2 sm:space-y-3 w-full">
+                          <label className="text-xs sm:text-sm font-semibold text-gray-700">Converted</label>
                           <Input
                             readOnly
                             value={convertedAmount || ""}
-                            className="text-base sm:text-lg font-medium h-12 sm:h-14 bg-amber-50 border-2 border-amber-200"
+                            className="w-full text-sm sm:text-base lg:text-lg font-medium h-10 sm:h-12 lg:h-14 bg-amber-50 border-2 border-amber-200 px-2 sm:px-3"
                             placeholder="Result"
                           />
                           <Select value={toCurrency} onValueChange={setToCurrency}>
-                            <SelectTrigger className="h-12 sm:h-14 border-2">
+                            <SelectTrigger className="w-full h-10 sm:h-12 lg:h-14 border-2 text-sm sm:text-base">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
@@ -302,51 +304,51 @@ export default function DashboardPage() {
                     </>
                   ) : (
                     <>
-                      <div className="mb-6 text-center py-6 rounded-2xl bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-100">
-                        <p className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-800 font-poppins">{convertedTime}</p>
-                        <p className="text-lg sm:text-xl text-gray-600 mt-3 font-medium">{convertedAmount}</p>
-                        <p className="text-sm text-gray-500 mt-2">
+                      <div className="mb-4 sm:mb-5 lg:mb-6 text-center py-4 sm:py-5 lg:py-6 rounded-2xl bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-100">
+                        <p className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-800 font-poppins">{convertedTime}</p>
+                        <p className="text-base sm:text-lg lg:text-xl text-gray-600 mt-2 sm:mt-3 font-medium">{convertedAmount}</p>
+                        <p className="text-xs sm:text-sm text-gray-500 mt-1.5 sm:mt-2 px-4">
                           {toZone.country} • {toZone.zone.split("/")[1]?.replace(/_/g, " ")}
                         </p>
                       </div>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6">
-                        <div>
-                          <label className="text-sm font-semibold text-gray-700 mb-2 block">From</label>
+                      <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:gap-6">
+                        <div className="w-full">
+                          <label className="text-xs sm:text-sm font-semibold text-gray-700 mb-2 block">From</label>
                           <Select value={fromZone.zone} onValueChange={(v) => setFromZone(TIMEZONES.find(t => t.zone === v) || fromZone)}>
-                            <SelectTrigger className="h-12 sm:h-14 border-2">
-                              <div className="flex items-center gap-2 sm:gap-3">
-                                <span className="text-xl sm:text-2xl">{fromZone.flag}</span>
-                                <span className="text-sm sm:text-base font-medium">{fromZone.country}</span>
+                            <SelectTrigger className="w-full h-10 sm:h-12 lg:h-14 border-2">
+                              <div className="flex items-center gap-2">
+                                <span className="text-lg sm:text-xl lg:text-2xl">{fromZone.flag}</span>
+                                <span className="text-xs sm:text-sm lg:text-base font-medium truncate">{fromZone.country}</span>
                               </div>
                             </SelectTrigger>
                             <SelectContent>
                               {TIMEZONES.map((tz) => (
                                 <SelectItem key={tz.zone} value={tz.zone}>
-                                  <div className="flex items-center gap-2 sm:gap-3">
-                                    <span className="text-lg sm:text-xl">{tz.flag}</span>
-                                    <span className="text-sm">{tz.country}</span>
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-base sm:text-lg">{tz.flag}</span>
+                                    <span className="text-xs sm:text-sm">{tz.country}</span>
                                   </div>
                                 </SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
                         </div>
-                        <div>
-                          <label className="text-sm font-semibold text-gray-700 mb-2 block">To</label>
+                        <div className="w-full">
+                          <label className="text-xs sm:text-sm font-semibold text-gray-700 mb-2 block">To</label>
                           <Select value={toZone.zone} onValueChange={(v) => setToZone(TIMEZONES.find(t => t.zone === v) || toZone)}>
-                            <SelectTrigger className="h-12 sm:h-14 border-2">
-                              <div className="flex items-center gap-2 sm:gap-3">
-                                <span className="text-xl sm:text-2xl">{toZone.flag}</span>
-                                <span className="text-sm sm:text-base font-medium">{toZone.country}</span>
+                            <SelectTrigger className="w-full h-10 sm:h-12 lg:h-14 border-2">
+                              <div className="flex items-center gap-2">
+                                <span className="text-lg sm:text-xl lg:text-2xl">{toZone.flag}</span>
+                                <span className="text-xs sm:text-sm lg:text-base font-medium truncate">{toZone.country}</span>
                               </div>
                             </SelectTrigger>
                             <SelectContent>
                               {TIMEZONES.map((tz) => (
                                 <SelectItem key={tz.zone} value={tz.zone}>
-                                  <div className="flex items-center gap-2 sm:gap-3">
-                                    <span className="text-lg sm:text-xl">{tz.flag}</span>
-                                    <span className="text-sm">{tz.country}</span>
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-base sm:text-lg">{tz.flag}</span>
+                                    <span className="text-xs sm:text-sm">{tz.country}</span>
                                   </div>
                                 </SelectItem>
                               ))}
