@@ -181,48 +181,48 @@ export default function Home() {
           {activeTab === "traveler" ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
               {/* Step 1 */}
-              <Card className="border-white/20 bg-white/5 backdrop-blur-sm shadow-xl hover:bg-white/10 transition-all group">
+              <Card className="border-gray-200 bg-white shadow-xl hover:shadow-2xl transition-all group">
                 <CardContent className="p-6 space-y-4">
-                  <div className="h-14 w-14 rounded-xl bg-amber-400/20 flex items-center justify-center group-hover:bg-amber-400/30 transition-all">
-                    <Calendar className="h-7 w-7 text-amber-400" />
+                  <div className="h-14 w-14 rounded-xl bg-amber-100 flex items-center justify-center group-hover:bg-amber-200 transition-all">
+                    <Calendar className="h-7 w-7 text-amber-600" />
                   </div>
                   <div className="space-y-2">
-                    <div className="text-5xl font-black text-white/10">01</div>
-                    <h3 className="text-xl font-bold text-white -mt-6">Create Request</h3>
+                    <div className="text-5xl font-black text-gray-100">01</div>
+                    <h3 className="text-xl font-bold text-black -mt-6">Create Request</h3>
                   </div>
-                  <p className="text-white/70 leading-relaxed text-sm">
+                  <p className="text-gray-600 leading-relaxed text-sm">
                     Tell us where you want to go and what you want to see.
                   </p>
                 </CardContent>
               </Card>
 
               {/* Step 2 */}
-              <Card className="border-white/20 bg-white/5 backdrop-blur-sm shadow-xl hover:bg-white/10 transition-all group">
+              <Card className="border-gray-200 bg-white shadow-xl hover:shadow-2xl transition-all group">
                 <CardContent className="p-6 space-y-4">
-                  <div className="h-14 w-14 rounded-xl bg-amber-400/20 flex items-center justify-center group-hover:bg-amber-400/30 transition-all">
-                    <Users className="h-7 w-7 text-amber-400" />
+                  <div className="h-14 w-14 rounded-xl bg-amber-100 flex items-center justify-center group-hover:bg-amber-200 transition-all">
+                    <Users className="h-7 w-7 text-amber-600" />
                   </div>
                   <div className="space-y-2">
-                    <div className="text-5xl font-black text-white/10">02</div>
-                    <h3 className="text-xl font-bold text-white -mt-6">Get Matched</h3>
+                    <div className="text-5xl font-black text-gray-100">02</div>
+                    <h3 className="text-xl font-bold text-black -mt-6">Get Matched</h3>
                   </div>
-                  <p className="text-white/70 leading-relaxed text-sm">
+                  <p className="text-gray-600 leading-relaxed text-sm">
                     We connect you with available local guides in that area.
                   </p>
                 </CardContent>
               </Card>
 
               {/* Step 3 */}
-              <Card className="border-white/20 bg-white/5 backdrop-blur-sm shadow-xl hover:bg-white/10 transition-all group">
+              <Card className="border-gray-200 bg-white shadow-xl hover:shadow-2xl transition-all group">
                 <CardContent className="p-6 space-y-4">
-                  <div className="h-14 w-14 rounded-xl bg-amber-400/20 flex items-center justify-center group-hover:bg-amber-400/30 transition-all">
-                    <MapPin className="h-7 w-7 text-amber-400" />
+                  <div className="h-14 w-14 rounded-xl bg-amber-100 flex items-center justify-center group-hover:bg-amber-200 transition-all">
+                    <MapPin className="h-7 w-7 text-amber-600" />
                   </div>
                   <div className="space-y-2">
-                    <div className="text-5xl font-black text-white/10">03</div>
-                    <h3 className="text-xl font-bold text-white -mt-6">Explore</h3>
+                    <div className="text-5xl font-black text-gray-100">03</div>
+                    <h3 className="text-xl font-bold text-black -mt-6">Explore</h3>
                   </div>
-                  <p className="text-white/70 leading-relaxed text-sm">
+                  <p className="text-gray-600 leading-relaxed text-sm">
                     Meet your guide and enjoy a safe, local experience.
                   </p>
                 </CardContent>
@@ -231,48 +231,48 @@ export default function Home() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
               {/* Step 1 */}
-              <Card className="border-white/20 bg-white/5 backdrop-blur-sm shadow-xl hover:bg-white/10 transition-all group">
+              <Card className="border-gray-200 bg-white shadow-xl hover:shadow-2xl transition-all group">
                 <CardContent className="p-6 space-y-4">
-                  <div className="h-14 w-14 rounded-xl bg-amber-400/20 flex items-center justify-center group-hover:bg-amber-400/30 transition-all">
-                    <Shield className="h-7 w-7 text-amber-400" />
+                  <div className="h-14 w-14 rounded-xl bg-amber-100 flex items-center justify-center group-hover:bg-amber-200 transition-all">
+                    <Shield className="h-7 w-7 text-amber-600" />
                   </div>
                   <div className="space-y-2">
-                    <div className="text-5xl font-black text-white/10">01</div>
-                    <h3 className="text-xl font-bold text-white -mt-6">Register</h3>
+                    <div className="text-5xl font-black text-gray-100">01</div>
+                    <h3 className="text-xl font-bold text-black -mt-6">Register</h3>
                   </div>
-                  <p className="text-white/70 leading-relaxed text-sm">
+                  <p className="text-gray-600 leading-relaxed text-sm">
                     Sign up with your details. We verify every guide manually.
                   </p>
                 </CardContent>
               </Card>
 
               {/* Step 2 */}
-              <Card className="border-white/20 bg-white/5 backdrop-blur-sm shadow-xl hover:bg-white/10 transition-all group">
+              <Card className="border-gray-200 bg-white shadow-xl hover:shadow-2xl transition-all group">
                 <CardContent className="p-6 space-y-4">
-                  <div className="h-14 w-14 rounded-xl bg-amber-400/20 flex items-center justify-center group-hover:bg-amber-400/30 transition-all">
-                    <Globe className="h-7 w-7 text-amber-400" />
+                  <div className="h-14 w-14 rounded-xl bg-amber-100 flex items-center justify-center group-hover:bg-amber-200 transition-all">
+                    <Globe className="h-7 w-7 text-amber-600" />
                   </div>
                   <div className="space-y-2">
-                    <div className="text-5xl font-black text-white/10">02</div>
-                    <h3 className="text-xl font-bold text-white -mt-6">Receive Jobs</h3>
+                    <div className="text-5xl font-black text-gray-100">02</div>
+                    <h3 className="text-xl font-bold text-black -mt-6">Receive Jobs</h3>
                   </div>
-                  <p className="text-white/70 leading-relaxed text-sm">
+                  <p className="text-gray-600 leading-relaxed text-sm">
                     Get notifications when travelers are looking for guides in your area.
                   </p>
                 </CardContent>
               </Card>
 
               {/* Step 3 */}
-              <Card className="border-white/20 bg-white/5 backdrop-blur-sm shadow-xl hover:bg-white/10 transition-all group">
+              <Card className="border-gray-200 bg-white shadow-xl hover:shadow-2xl transition-all group">
                 <CardContent className="p-6 space-y-4">
-                  <div className="h-14 w-14 rounded-xl bg-amber-400/20 flex items-center justify-center group-hover:bg-amber-400/30 transition-all">
-                    <Star className="h-7 w-7 text-amber-400" />
+                  <div className="h-14 w-14 rounded-xl bg-amber-100 flex items-center justify-center group-hover:bg-amber-200 transition-all">
+                    <Star className="h-7 w-7 text-amber-600" />
                   </div>
                   <div className="space-y-2">
-                    <div className="text-5xl font-black text-white/10">03</div>
-                    <h3 className="text-xl font-bold text-white -mt-6">Get Paid</h3>
+                    <div className="text-5xl font-black text-gray-100">03</div>
+                    <h3 className="text-xl font-bold text-black -mt-6">Get Paid</h3>
                   </div>
-                  <p className="text-white/70 leading-relaxed text-sm">
+                  <p className="text-gray-600 leading-relaxed text-sm">
                     Complete the tour and receive payments directly.
                   </p>
                 </CardContent>
