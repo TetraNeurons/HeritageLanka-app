@@ -210,12 +210,29 @@
   }
 }
 
+@keyframes scroll-left {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
 .animate-fade-in {
   animation: fade-in 0.8s ease-out;
 }
 
 .animate-fade-in-up {
   animation: fade-in-up 0.8s ease-out;
+}
+
+.animate-scroll-left {
+  animation: scroll-left 25s linear infinite;
+}
+
+.animate-scroll-left:hover {
+  animation-play-state: paused;
 }
 
 .animation-delay-200 {
