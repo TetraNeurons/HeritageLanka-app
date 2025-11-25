@@ -83,26 +83,28 @@ export default function CheckAdPage() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col bg-gradient-to-br from-gray-50 to-gray-100">
       <Header />
 
-      <main className="flex-1 py-16 px-6 md:px-8 lg:px-12">
+      <main className="flex-1 py-24 px-6 md:px-8 lg:px-12">
         <div className="container mx-auto max-w-2xl">
           <div className="text-center mb-12">
-            <h1 className="text-3xl md:text-4xl font-bold mb-4">Check Your Advertisement</h1>
-            <p className="text-muted-foreground text-lg">
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 font-poppins">
+              Check Your <span className="text-amber-500">Advertisement</span>
+            </h1>
+            <p className="text-gray-600 text-lg">
               Enter your payment reference ID to check the status and performance of your advertisement
             </p>
           </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Advertisement Status Checker</CardTitle>
+          <Card className="bg-white/95 backdrop-blur-md border-2 border-gray-100 shadow-2xl">
+            <CardHeader className="pb-6 pt-8 px-8 text-center">
+              <CardTitle className="text-2xl font-bold font-poppins">Advertisement Status Checker</CardTitle>
             </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-4">
+            <CardContent className="px-8 pb-8">
+              <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
-                  <Label htmlFor="paymentRef">Payment Reference ID</Label>
+                  <Label htmlFor="paymentRef" className="text-base font-semibold">Payment Reference ID</Label>
                   <div className="flex gap-2 mt-2">
                     <Input
                       id="paymentRef"
@@ -111,62 +113,62 @@ export default function CheckAdPage() {
                       value={paymentRef}
                       onChange={(e) => setPaymentRef(e.target.value)}
                       required
-                      className="flex-1"
+                      className="flex-1 h-12"
                     />
-                    <Button type="submit" disabled={loading || !paymentRef}>
+                    <Button type="submit" disabled={loading || !paymentRef} className="h-12 bg-amber-500 hover:bg-amber-600 text-white font-poppins font-bold shadow-xl">
                       {loading ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <Loader2 className="h-5 w-5 animate-spin" />
                       ) : (
-                        <Search className="h-4 w-4" />
+                        <Search className="h-5 w-5" />
                       )}
                     </Button>
                   </div>
                 </div>
 
                 {error && (
-                  <div className="p-3 bg-red-50 border border-red-200 rounded-md text-red-600 text-sm">
+                  <div className="p-4 bg-red-50 border-2 border-red-200 rounded-lg text-red-600 text-sm font-medium">
                     {error}
                   </div>
                 )}
               </form>
 
               {adData && (
-                <div className="mt-6 space-y-4">
-                  <div className="border-t pt-4">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="font-semibold text-lg">Status</h3>
-                      <Badge className={`${getStatusInfo(adData.status).color} border`} variant="outline">
+                <div className="mt-8 space-y-6">
+                  <div className="border-t-2 border-gray-200 pt-6">
+                    <div className="flex items-center justify-between mb-6">
+                      <h3 className="font-bold text-xl font-poppins">Status</h3>
+                      <Badge className={`${getStatusInfo(adData.status).color} border-2 text-base px-4 py-1.5`} variant="outline">
                         {getStatusInfo(adData.status).label}
                       </Badge>
                     </div>
 
-                    <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                    <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-5 mb-6 border-2 border-amber-100">
                       <div className="flex items-start gap-3">
                         {(() => {
                           const StatusIcon = getStatusInfo(adData.status).icon;
-                          return <StatusIcon className="h-5 w-5 mt-0.5 text-gray-600" />;
+                          return <StatusIcon className="h-6 w-6 mt-0.5 text-amber-600" />;
                         })()}
-                        <p className="text-sm text-gray-700">
+                        <p className="text-sm text-gray-700 leading-relaxed">
                           {getStatusInfo(adData.status).description}
                         </p>
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="bg-blue-50 rounded-lg p-4">
-                        <div className="flex items-center gap-2 text-blue-600 mb-2">
-                          <Eye className="h-4 w-4" />
-                          <span className="text-sm font-medium">Total Views</span>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-5 border-2 border-blue-200">
+                        <div className="flex items-center gap-2 text-blue-600 mb-3">
+                          <Eye className="h-5 w-5" />
+                          <span className="text-sm font-semibold">Total Views</span>
                         </div>
-                        <div className="text-2xl font-bold text-blue-900">{adData.viewCount}</div>
+                        <div className="text-3xl font-bold text-blue-900">{adData.viewCount}</div>
                       </div>
 
-                      <div className="bg-purple-50 rounded-lg p-4">
-                        <div className="flex items-center gap-2 text-purple-600 mb-2">
-                          <Calendar className="h-4 w-4" />
-                          <span className="text-sm font-medium">Submitted</span>
+                      <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-5 border-2 border-purple-200">
+                        <div className="flex items-center gap-2 text-purple-600 mb-3">
+                          <Calendar className="h-5 w-5" />
+                          <span className="text-sm font-semibold">Submitted</span>
                         </div>
-                        <div className="text-sm font-semibold text-purple-900">
+                        <div className="text-base font-bold text-purple-900">
                           {new Date(adData.submittedAt).toLocaleDateString("en-US", {
                             month: "short",
                             day: "numeric",
@@ -182,10 +184,10 @@ export default function CheckAdPage() {
           </Card>
 
           <div className="mt-8 text-center">
-            <p className="text-sm text-muted-foreground mb-4">
+            <p className="text-sm text-gray-600 mb-4 font-medium">
               Want to advertise with us?
             </p>
-            <Button variant="outline" asChild>
+            <Button variant="outline" className="border-2 border-amber-500 text-amber-600 hover:bg-amber-50 font-poppins font-semibold shadow-lg" asChild>
               <Link href="/">Submit New Advertisement</Link>
             </Button>
           </div>
