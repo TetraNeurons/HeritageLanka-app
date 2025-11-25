@@ -134,13 +134,6 @@ export default function Home() {
               </Link>
             </Button>
           </div>
-
-          {/* Scroll Indicator */}
-          <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-            <div className="text-white/60 text-sm uppercase tracking-widest font-semibold">
-              Scroll Down
-            </div>
-          </div>
           
         </div>
       </section>
