@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import { stripe } from '@/lib/stripe';
 import { db } from '@/db/drizzle';
-import { payments } from '@/db/schema';
+import { payments, events } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import Stripe from 'stripe';
 
@@ -54,25 +54,50 @@ export async function POST(request: NextRequest) {
         
         console.log('Payment successful for session:', session.id);
         
-        // Update payment status to PAID
+        // Get payment record
         const [payment] = await db
           .select()
           .from(payments)
           .where(eq(payments.stripeSessionId, session.id))
           .limit(1);
 
-        if (payment) {
-          await db
-            .update(payments)
-            .set({
-              status: 'PAID',
-              paidAt: new Date(),
-            })
-            .where(eq(payments.id, payment.id));
-
-          console.log('Payment updated to PAID:', payment.id);
-        } else {
+        if (!payment) {
           console.error('Payment not found for session:', session.id);
+          break;
+        }
+
+        // Update payment status to PAID
+        await db
+          .update(payments)
+          .set({
+            status: 'PAID',
+            paidAt: new Date(),
+          })
+          .where(eq(payments.id, payment.id));
+
+        console.log('Payment updated to PAID:', payment.id);
+
+        // Decrement ticket count for the event (only if eventId exists)
+        if (payment.eventId && payment.ticketQuantity) {
+          const [eventRecord] = await db
+            .select()
+            .from(events)
+            .where(eq(events.id, payment.eventId))
+            .limit(1);
+
+          if (eventRecord) {
+            const newTicketCount = Math.max(0, eventRecord.ticketCount - payment.ticketQuantity);
+            await db
+              .update(events)
+              .set({ ticketCount: newTicketCount })
+              .where(eq(events.id, payment.eventId));
+
+            console.log(
+              `Decremented ticket count for event ${payment.eventId}: ${eventRecord.ticketCount} -> ${newTicketCount}`
+            );
+          } else {
+            console.error('Event not found for payment:', payment.eventId);
+          }
         }
         break;
       }

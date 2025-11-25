@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { AppSidebar } from "@/components/traveler/Sidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 
@@ -48,9 +50,26 @@ export default function EventsPage() {
   const [events, setEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<"grid" | "map">("grid");
+  const [purchasingEventId, setPurchasingEventId] = useState<string | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<EventItem | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     fetchEvents();
+
+    // Check for payment result in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const paymentStatus = urlParams.get("payment");
+
+    if (paymentStatus === "success") {
+      toast.success("Payment successful! Your tickets have been confirmed.");
+      // Clear the query parameter
+      window.history.replaceState({}, "", "/traveler/events");
+    } else if (paymentStatus === "cancelled") {
+      toast.info("Payment was cancelled. You can try again anytime.");
+      // Clear the query parameter
+      window.history.replaceState({}, "", "/traveler/events");
+    }
   }, []);
 
   const fetchEvents = async () => {
@@ -69,6 +88,69 @@ export default function EventsPage() {
     const query = encodeURIComponent(place);
     const url = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}&query_place=${query}`;
     window.open(url, "_blank", "noopener,noreferrer");
+  };
+
+  const handlePurchase = async (event: EventItem) => {
+    // Check if sold out
+    if (event.ticketCount <= 0) {
+      toast.error("Sorry, this event is sold out");
+      return;
+    }
+
+    // Set loading state
+    setPurchasingEventId(event.id);
+
+    try {
+      // Call purchase API (authentication handled by cookies)
+      const response = await fetch(`/api/traveler/events/${event.id}/purchase`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include", // Include cookies for authentication
+        body: JSON.stringify({ quantity: 1 }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        // Handle authentication errors
+        if (response.status === 401 || response.status === 403) {
+          toast.error("Please sign in to purchase tickets");
+          router.push("/auth/signin?redirect=/traveler/events");
+          return;
+        }
+        throw new Error(data.error || "Purchase failed");
+      }
+
+      // Handle free events
+      if (event.price.toLowerCase().includes("free")) {
+        toast.success("Successfully registered for the event!");
+        await fetchEvents(); // Refresh list
+        setSelectedEvent(null); // Close dialog
+      } else {
+        // Handle paid events - redirect to Stripe
+        if (data.sessionUrl) {
+          window.location.href = data.sessionUrl;
+        }
+      }
+    } catch (error: any) {
+      toast.error(error.message || "Failed to process purchase");
+    } finally {
+      setPurchasingEventId(null);
+    }
+  };
+
+  const getButtonText = (event: EventItem) => {
+    if (event.ticketCount <= 0) return "Sold Out";
+    if (purchasingEventId === event.id) return "Processing...";
+    return event.price.toLowerCase().includes("free")
+      ? "Register Interest"
+      : "Buy Tickets Now";
+  };
+
+  const isButtonDisabled = (event: EventItem) => {
+    return event.ticketCount <= 0 || purchasingEventId === event.id;
   };
 
   if (loading) {
@@ -156,6 +238,12 @@ export default function EventsPage() {
                       FREE
                     </span>
                   )}
+
+                  {event.ticketCount <= 0 && (
+                    <span className="absolute top-3 right-3 bg-gradient-to-r from-red-500 to-rose-500 text-white px-4 py-2 rounded-lg text-xs font-bold shadow-lg">
+                      SOLD OUT
+                    </span>
+                  )}
                 </div>
 
                 <div className="p-5 space-y-3">
@@ -180,7 +268,10 @@ export default function EventsPage() {
                   </div>
 
                   {/* Dialog */}
-                  <Dialog>
+                  <Dialog open={selectedEvent?.id === event.id} onOpenChange={(open) => {
+                    if (!open) setSelectedEvent(null);
+                    else setSelectedEvent(event);
+                  }}>
                     <DialogTrigger asChild>
                       <Button variant="outline" className="w-full mt-3 border-2 hover:bg-amber-50 hover:border-amber-300 font-semibold font-poppins shadow-md">
                         View Details
@@ -318,10 +409,13 @@ export default function EventsPage() {
                       </div>
 
                       <DialogFooter className="mt-6">
-                        <Button className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold font-poppins shadow-xl h-12" size="lg">
-                          {event.price.includes("Free")
-                            ? "Register Interest"
-                            : "Buy Tickets Now"}
+                        <Button 
+                          className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold font-poppins shadow-xl h-12 disabled:opacity-50 disabled:cursor-not-allowed" 
+                          size="lg"
+                          onClick={() => handlePurchase(event)}
+                          disabled={isButtonDisabled(event)}
+                        >
+                          {getButtonText(event)}
                         </Button>
                       </DialogFooter>
                     </DialogContent>
