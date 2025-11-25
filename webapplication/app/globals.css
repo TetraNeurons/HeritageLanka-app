@@ -131,6 +131,19 @@
   }
 }
 
+/* Font utility classes */
+.font-poppins {
+  font-family: var(--font-poppins), system-ui, -apple-system, sans-serif;
+}
+
+.font-inter {
+  font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
+}
+
+.font-dancing-script {
+  font-family: var(--font-dancing-script), cursive;
+}
+
 .leaflet-container {
   z-index: 0 !important;
 }

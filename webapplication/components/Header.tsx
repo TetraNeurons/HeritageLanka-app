@@ -62,9 +62,11 @@ const response = await axiosInstance.get('/api/auth/validate')
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/10 backdrop-blur-sm text-white border border-white/20">
-              <span className="text-xl font-bold">H</span>
+              <span className="text-xl font-bold font-poppins">H</span>
             </div>
-            <span className="text-2xl font-bold tracking-tight text-white">HERITAGELANKA</span>
+            <span className="text-2xl font-bold tracking-tight text-white font-dancing-script">
+              Heritage <span className="ml-2">Lanka</span>
+            </span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -73,10 +75,10 @@ const response = await axiosInstance.get('/api/auth/validate')
               <div className="h-10 w-32 bg-white/10 animate-pulse rounded-md" />
             ) : user ? (
               <>
-                <span className="text-sm text-white/80">
+                <span className="text-sm text-white/80 font-poppins">
                   Welcome, <span className="font-semibold text-white">{user.name}</span>
                 </span>
-                <Button variant="ghost" size="sm" className="text-white hover:bg-white/20" asChild>
+                <Button variant="ghost" size="sm" className="text-white hover:bg-white/20 font-poppins font-semibold shadow-lg" asChild>
                   <Link href={getDashboardUrl()}>
                     <LayoutDashboard className="mr-2 h-4 w-4" />
                     Dashboard
@@ -86,10 +88,10 @@ const response = await axiosInstance.get('/api/auth/validate')
               </>
             ) : (
               <>
-                <Button variant="ghost" size="sm" className="text-white hover:bg-white/20 font-semibold" asChild>
+                <Button variant="ghost" size="sm" className="text-white hover:bg-white/20 font-poppins font-semibold shadow-lg" asChild>
                   <Link href="/auth/signin">Sign In</Link>
                 </Button>
-                <Button size="sm" className="bg-white text-black hover:bg-gray-100 font-bold" asChild>
+                <Button size="sm" className="bg-white text-black hover:bg-gray-100 font-poppins font-bold shadow-xl" asChild>
                   <Link href="/auth/signup">Get Started</Link>
                 </Button>
               </>
@@ -120,10 +122,10 @@ const response = await axiosInstance.get('/api/auth/validate')
                 <div className="h-9 bg-white/10 animate-pulse rounded-md" />
               ) : user ? (
                 <>
-                  <div className="px-3 py-2 text-sm text-white/80">
+                  <div className="px-3 py-2 text-sm text-white/80 font-poppins">
                     Welcome, <span className="font-semibold text-white">{user.name}</span>
                   </div>
-                  <Button variant="ghost" className="justify-start text-white hover:bg-white/20" asChild>
+                  <Button variant="ghost" className="justify-start text-white hover:bg-white/20 font-poppins font-semibold shadow-lg" asChild>
                     <Link href={getDashboardUrl()}>
                       <LayoutDashboard className="mr-2 h-4 w-4" />
                       Dashboard
@@ -133,10 +135,10 @@ const response = await axiosInstance.get('/api/auth/validate')
                 </>
               ) : (
                 <>
-                  <Button variant="ghost" className="justify-start text-white hover:bg-white/20" asChild>
+                  <Button variant="ghost" className="justify-start text-white hover:bg-white/20 font-poppins font-semibold shadow-lg" asChild>
                     <Link href="/auth/signin">Sign In</Link>
                   </Button>
-                  <Button className="justify-start bg-white text-black hover:bg-gray-100" asChild>
+                  <Button className="justify-start bg-white text-black hover:bg-gray-100 font-poppins font-bold shadow-xl" asChild>
                     <Link href="/auth/signup">Get Started</Link>
                   </Button>
                 </>

@@ -16,7 +16,6 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { X } from "lucide-react";
-import Header from '@/components/Header';
 
 const CURRENT_YEAR = new Date().getFullYear();
 const BIRTH_YEARS = Array.from({ length: 100 }, (_, i) => CURRENT_YEAR - 18 - i);
@@ -147,8 +146,31 @@ export default function SignUpPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-background via-muted/20 to-background">
-      <Header />
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 to-gray-100">
+      <header className="fixed top-0 left-0 right-0 z-50 border-b border-gray-200 bg-white/80 backdrop-blur-lg shadow-sm">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex h-20 items-center justify-between">
+            {/* Logo */}
+            <Link href="/" className="flex items-center space-x-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-500 text-white">
+                <span className="text-xl font-bold font-poppins">H</span>
+              </div>
+              <span className="text-2xl font-bold tracking-tight text-gray-900 font-dancing-script">
+                Heritage <span className="ml-2">Lanka</span>
+              </span>
+            </Link>
+
+            {/* Navigation */}
+            <div className="flex items-center space-x-4">
+              <Link href="/auth/signin">
+                <Button variant="ghost" className="text-gray-700 hover:bg-gray-100 font-poppins font-semibold">
+                  Sign In
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </header>
 
       <main className="flex-1 flex items-center justify-center p-4 pt-24 pb-8">
         <Card className="w-full max-w-md shadow-lg border-muted">
