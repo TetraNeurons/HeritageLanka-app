@@ -198,6 +198,7 @@ export const apiUsageLogs = pgTable('api_usage_logs', {
 // Advertisements table - Tracks advertisement submissions and display
 export const advertisements = pgTable('advertisements', {
   id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+  email: text('email').notNull(),
   imageUrl: text('image_url').notNull(),
   description: text('description').notNull(),
   redirectUrl: text('redirect_url').notNull(),
