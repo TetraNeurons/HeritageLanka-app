@@ -1,7 +1,5 @@
 import * as admin from 'firebase-admin';
 
-let firebaseApp: admin.app.App | null = null;
-
 /**
  * Initialize Firebase Admin SDK with service account credentials from environment variables
  * Uses singleton pattern to ensure only one instance is created
@@ -9,9 +7,10 @@ let firebaseApp: admin.app.App | null = null;
  * @throws Error if required environment variables are missing or invalid
  */
 export function initializeFirebaseAdmin(): admin.app.App {
-  // Return existing instance if already initialized
-  if (firebaseApp) {
-    return firebaseApp;
+  // Check if Firebase Admin is already initialized globally
+  const existingApps = admin.apps;
+  if (existingApps.length > 0) {
+    return existingApps[0] as admin.app.App;
   }
 
   try {
@@ -28,7 +27,7 @@ export function initializeFirebaseAdmin(): admin.app.App {
     }
 
     // Initialize Firebase Admin SDK with environment variables
-    firebaseApp = admin.initializeApp({
+    const firebaseApp = admin.initializeApp({
       credential: admin.credential.cert({
         projectId,
         clientEmail,
