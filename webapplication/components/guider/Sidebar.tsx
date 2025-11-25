@@ -50,10 +50,14 @@ export function AppSidebar() {
     <Sidebar className="w-64">
       <SidebarHeader className="p-6 border-b">
         <div className="flex items-center gap-3">
-          <Globe className="h-10 w-10 text-blue-600" />
+          <img 
+            src="/images/logo.png" 
+            alt="Heritage Lanka" 
+            className="h-12 w-12 object-contain drop-shadow-lg"
+          />
           <div>
-            <h2 className="text-xl font-bold">Heritage Lanka</h2>
-            <p className="text-sm text-muted-foreground">Guide</p>
+            <h2 className="text-xl font-bold font-dancing-script drop-shadow-md">Heritage Lanka</h2>
+            <p className="text-sm text-muted-foreground font-poppins">Guide</p>
           </div>
         </div>
       </SidebarHeader>
@@ -65,10 +69,10 @@ export function AppSidebar() {
               <SidebarMenuButton asChild>
                 <a
                   href={item.href}
-                  className={`flex items-center gap-4 p-4 h-8 text-lg font-medium rounded-lg transition-colors ${
+                  className={`flex items-center gap-4 p-4 h-8 text-lg font-poppins font-medium rounded-lg transition-all duration-200 ${
                     isActive(item.href)
-                      ? "bg-green-100 text-green-700 font-semibold"
-                      : "hover:bg-muted"
+                      ? "bg-amber-100 text-amber-700 font-semibold shadow-md"
+                      : "hover:bg-gray-100"
                   }`}
                 >
                   <item.icon className="h-6 w-6" />
@@ -85,7 +89,7 @@ export function AppSidebar() {
         <SidebarMenuButton
           onClick={handleSignOut}
           disabled={loading}
-          className="w-full justify-start text-black/70 flex items-center gap-3 h-5 text-lg font-medium"
+          className="w-full justify-start text-black/70 flex items-center gap-3 h-5 text-lg font-poppins font-medium hover:bg-gray-100 rounded-lg transition-colors"
         >
           <LogOut className="h-6 w-6" />
           {loading ? "Signing out..." : "Sign Out"}

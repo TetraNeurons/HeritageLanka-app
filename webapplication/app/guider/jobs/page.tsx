@@ -351,62 +351,62 @@ export default function JobsPage() {
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-4 sm:mb-6 gap-3">
               <div className="w-full sm:w-auto">
                 <div className="lg:hidden mb-2"><SidebarTrigger /></div>
-                <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-gray-900">Jobs</h1>
-                <p className="text-gray-500 text-xs sm:text-sm">{currentDate}</p>
+                <h1 className="text-xl sm:text-2xl font-bold font-poppins tracking-tight text-gray-900">Jobs</h1>
+                <p className="text-gray-500 text-xs sm:text-sm font-poppins">{currentDate}</p>
               </div>
               <div className="text-left sm:text-right w-full sm:w-auto">
-                <p className="text-2xl sm:text-3xl font-light text-gray-800">{currentTime}</p>
+                <p className="text-2xl sm:text-3xl font-light font-poppins text-gray-800">{currentTime}</p>
               </div>
             </div>
 
             {/* Statistics Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6">
               {/* In Progress Card */}
-              <Card className="shadow-sm border-gray-100 hover:shadow-md hover:-translate-y-1 transition-all duration-300 animate-fadeIn" style={{ animationDelay: '0.1s', animationFillMode: 'both' }}>
+              <Card className="bg-white/95 backdrop-blur-md border-2 border-white shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 animate-fadeIn" style={{ animationDelay: '0.1s', animationFillMode: 'both' }}>
                 <CardContent className="p-4 sm:p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-xs font-medium text-gray-400 uppercase tracking-wider">In Progress</p>
-                      <p className="text-2xl sm:text-3xl font-bold text-gray-900 mt-1">
+                      <p className="text-xs font-poppins font-semibold text-gray-500 uppercase tracking-wider">In Progress</p>
+                      <p className="text-2xl sm:text-3xl font-bold font-poppins text-gray-900 mt-1">
                         {jobsData?.statistics.inProgressCount || 0}
                       </p>
                     </div>
-                    <div className="bg-blue-100 p-2 sm:p-3 rounded-lg">
-                      <Clock className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
+                    <div className="bg-gradient-to-br from-amber-400 to-orange-500 p-2 sm:p-3 rounded-lg shadow-lg">
+                      <Clock className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
               {/* Completed Card */}
-              <Card className="shadow-sm border-gray-100 hover:shadow-md hover:-translate-y-1 transition-all duration-300 animate-fadeIn" style={{ animationDelay: '0.2s', animationFillMode: 'both' }}>
+              <Card className="bg-white/95 backdrop-blur-md border-2 border-white shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 animate-fadeIn" style={{ animationDelay: '0.2s', animationFillMode: 'both' }}>
                 <CardContent className="p-4 sm:p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-xs font-medium text-gray-400 uppercase tracking-wider">Completed</p>
-                      <p className="text-2xl sm:text-3xl font-bold text-gray-900 mt-1">
+                      <p className="text-xs font-poppins font-semibold text-gray-500 uppercase tracking-wider">Completed</p>
+                      <p className="text-2xl sm:text-3xl font-bold font-poppins text-gray-900 mt-1">
                         {jobsData?.statistics.completedCount || 0}
                       </p>
                     </div>
-                    <div className="bg-green-100 p-2 sm:p-3 rounded-lg">
-                      <CheckCircle className="h-5 w-5 sm:h-6 sm:w-6 text-green-600" />
+                    <div className="bg-gradient-to-br from-amber-400 to-orange-500 p-2 sm:p-3 rounded-lg shadow-lg">
+                      <CheckCircle className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
               {/* Cancelled Card */}
-              <Card className="shadow-sm border-gray-100 hover:shadow-md hover:-translate-y-1 transition-all duration-300 animate-fadeIn" style={{ animationDelay: '0.3s', animationFillMode: 'both' }}>
+              <Card className="bg-white/95 backdrop-blur-md border-2 border-white shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 animate-fadeIn" style={{ animationDelay: '0.3s', animationFillMode: 'both' }}>
                 <CardContent className="p-4 sm:p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-xs font-medium text-gray-400 uppercase tracking-wider">Cancelled</p>
-                      <p className="text-2xl sm:text-3xl font-bold text-gray-900 mt-1">
+                      <p className="text-xs font-poppins font-semibold text-gray-500 uppercase tracking-wider">Cancelled</p>
+                      <p className="text-2xl sm:text-3xl font-bold font-poppins text-gray-900 mt-1">
                         {jobsData?.statistics.cancelledCount || 0}
                       </p>
                     </div>
-                    <div className="bg-red-100 p-2 sm:p-3 rounded-lg">
-                      <XCircle className="h-5 w-5 sm:h-6 sm:w-6 text-red-600" />
+                    <div className="bg-gradient-to-br from-amber-400 to-orange-500 p-2 sm:p-3 rounded-lg shadow-lg">
+                      <XCircle className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                     </div>
                   </div>
                 </CardContent>
@@ -414,37 +414,36 @@ export default function JobsPage() {
             </div>
 
             {/* In-Progress Jobs Section */}
-            <Card className="shadow-sm border-gray-100 mb-6">
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                  <div className="bg-blue-100 p-1.5 rounded-md">
-                    <Clock className="h-4 w-4 text-blue-600" />
+            <Card className="bg-white/95 backdrop-blur-md border-2 border-white shadow-xl mb-6 overflow-hidden">
+              <CardHeader className="pb-3 pt-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white">
+                <CardTitle className="flex items-center gap-2 text-base sm:text-lg font-poppins">
+                  <div className="bg-white/20 p-1.5 rounded-md backdrop-blur-sm">
+                    <Clock className="h-4 w-4 text-white" />
                   </div>
                   In-Progress Jobs
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                {jobsData?.inProgress.length === 0 ? (
+              <CardContent className="pt-4">{jobsData?.inProgress.length === 0 ? (
                   <div className="text-center py-12">
                     <Clock className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-                    <p className="text-gray-500 text-sm">No in-progress jobs</p>
-                    <p className="text-gray-400 text-xs mt-1">Your active trips will appear here</p>
+                    <p className="text-gray-500 font-poppins text-sm">No in-progress jobs</p>
+                    <p className="text-gray-400 font-poppins text-xs mt-1">Your active trips will appear here</p>
                   </div>
                 ) : (
                   <div className="space-y-4">
                     {jobsData?.inProgress.map((job) => (
                       <div
                         key={job.id}
-                        className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-all bg-white"
+                        className="border-2 border-gray-200 rounded-lg p-4 hover:shadow-lg hover:border-amber-200 transition-all bg-white"
                       >
                         <div className="space-y-3">
                           {/* Job Header */}
                           <div className="flex items-start justify-between">
                             <div>
-                              <h3 className="font-semibold text-gray-900 text-base">{job.traveler.name}</h3>
-                              <p className="text-sm text-gray-500 mt-1">{job.country}</p>
+                              <h3 className="font-semibold font-poppins text-gray-900 text-base">{job.traveler.name}</h3>
+                              <p className="text-sm font-poppins text-gray-500 mt-1">{job.country}</p>
                             </div>
-                            <Badge className={job.status === 'IN_PROGRESS' ? 'bg-blue-600 text-white' : 'bg-green-600 text-white'}>
+                            <Badge className={job.status === 'IN_PROGRESS' ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-poppins' : 'bg-gradient-to-r from-green-500 to-emerald-500 text-white font-poppins'}>
                               {job.status === 'IN_PROGRESS' ? 'IN PROGRESS' : 'CONFIRMED'}
                             </Badge>
                           </div>
@@ -453,21 +452,21 @@ export default function JobsPage() {
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                             <div className="flex items-center gap-2 text-gray-600">
                               <Calendar className="h-4 w-4" />
-                              <span>{formatDate(job.fromDate)} - {formatDate(job.toDate)}</span>
+                              <span className="font-poppins">{formatDate(job.fromDate)} - {formatDate(job.toDate)}</span>
                             </div>
                             <div className="flex items-center gap-2 text-gray-600">
                               <Users className="h-4 w-4" />
-                              <span>{job.numberOfPeople} {job.numberOfPeople === 1 ? "person" : "people"}</span>
+                              <span className="font-poppins">{job.numberOfPeople} {job.numberOfPeople === 1 ? "person" : "people"}</span>
                             </div>
                             {job.totalDistance && (
                               <div className="flex items-center gap-2 text-gray-600">
                                 <MapPin className="h-4 w-4" />
-                                <span>{job.totalDistance.toFixed(1)} km</span>
+                                <span className="font-poppins">{job.totalDistance.toFixed(1)} km</span>
                               </div>
                             )}
                             <div className="flex items-center gap-2 text-gray-600">
                               <Clock className="h-4 w-4" />
-                              <span>{job.daysRemaining} days remaining</span>
+                              <span className="font-poppins">{job.daysRemaining} days remaining</span>
                             </div>
                           </div>
 
@@ -477,7 +476,7 @@ export default function JobsPage() {
                               <Phone className="h-4 w-4 text-gray-400" />
                               <a 
                                 href={`tel:${job.traveler.phone}`} 
-                                className="text-sm font-medium text-blue-600 hover:underline"
+                                className="text-sm font-poppins font-medium text-amber-600 hover:underline"
                               >
                                 {job.traveler.phone}
                               </a>
@@ -487,7 +486,7 @@ export default function JobsPage() {
                                 <Button
                                   size="sm"
                                   onClick={() => handleVerifyOtpClick(job)}
-                                  className="bg-green-600 hover:bg-green-700 text-white"
+                                  className="h-10 font-poppins font-bold bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-lg"
                                 >
                                   <Shield className="h-4 w-4 mr-1" />
                                   Verify OTP
@@ -495,14 +494,14 @@ export default function JobsPage() {
                               )}
                               {job.status === 'IN_PROGRESS' && job.verified && (
                                 <>
-                                  <Badge className="bg-green-600 text-white">
+                                  <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white font-poppins">
                                     <CheckCircle className="h-3 w-3 mr-1" />
                                     Verified
                                   </Badge>
                                   <Button
                                     size="sm"
                                     onClick={() => window.location.href = `/guider/trip-tracker/${job.id}`}
-                                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                                    className="h-10 font-poppins font-bold bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-lg"
                                   >
                                     <MapPin className="h-4 w-4 mr-1" />
                                     Track Trip
@@ -519,7 +518,7 @@ export default function JobsPage() {
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => toggleJobExpanded(job.id)}
-                                className="w-full justify-between hover:bg-gray-50 transition-colors duration-200"
+                                className="w-full justify-between hover:bg-amber-50 transition-colors duration-200 font-poppins"
                               >
                                 <span className="text-sm font-medium">
                                   {job.locations.length} location{job.locations.length !== 1 ? "s" : ""} planned
@@ -536,14 +535,14 @@ export default function JobsPage() {
                                   {job.locations.map((location, idx) => (
                                     <div
                                       key={location.id}
-                                      className="p-3 bg-gray-50 rounded-lg text-sm"
+                                      className="p-3 bg-amber-50 border border-amber-100 rounded-lg text-sm"
                                     >
                                       <div className="flex items-start gap-2">
-                                        <MapPin className="h-4 w-4 text-gray-400 mt-0.5 flex-shrink-0" />
+                                        <MapPin className="h-4 w-4 text-amber-500 mt-0.5 flex-shrink-0" />
                                         <div className="flex-1">
-                                          <p className="font-medium text-gray-900">{location.title}</p>
-                                          <p className="text-gray-600 text-xs mt-1">{location.address}</p>
-                                          <div className="flex items-center gap-3 mt-2 text-xs text-gray-500">
+                                          <p className="font-poppins font-medium text-gray-900">{location.title}</p>
+                                          <p className="font-poppins text-gray-600 text-xs mt-1">{location.address}</p>
+                                          <div className="flex items-center gap-3 mt-2 text-xs font-poppins text-gray-500">
                                             <span>Day {location.dayNumber}</span>
                                             <span>•</span>
                                             <span>Stop {location.visitOrder}</span>
@@ -571,12 +570,12 @@ export default function JobsPage() {
             </Card>
 
             {/* Job History Section */}
-            <Card className="shadow-sm border-gray-100">
+            <Card className="bg-white/95 backdrop-blur-md border-2 border-white shadow-xl">
               <CardHeader className="pb-3">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                  <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                    <div className="bg-gray-100 p-1.5 rounded-md">
-                      <Calendar className="h-4 w-4 text-gray-600" />
+                  <CardTitle className="flex items-center gap-2 text-base sm:text-lg font-poppins">
+                    <div className="bg-gradient-to-br from-gray-400 to-gray-600 p-1.5 rounded-md shadow-md">
+                      <Calendar className="h-4 w-4 text-white" />
                     </div>
                     Job History
                   </CardTitle>
@@ -585,7 +584,7 @@ export default function JobsPage() {
                       variant={historyFilter === 'ALL' ? 'default' : 'outline'}
                       size="sm"
                       onClick={() => setHistoryFilter('ALL')}
-                      className="transition-all duration-200"
+                      className={`transition-all duration-200 font-poppins font-semibold ${historyFilter === 'ALL' ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg' : 'border-2'}`}
                     >
                       All
                     </Button>
@@ -593,7 +592,7 @@ export default function JobsPage() {
                       variant={historyFilter === 'COMPLETED' ? 'default' : 'outline'}
                       size="sm"
                       onClick={() => setHistoryFilter('COMPLETED')}
-                      className="transition-all duration-200"
+                      className={`transition-all duration-200 font-poppins font-semibold ${historyFilter === 'COMPLETED' ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg' : 'border-2'}`}
                     >
                       Completed
                     </Button>
@@ -601,7 +600,7 @@ export default function JobsPage() {
                       variant={historyFilter === 'CANCELLED' ? 'default' : 'outline'}
                       size="sm"
                       onClick={() => setHistoryFilter('CANCELLED')}
-                      className="transition-all duration-200"
+                      className={`transition-all duration-200 font-poppins font-semibold ${historyFilter === 'CANCELLED' ? 'bg-gradient-to-r from-red-500 to-rose-500 text-white shadow-lg' : 'border-2'}`}
                     >
                       Cancelled
                     </Button>
@@ -612,8 +611,8 @@ export default function JobsPage() {
                 {filteredHistory.length === 0 ? (
                   <div className="text-center py-12">
                     <Calendar className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-                    <p className="text-gray-500 text-sm">No job history</p>
-                    <p className="text-gray-400 text-xs mt-1">
+                    <p className="text-gray-500 font-poppins text-sm">No job history</p>
+                    <p className="text-gray-400 font-poppins text-xs mt-1">
                       {historyFilter === 'ALL' 
                         ? 'Your completed and cancelled trips will appear here'
                         : `No ${historyFilter.toLowerCase()} trips found`
@@ -625,26 +624,26 @@ export default function JobsPage() {
                     {filteredHistory.map((job) => (
                       <div
                         key={job.id}
-                        className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-all"
+                        className="border-2 border-gray-200 rounded-lg p-4 hover:bg-amber-50 hover:border-amber-200 transition-all"
                       >
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-2">
-                              <h3 className="font-semibold text-gray-900">{job.traveler.name}</h3>
+                              <h3 className="font-semibold font-poppins text-gray-900">{job.traveler.name}</h3>
                               <Badge 
                                 variant={job.status === 'COMPLETED' ? 'default' : 'destructive'}
-                                className={job.status === 'COMPLETED' ? 'bg-green-600' : 'bg-red-600'}
+                                className={job.status === 'COMPLETED' ? 'bg-gradient-to-r from-green-500 to-emerald-500 font-poppins' : 'bg-gradient-to-r from-red-500 to-rose-500 font-poppins'}
                               >
                                 {job.status}
                               </Badge>
                             </div>
-                            <p className="text-sm text-gray-600">{job.country}</p>
+                            <p className="text-sm font-poppins text-gray-600">{job.country}</p>
                             <div className="flex flex-wrap items-center gap-3 mt-2 text-xs text-gray-500">
-                              <span className="flex items-center gap-1">
+                              <span className="flex items-center gap-1 font-poppins">
                                 <Calendar className="h-3 w-3" />
                                 {formatDate(job.fromDate)} - {formatDate(job.toDate)}
                               </span>
-                              <span className="flex items-center gap-1">
+                              <span className="flex items-center gap-1 font-poppins">
                                 <Users className="h-3 w-3" />
                                 {job.numberOfPeople} {job.numberOfPeople === 1 ? "person" : "people"}
                               </span>
@@ -652,8 +651,8 @@ export default function JobsPage() {
                           </div>
                           <div className="text-left sm:text-right flex flex-col gap-2">
                             <div>
-                              <p className="text-xs text-gray-400">Completed</p>
-                              <p className="text-sm text-gray-600">{formatDate(job.completedAt)}</p>
+                              <p className="text-xs font-poppins text-gray-400">Completed</p>
+                              <p className="text-sm font-poppins text-gray-600">{formatDate(job.completedAt)}</p>
                             </div>
                             
                             {/* Review Button */}
@@ -661,7 +660,7 @@ export default function JobsPage() {
                               <Button
                                 size="sm"
                                 onClick={() => handleReviewClick(job)}
-                                className="bg-yellow-500 hover:bg-yellow-600 text-white"
+                                className="h-10 font-poppins font-bold bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white shadow-lg"
                               >
                                 <Star className="h-4 w-4 mr-1" />
                                 Write Review
@@ -670,7 +669,7 @@ export default function JobsPage() {
 
                             {/* Review Submitted Badge */}
                             {hasReviewed(job) && (
-                              <div className="flex items-center justify-center gap-2 text-sm text-green-600 bg-green-50 rounded px-3 py-2">
+                              <div className="flex items-center justify-center gap-2 text-sm font-poppins text-green-600 bg-green-50 border-2 border-green-200 rounded-lg px-3 py-2 shadow-md">
                                 <CheckCircle className="h-4 w-4" />
                                 Review Submitted
                               </div>
@@ -689,20 +688,20 @@ export default function JobsPage() {
 
       {/* OTP Verification Dialog */}
       <Dialog open={otpDialogOpen} onOpenChange={setOtpDialogOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md bg-white/95 backdrop-blur-md border-2 border-white shadow-2xl">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+            <DialogTitle className="flex items-center gap-2 font-poppins text-xl">
               <Shield className="h-5 w-5 text-green-600" />
               Verify Trip Start
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="font-poppins">
               Enter the 4-digit OTP provided by {selectedJobForVerification?.traveler.name} to verify and start the trip
             </DialogDescription>
           </DialogHeader>
           
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="otp">Enter OTP</Label>
+              <Label htmlFor="otp" className="font-poppins font-semibold">Enter OTP</Label>
               <Input
                 id="otp"
                 type="text"
@@ -715,14 +714,14 @@ export default function JobsPage() {
                   const value = e.target.value.replace(/\D/g, '');
                   setOtpInput(value);
                 }}
-                className="text-center text-2xl tracking-widest font-bold"
+                className="text-center text-2xl tracking-widest font-bold font-poppins border-2 h-14 shadow-lg"
                 disabled={verifying}
               />
             </div>
             
-            <div className="bg-blue-50 p-3 rounded-lg text-sm text-gray-700">
-              <p className="font-medium mb-1">Important:</p>
-              <ul className="list-disc list-inside space-y-1 text-xs">
+            <div className="bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-200 p-4 rounded-lg text-sm text-gray-700">
+              <p className="font-poppins font-semibold mb-2">Important:</p>
+              <ul className="list-disc list-inside space-y-1 text-xs font-poppins">
                 <li>You must be near the traveler's location</li>
                 <li>The OTP is valid for 30 minutes</li>
                 <li>Your location will be verified automatically</li>
@@ -740,13 +739,14 @@ export default function JobsPage() {
                 setUserLocation(null);
               }}
               disabled={verifying}
+              className="font-poppins font-semibold border-2"
             >
               Cancel
             </Button>
             <Button
               onClick={handleVerifyOtp}
               disabled={verifying || otpInput.length !== 4}
-              className="bg-green-600 hover:bg-green-700"
+              className="font-poppins font-bold bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 shadow-lg"
             >
               {verifying ? (
                 <>
@@ -766,13 +766,13 @@ export default function JobsPage() {
 
       {/* Review Dialog */}
       <Dialog open={reviewDialogOpen} onOpenChange={setReviewDialogOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md bg-white/95 backdrop-blur-md border-2 border-white shadow-2xl">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+            <DialogTitle className="flex items-center gap-2 font-poppins text-xl">
               <Star className="h-5 w-5 text-yellow-500" />
               Review Traveler
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="font-poppins">
               Share your experience with {selectedJobForReview?.traveler.name}
             </DialogDescription>
           </DialogHeader>
