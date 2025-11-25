@@ -68,6 +68,12 @@ export async function POST(request: NextRequest) {
           break;
         }
 
+        // Check if already processed (by the success handler)
+        if (payment.status === 'PAID') {
+          console.log('⚠️ Payment already processed:', payment.id);
+          break;
+        }
+
         // Update payment status to PAID
         await db
           .update(payments)

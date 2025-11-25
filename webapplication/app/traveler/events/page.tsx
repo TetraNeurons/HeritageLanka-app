@@ -74,6 +74,10 @@ export default function EventsPage() {
       toast.info("Payment was cancelled. You can try again anytime.");
       // Clear the query parameter
       window.history.replaceState({}, "", "/traveler/events");
+    } else if (paymentStatus === "error") {
+      toast.error("Payment processing failed. Please try again or contact support.");
+      // Clear the query parameter
+      window.history.replaceState({}, "", "/traveler/events");
     }
   }, []);
 

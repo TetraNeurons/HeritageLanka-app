@@ -147,13 +147,14 @@ export async function POST(
         },
       ],
       mode: 'payment',
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/traveler/events?payment=success`,
+      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/api/traveler/events/payment-success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/traveler/events?payment=cancelled`,
       metadata: {
         paymentId: result.payment.id,
         eventId,
+        travelerId: traveler.id,
         quantity: quantity.toString(),
-        userId: userSession.userId, // Store userId for filtering payments later
+        userId: userSession.userId,
       },
     });
 
