@@ -10,9 +10,18 @@ export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [user, setUser] = useState<{ name: string; role: string } | null>(null)
   const [loading, setLoading] = useState(true)
+  const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
     checkAuth()
+    
+    // Add scroll listener
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 50)
+    }
+    
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
   async function checkAuth() {
@@ -43,27 +52,31 @@ const response = await axiosInstance.get('/api/auth/validate')
   }
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 border-b border-border/40 bg-background/80 backdrop-blur-lg">
+    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      scrolled 
+        ? 'border-b border-white/20 bg-black/80 backdrop-blur-lg' 
+        : 'border-b border-transparent bg-transparent'
+    }`}>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between">
+        <div className="flex h-20 items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
-              <span className="text-lg font-bold">T</span>
+          <Link href="/" className="flex items-center space-x-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/10 backdrop-blur-sm text-white border border-white/20">
+              <span className="text-xl font-bold">H</span>
             </div>
-            <span className="text-xl font-semibold tracking-tight">Heritage Lanka</span>
+            <span className="text-2xl font-bold tracking-tight text-white">HERITAGELANKA</span>
           </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-4">
             {loading ? (
-              <div className="h-9 w-32 bg-muted animate-pulse rounded-md" />
+              <div className="h-10 w-32 bg-white/10 animate-pulse rounded-md" />
             ) : user ? (
               <>
-                <span className="text-sm text-muted-foreground">
-                  Welcome, <span className="font-medium text-foreground">{user.name}</span>
+                <span className="text-sm text-white/80">
+                  Welcome, <span className="font-semibold text-white">{user.name}</span>
                 </span>
-                <Button variant="ghost" size="sm" asChild>
+                <Button variant="ghost" size="sm" className="text-white hover:bg-white/20" asChild>
                   <Link href={getDashboardUrl()}>
                     <LayoutDashboard className="mr-2 h-4 w-4" />
                     Dashboard
@@ -73,10 +86,10 @@ const response = await axiosInstance.get('/api/auth/validate')
               </>
             ) : (
               <>
-                <Button variant="ghost" size="sm" asChild>
+                <Button variant="ghost" size="sm" className="text-white hover:bg-white/20 font-semibold" asChild>
                   <Link href="/auth/signin">Sign In</Link>
                 </Button>
-                <Button size="sm" asChild>
+                <Button size="sm" className="bg-white text-black hover:bg-gray-100 font-bold" asChild>
                   <Link href="/auth/signup">Get Started</Link>
                 </Button>
               </>
@@ -86,7 +99,7 @@ const response = await axiosInstance.get('/api/auth/validate')
           {/* Mobile Controls */}
           <div className="flex items-center gap-2 md:hidden">
             <button
-              className="inline-flex items-center justify-center rounded-md p-2 text-foreground hover:bg-muted"
+              className="inline-flex items-center justify-center rounded-md p-2 text-white hover:bg-white/20"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label="Toggle menu"
             >
@@ -101,16 +114,16 @@ const response = await axiosInstance.get('/api/auth/validate')
 
         {/* Mobile Navigation */}
         {mobileMenuOpen && (
-          <div className="md:hidden border-t border-border/40 py-4 bg-background">
+          <div className="md:hidden border-t border-white/20 py-4 bg-black/90 backdrop-blur-lg">
             <nav className="flex flex-col space-y-4 px-2">
               {loading ? (
-                <div className="h-9 bg-muted animate-pulse rounded-md" />
+                <div className="h-9 bg-white/10 animate-pulse rounded-md" />
               ) : user ? (
                 <>
-                  <div className="px-3 py-2 text-sm text-muted-foreground">
-                    Welcome, <span className="font-medium text-foreground">{user.name}</span>
+                  <div className="px-3 py-2 text-sm text-white/80">
+                    Welcome, <span className="font-semibold text-white">{user.name}</span>
                   </div>
-                  <Button variant="ghost" className="justify-start" asChild>
+                  <Button variant="ghost" className="justify-start text-white hover:bg-white/20" asChild>
                     <Link href={getDashboardUrl()}>
                       <LayoutDashboard className="mr-2 h-4 w-4" />
                       Dashboard
@@ -120,10 +133,10 @@ const response = await axiosInstance.get('/api/auth/validate')
                 </>
               ) : (
                 <>
-                  <Button variant="ghost" className="justify-start" asChild>
+                  <Button variant="ghost" className="justify-start text-white hover:bg-white/20" asChild>
                     <Link href="/auth/signin">Sign In</Link>
                   </Button>
-                  <Button className="justify-start" asChild>
+                  <Button className="justify-start bg-white text-black hover:bg-gray-100" asChild>
                     <Link href="/auth/signup">Get Started</Link>
                   </Button>
                 </>

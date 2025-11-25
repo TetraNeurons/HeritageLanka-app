@@ -82,7 +82,7 @@ export default function Home() {
       <Header />
 
       {/* Hero Section */}
-      <section className="relative pt-32 pb-16 px-6 md:px-8 lg:px-12 min-h-[80vh] flex items-center overflow-hidden">
+      <section className="relative pt-32 pb-16 px-6 md:px-8 lg:px-12 min-h-screen flex items-center overflow-hidden">
         {/* Video Background */}
         <div className="absolute inset-0 z-0">
           <video
@@ -96,62 +96,80 @@ export default function Home() {
             Your browser does not support the video tag.
           </video>
           {/* Dark overlay for better text readability */}
-          <div className="absolute inset-0 bg-black/50" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/60 to-black/70" />
         </div>
 
         {/* Content */}
-        <div className="container mx-auto text-center space-y-8 max-w-4xl relative z-10">
+        <div className="container mx-auto text-center space-y-10 max-w-5xl relative z-10">
           
           {/* Beta Badge */}
-          <div className="flex justify-center">
-            <Badge variant="secondary" className="px-4 py-1.5 bg-amber-100 text-amber-800 hover:bg-amber-100 border-amber-200">
-              <span className="text-xs font-bold uppercase tracking-wide">Early Access Beta</span>
+          <div className="flex justify-center animate-fade-in">
+            <Badge variant="secondary" className="px-6 py-2 bg-white/20 backdrop-blur-sm text-white hover:bg-white/30 border-white/30 transition-all">
+              <span className="text-sm font-bold uppercase tracking-widest">Early Access Beta</span>
             </Badge>
           </div>
 
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.15] text-white drop-shadow-lg">
-            Explore Sri Lanka{" "}
-            <br className="hidden sm:block" />
-            <span className="text-amber-400">Like a Local</span>
+          <h1 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tight leading-[1.1] text-white drop-shadow-2xl animate-fade-in-up">
+            YOUR UNIFIED
+            <br />
+            <span className="bg-gradient-to-r from-amber-400 via-orange-400 to-amber-500 bg-clip-text text-transparent">
+              TRAVEL COMPANION
+            </span>
+            <br />
+            FOR SRI LANKA
           </h1>
 
-          <p className="text-lg md:text-xl text-white/90 max-w-2xl mx-auto leading-relaxed drop-shadow-md">
-            A new way to connect with verified local guides. Be among the first to test our platform and discover hidden places across Sri Lanka.
+          <p className="text-xl md:text-2xl text-white/95 max-w-3xl mx-auto leading-relaxed drop-shadow-lg font-medium animate-fade-in-up animation-delay-200">
+            Plan, guide, and manage your perfect Sri Lankan adventure with one intelligent platform
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center pt-6 px-4 sm:px-0">
-            <Button size="lg" className="w-full sm:w-auto h-12 text-base shadow-lg" asChild>
+          <div className="flex flex-col sm:flex-row gap-5 justify-center pt-8 px-4 sm:px-0 animate-fade-in-up animation-delay-400">
+            <Button size="lg" className="w-full sm:w-auto h-14 text-lg px-8 bg-white text-black hover:bg-gray-100 font-bold shadow-2xl transition-all transform hover:scale-105" asChild>
               <Link href="/auth/signup">
                 Join as Traveler
-                <ArrowRight className="ml-2 h-4 w-4" />
+                <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
-            <Button size="lg" variant="outline" className="w-full sm:w-auto h-12 text-base bg-white/90 hover:bg-white border-white shadow-lg" asChild>
+            <Button size="lg" variant="outline" className="w-full sm:w-auto h-14 text-lg px-8 bg-transparent text-white hover:bg-white/20 border-2 border-white font-bold shadow-2xl backdrop-blur-sm transition-all transform hover:scale-105" asChild>
               <Link href="/auth/signup">
                 Apply as Guide
               </Link>
             </Button>
           </div>
+
+          {/* Scroll Indicator */}
+          <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
+            <div className="text-white/60 text-sm uppercase tracking-widest font-semibold">
+              Scroll Down
+            </div>
+          </div>
           
-          {/* Removed fake stats section completely */}
         </div>
       </section>
 
       {/* How It Works */}
-      <section className="py-16 px-6 md:px-8 lg:px-12 bg-background">
+      <section className="py-24 px-6 md:px-8 lg:px-12 bg-black text-white">
         <div className="container mx-auto">
-          <div className="text-center mb-12 max-w-2xl mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">How It Works</h2>
-            <p className="text-muted-foreground text-lg">
-              We are simplifying how you connect with locals.
+          <div className="text-center mb-16 max-w-3xl mx-auto">
+            <h2 className="text-5xl md:text-6xl font-black mb-6 tracking-tight">
+              ONE PLATFORM
+              <br />
+              <span className="text-amber-400">FOR YOUR ENTIRE JOURNEY</span>
+            </h2>
+            <p className="text-white/80 text-xl font-medium">
+              Stop switching between multiple apps. Heritage Lanka brings everything together.
             </p>
           </div>
 
-          <div className="flex justify-center gap-4 mb-10">
+          <div className="flex justify-center gap-4 mb-14">
             <Button 
               variant={activeTab === "traveler" ? "default" : "ghost"} 
               onClick={() => setActiveTab("traveler")}
-              className="w-32"
+              className={`px-8 py-6 text-lg font-bold uppercase tracking-wider transition-all ${
+                activeTab === "traveler" 
+                  ? "bg-white text-black hover:bg-gray-100" 
+                  : "text-white/70 hover:text-white hover:bg-white/10"
+              }`}
             >
               Travelers
             </Button>
@@ -159,89 +177,111 @@ export default function Home() {
             <Button 
               variant={activeTab === "guide" ? "default" : "ghost"} 
               onClick={() => setActiveTab("guide")}
-              className="w-32"
+              className={`px-8 py-6 text-lg font-bold uppercase tracking-wider transition-all ${
+                activeTab === "guide" 
+                  ? "bg-white text-black hover:bg-gray-100" 
+                  : "text-white/70 hover:text-white hover:bg-white/10"
+              }`}
             >
               Guides
             </Button>
           </div>
 
           {activeTab === "traveler" ? (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-10">
               {/* Step 1 */}
-              <Card className="border-border/50 shadow-sm">
-                <CardContent className="p-6 space-y-4">
-                  <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <Calendar className="h-6 w-6 text-primary" />
+              <Card className="border-white/20 bg-white/5 backdrop-blur-sm shadow-xl hover:bg-white/10 transition-all group">
+                <CardContent className="p-8 space-y-6">
+                  <div className="h-16 w-16 rounded-2xl bg-amber-400/20 flex items-center justify-center group-hover:bg-amber-400/30 transition-all">
+                    <Calendar className="h-8 w-8 text-amber-400" />
                   </div>
-                  <h3 className="text-xl font-semibold">1. Create a Request</h3>
-                  <p className="text-muted-foreground leading-relaxed">
+                  <div className="space-y-3">
+                    <div className="text-6xl font-black text-white/10">01</div>
+                    <h3 className="text-2xl font-bold text-white -mt-8">CREATE REQUEST</h3>
+                  </div>
+                  <p className="text-white/70 leading-relaxed text-lg">
                     Tell us where you want to go and what you want to see.
                   </p>
                 </CardContent>
               </Card>
 
               {/* Step 2 */}
-              <Card className="border-border/50 shadow-sm">
-                <CardContent className="p-6 space-y-4">
-                  <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <Users className="h-6 w-6 text-primary" />
+              <Card className="border-white/20 bg-white/5 backdrop-blur-sm shadow-xl hover:bg-white/10 transition-all group">
+                <CardContent className="p-8 space-y-6">
+                  <div className="h-16 w-16 rounded-2xl bg-amber-400/20 flex items-center justify-center group-hover:bg-amber-400/30 transition-all">
+                    <Users className="h-8 w-8 text-amber-400" />
                   </div>
-                  <h3 className="text-xl font-semibold">2. Get Matched</h3>
-                  <p className="text-muted-foreground leading-relaxed">
+                  <div className="space-y-3">
+                    <div className="text-6xl font-black text-white/10">02</div>
+                    <h3 className="text-2xl font-bold text-white -mt-8">GET MATCHED</h3>
+                  </div>
+                  <p className="text-white/70 leading-relaxed text-lg">
                     We connect you with available local guides in that area.
                   </p>
                 </CardContent>
               </Card>
 
               {/* Step 3 */}
-              <Card className="border-border/50 shadow-sm">
-                <CardContent className="p-6 space-y-4">
-                  <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <MapPin className="h-6 w-6 text-primary" />
+              <Card className="border-white/20 bg-white/5 backdrop-blur-sm shadow-xl hover:bg-white/10 transition-all group">
+                <CardContent className="p-8 space-y-6">
+                  <div className="h-16 w-16 rounded-2xl bg-amber-400/20 flex items-center justify-center group-hover:bg-amber-400/30 transition-all">
+                    <MapPin className="h-8 w-8 text-amber-400" />
                   </div>
-                  <h3 className="text-xl font-semibold">3. Explore</h3>
-                  <p className="text-muted-foreground leading-relaxed">
+                  <div className="space-y-3">
+                    <div className="text-6xl font-black text-white/10">03</div>
+                    <h3 className="text-2xl font-bold text-white -mt-8">EXPLORE</h3>
+                  </div>
+                  <p className="text-white/70 leading-relaxed text-lg">
                     Meet your guide and enjoy a safe, local experience.
                   </p>
                 </CardContent>
               </Card>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-10">
               {/* Step 1 */}
-              <Card className="border-border/50 shadow-sm">
-                <CardContent className="p-6 space-y-4">
-                  <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <Shield className="h-6 w-6 text-primary" />
+              <Card className="border-white/20 bg-white/5 backdrop-blur-sm shadow-xl hover:bg-white/10 transition-all group">
+                <CardContent className="p-8 space-y-6">
+                  <div className="h-16 w-16 rounded-2xl bg-amber-400/20 flex items-center justify-center group-hover:bg-amber-400/30 transition-all">
+                    <Shield className="h-8 w-8 text-amber-400" />
                   </div>
-                  <h3 className="text-xl font-semibold">1. Register</h3>
-                  <p className="text-muted-foreground leading-relaxed">
+                  <div className="space-y-3">
+                    <div className="text-6xl font-black text-white/10">01</div>
+                    <h3 className="text-2xl font-bold text-white -mt-8">REGISTER</h3>
+                  </div>
+                  <p className="text-white/70 leading-relaxed text-lg">
                     Sign up with your details. We verify every guide manually.
                   </p>
                 </CardContent>
               </Card>
 
               {/* Step 2 */}
-              <Card className="border-border/50 shadow-sm">
-                <CardContent className="p-6 space-y-4">
-                  <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <Globe className="h-6 w-6 text-primary" />
+              <Card className="border-white/20 bg-white/5 backdrop-blur-sm shadow-xl hover:bg-white/10 transition-all group">
+                <CardContent className="p-8 space-y-6">
+                  <div className="h-16 w-16 rounded-2xl bg-amber-400/20 flex items-center justify-center group-hover:bg-amber-400/30 transition-all">
+                    <Globe className="h-8 w-8 text-amber-400" />
                   </div>
-                  <h3 className="text-xl font-semibold">2. Receive Jobs</h3>
-                  <p className="text-muted-foreground leading-relaxed">
+                  <div className="space-y-3">
+                    <div className="text-6xl font-black text-white/10">02</div>
+                    <h3 className="text-2xl font-bold text-white -mt-8">RECEIVE JOBS</h3>
+                  </div>
+                  <p className="text-white/70 leading-relaxed text-lg">
                     Get notifications when travelers are looking for guides in your area.
                   </p>
                 </CardContent>
               </Card>
 
               {/* Step 3 */}
-              <Card className="border-border/50 shadow-sm">
-                <CardContent className="p-6 space-y-4">
-                  <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <Star className="h-6 w-6 text-primary" />
+              <Card className="border-white/20 bg-white/5 backdrop-blur-sm shadow-xl hover:bg-white/10 transition-all group">
+                <CardContent className="p-8 space-y-6">
+                  <div className="h-16 w-16 rounded-2xl bg-amber-400/20 flex items-center justify-center group-hover:bg-amber-400/30 transition-all">
+                    <Star className="h-8 w-8 text-amber-400" />
                   </div>
-                  <h3 className="text-xl font-semibold">3. Get Paid</h3>
-                  <p className="text-muted-foreground leading-relaxed">
+                  <div className="space-y-3">
+                    <div className="text-6xl font-black text-white/10">03</div>
+                    <h3 className="text-2xl font-bold text-white -mt-8">GET PAID</h3>
+                  </div>
+                  <p className="text-white/70 leading-relaxed text-lg">
                     Complete the tour and receive payments directly.
                   </p>
                 </CardContent>
@@ -252,42 +292,55 @@ export default function Home() {
       </section>
 
       {/* Features - Kept minimal and realistic */}
-      <section className="py-16 px-6 md:px-8 lg:px-12 bg-muted/30">
+      <section className="py-24 px-6 md:px-8 lg:px-12 bg-gradient-to-b from-white to-gray-50">
         <div className="container mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold">Why Heritage Lanka?</h2>
+          <div className="text-center mb-16">
+            <h2 className="text-5xl md:text-6xl font-black tracking-tight mb-4">
+              WHY <span className="text-amber-500">HERITAGE LANKA?</span>
+            </h2>
+            <p className="text-xl text-gray-600 font-medium">
+              Everything you need in one intelligent platform
+            </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Card className="bg-background/60 border-none shadow-none">
-              <CardContent className="pt-6 text-center sm:text-left">
-                <Shield className="h-8 w-8 text-primary mb-4 mx-auto sm:mx-0" />
-                <h3 className="font-semibold text-lg mb-2">Manual Verification</h3>
-                <p className="text-sm text-muted-foreground">Every guide is screened before approval.</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            <Card className="bg-white border-2 border-gray-100 shadow-lg hover:shadow-xl transition-all hover:scale-105 group">
+              <CardContent className="pt-8 pb-8 text-center">
+                <div className="h-20 w-20 rounded-2xl bg-amber-100 flex items-center justify-center mx-auto mb-6 group-hover:bg-amber-200 transition-all">
+                  <Shield className="h-10 w-10 text-amber-600" />
+                </div>
+                <h3 className="font-bold text-xl mb-3 uppercase tracking-wide">Manual Verification</h3>
+                <p className="text-base text-gray-600">Every guide is screened before approval.</p>
               </CardContent>
             </Card>
 
-            <Card className="bg-background/60 border-none shadow-none">
-              <CardContent className="pt-6 text-center sm:text-left">
-                <Zap className="h-8 w-8 text-primary mb-4 mx-auto sm:mx-0" />
-                <h3 className="font-semibold text-lg mb-2">Direct Connection</h3>
-                <p className="text-sm text-muted-foreground">No middlemen agencies, just you and the guide.</p>
+            <Card className="bg-white border-2 border-gray-100 shadow-lg hover:shadow-xl transition-all hover:scale-105 group">
+              <CardContent className="pt-8 pb-8 text-center">
+                <div className="h-20 w-20 rounded-2xl bg-amber-100 flex items-center justify-center mx-auto mb-6 group-hover:bg-amber-200 transition-all">
+                  <Zap className="h-10 w-10 text-amber-600" />
+                </div>
+                <h3 className="font-bold text-xl mb-3 uppercase tracking-wide">Direct Connection</h3>
+                <p className="text-base text-gray-600">No middlemen agencies, just you and the guide.</p>
               </CardContent>
             </Card>
 
-            <Card className="bg-background/60 border-none shadow-none">
-              <CardContent className="pt-6 text-center sm:text-left">
-                <Globe className="h-8 w-8 text-primary mb-4 mx-auto sm:mx-0" />
-                <h3 className="font-semibold text-lg mb-2">Local Secrets</h3>
-                <p className="text-sm text-muted-foreground">Access places only locals know about.</p>
+            <Card className="bg-white border-2 border-gray-100 shadow-lg hover:shadow-xl transition-all hover:scale-105 group">
+              <CardContent className="pt-8 pb-8 text-center">
+                <div className="h-20 w-20 rounded-2xl bg-amber-100 flex items-center justify-center mx-auto mb-6 group-hover:bg-amber-200 transition-all">
+                  <Globe className="h-10 w-10 text-amber-600" />
+                </div>
+                <h3 className="font-bold text-xl mb-3 uppercase tracking-wide">Local Secrets</h3>
+                <p className="text-base text-gray-600">Access places only locals know about.</p>
               </CardContent>
             </Card>
 
-            <Card className="bg-background/60 border-none shadow-none">
-              <CardContent className="pt-6 text-center sm:text-left">
-                <Shield className="h-8 w-8 text-primary mb-4 mx-auto sm:mx-0" />
-                <h3 className="font-semibold text-lg mb-2">Beta Support</h3>
-                <p className="text-sm text-muted-foreground">24/7 support team available during beta.</p>
+            <Card className="bg-white border-2 border-gray-100 shadow-lg hover:shadow-xl transition-all hover:scale-105 group">
+              <CardContent className="pt-8 pb-8 text-center">
+                <div className="h-20 w-20 rounded-2xl bg-amber-100 flex items-center justify-center mx-auto mb-6 group-hover:bg-amber-200 transition-all">
+                  <Shield className="h-10 w-10 text-amber-600" />
+                </div>
+                <h3 className="font-bold text-xl mb-3 uppercase tracking-wide">Beta Support</h3>
+                <p className="text-base text-gray-600">24/7 support team available during beta.</p>
               </CardContent>
             </Card>
           </div>
