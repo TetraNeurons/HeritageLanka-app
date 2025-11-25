@@ -110,33 +110,36 @@ export default function UsersManagementPage() {
 
   return (
     <SidebarProvider>
-      <div className="flex h-screen w-full bg-gray-50">
+      <div className="flex h-screen w-full bg-gradient-to-br from-gray-50 to-gray-100">
         <AppSidebar />
         <div className="flex-1 overflow-y-auto">
-          <header className="px-8 py-5  sticky top-0 z-10">
-            <div className="flex items-center justify-between">
-              <h1 className="text-3xl font-bold text-gray-900">User Management</h1>
-             
-            </div>
-          </header>
-
           <div className="p-8 space-y-8">
+            {/* Header */}
+            <div>
+              <h1 className="text-4xl font-bold font-poppins bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
+                User Management
+              </h1>
+              <p className="text-gray-600 mt-2 font-poppins">Manage travelers, guides, and administrators</p>
+            </div>
+
             {/* Stats */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {[
-                { title: 'Total Users', value: stats.totalUsers, icon: Users, color: 'blue' },
-                { title: 'Travelers', value: stats.totalTravelers, icon: MapPin, color: 'blue' },
-                { title: 'Guides', value: stats.totalGuides, icon: UserCheck, color: 'green' },
-                { title: 'Admins', value: stats.totalAdmins, icon: BarChart3, color: 'orange' },
+                { title: 'Total Users', value: stats.totalUsers, icon: Users, color: 'from-blue-400 to-blue-600' },
+                { title: 'Travelers', value: stats.totalTravelers, icon: MapPin, color: 'from-purple-400 to-purple-600' },
+                { title: 'Guides', value: stats.totalGuides, icon: UserCheck, color: 'from-green-400 to-green-600' },
+                { title: 'Admins', value: stats.totalAdmins, icon: BarChart3, color: 'from-orange-400 to-orange-600' },
               ].map(({ title, value, icon: Icon, color }) => (
-                <div key={title} className="bg-white p-6 rounded-xl shadow-sm border hover:shadow-md transition-shadow">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">{title}</p>
-                      <p className={`text-3xl font-bold text-${color}-600 mt-2`}>{value}</p>
-                    </div>
-                    <div className={`p-4 bg-${color}-100 rounded-full`}>
-                      <Icon className={`h-8 w-8 text-${color}-600`} />
+                <div key={title} className="bg-white/95 backdrop-blur-md border-2 border-white shadow-xl rounded-2xl overflow-hidden">
+                  <div className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-poppins font-medium text-gray-600 mb-2">{title}</p>
+                        <p className="text-3xl font-bold font-poppins text-gray-900">{value}</p>
+                      </div>
+                      <div className={`p-4 bg-gradient-to-br ${color} rounded-2xl shadow-lg`}>
+                        <Icon className="h-7 w-7 text-white" />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -144,9 +147,11 @@ export default function UsersManagementPage() {
             </div>
 
             {/* Users Table */}
-            <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
-              <div className="px-8 py-5 border-b bg-gray-50">
-                <h2 className="text-xl font-bold text-gray-800">All Users</h2>
+            <div className="bg-white/95 backdrop-blur-md border-2 border-white shadow-xl rounded-2xl overflow-hidden">
+              <div className="px-8 py-6 border-b overflow-hidden">
+                <div className="bg-gradient-to-r from-amber-500 to-orange-500 -mx-8 -my-6 px-8 py-6">
+                  <h2 className="text-2xl font-bold font-poppins text-white">All Users</h2>
+                </div>
               </div>
               {users.length === 0 ? (
                 <div className="p-20 text-center text-gray-500">No users found.</div>

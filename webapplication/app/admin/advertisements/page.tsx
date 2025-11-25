@@ -131,24 +131,63 @@ export default function AdvertisementsPage() {
 
   return (
     <SidebarProvider>
-      <div className="flex h-screen w-full">
+      <div className="flex h-screen w-full bg-gradient-to-br from-gray-50 to-gray-100">
         <AppSidebar />
 
         <div className="flex-1 flex flex-col overflow-hidden">
-          <main className="flex-1 overflow-y-auto p-6">
+          <main className="flex-1 overflow-y-auto p-8">
             <div className="lg:hidden mb-4">
               <SidebarTrigger />
             </div>
 
-            <div className="mb-6">
-              <h1 className="text-3xl font-bold">Advertisements</h1>
-              <p className="text-muted-foreground">Manage advertisement submissions</p>
+            <div className="mb-8">
+              <h1 className="text-4xl font-bold font-poppins bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
+                Advertisements
+              </h1>
+              <p className="text-gray-600 mt-2 font-poppins">Manage advertisement submissions</p>
             </div>
 
-            <Card>
-              <CardHeader>
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              <div className="bg-white/95 backdrop-blur-md border-2 border-white shadow-xl rounded-2xl overflow-hidden">
+                <div className="p-6">
+                  <div className="text-sm font-poppins font-medium text-gray-600 mb-2">Total Ads</div>
+                  <div className="text-3xl font-bold font-poppins text-gray-900">{advertisements.length}</div>
+                </div>
+              </div>
+
+              <div className="bg-white/95 backdrop-blur-md border-2 border-white shadow-xl rounded-2xl overflow-hidden">
+                <div className="p-6">
+                  <div className="text-sm font-poppins font-medium text-gray-600 mb-2">Active</div>
+                  <div className="text-3xl font-bold font-poppins text-green-600">
+                    {advertisements.filter(ad => ad.status === "ACTIVE").length}
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white/95 backdrop-blur-md border-2 border-white shadow-xl rounded-2xl overflow-hidden">
+                <div className="p-6">
+                  <div className="text-sm font-poppins font-medium text-gray-600 mb-2">Pending</div>
+                  <div className="text-3xl font-bold font-poppins text-yellow-600">
+                    {advertisements.filter(ad => ad.status === "PENDING").length}
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white/95 backdrop-blur-md border-2 border-white shadow-xl rounded-2xl overflow-hidden">
+                <div className="p-6">
+                  <div className="text-sm font-poppins font-medium text-gray-600 mb-2">Total Views</div>
+                  <div className="text-3xl font-bold font-poppins text-blue-600">
+                    {advertisements.reduce((sum, ad) => sum + ad.viewCount, 0)}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white/95 backdrop-blur-md border-2 border-white shadow-xl rounded-2xl overflow-hidden">
+              <div className="p-6 border-b">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                  <CardTitle>All Advertisements</CardTitle>
+                  <h2 className="text-2xl font-bold font-poppins text-gray-900">All Advertisements</h2>
                   <Select value={statusFilter} onValueChange={setStatusFilter}>
                     <SelectTrigger className="w-[180px]">
                       <SelectValue placeholder="Filter by status" />
@@ -162,11 +201,11 @@ export default function AdvertisementsPage() {
                     </SelectContent>
                   </Select>
                 </div>
-              </CardHeader>
-              <CardContent>
+              </div>
+              <div className="p-6">
                 {loading ? (
                   <div className="flex justify-center py-8">
-                    <Loader2 className="h-8 w-8 animate-spin" />
+                    <Loader2 className="h-12 w-12 animate-spin text-amber-600" />
                   </div>
                 ) : advertisements.length === 0 ? (
                   <div className="text-center py-8 text-muted-foreground">
@@ -287,8 +326,8 @@ export default function AdvertisementsPage() {
                     </Table>
                   </div>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </main>
         </div>
       </div>

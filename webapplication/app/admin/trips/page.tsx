@@ -203,10 +203,10 @@ export default function AdminTripsPage() {
   if (loading) {
     return (
       <SidebarProvider>
-        <div className="flex h-screen w-full bg-gray-50">
+        <div className="flex h-screen w-full bg-gradient-to-br from-gray-50 to-gray-100">
           <AppSidebar />
           <div className="flex-1 flex items-center justify-center">
-            <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+            <Loader2 className="h-12 w-12 animate-spin text-amber-600" />
           </div>
         </div>
       </SidebarProvider>
@@ -215,56 +215,71 @@ export default function AdminTripsPage() {
 
   return (
     <SidebarProvider>
-      <div className="flex h-screen w-full bg-gray-50">
+      <div className="flex h-screen w-full bg-gradient-to-br from-gray-50 to-gray-100">
         <AppSidebar />
 
         <div className="flex-1 flex flex-col overflow-hidden">
-          <main className="flex-1 overflow-y-auto p-4 lg:p-6">
+          <main className="flex-1 overflow-y-auto p-4 lg:p-8">
             {/* Header */}
-            <div className="mb-6">
+            <div className="mb-8">
               <div className="lg:hidden mb-4">
                 <SidebarTrigger />
               </div>
-              <div className="flex items-center gap-3 mb-4">
-                <div className="bg-blue-100 p-3 rounded-lg">
-                  <Plane className="h-6 w-6 text-blue-600" />
-                </div>
-                <div>
-                  <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Trips Overview</h1>
-                  <p className="text-gray-600 mt-1">Monitor all travel activities</p>
-                </div>
+              <div className="mb-6">
+                <h1 className="text-3xl lg:text-4xl font-bold font-poppins bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">Trips Overview</h1>
+                <p className="text-gray-600 mt-2 font-poppins">Monitor all travel activities</p>
               </div>
 
               {/* Stats Cards */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                <Card>
-                  <CardContent className="p-4">
-                    <div className="text-sm text-gray-600 mb-1">Total Trips</div>
-                    <div className="text-2xl font-bold text-gray-900">{trips.length}</div>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="p-4">
-                    <div className="text-sm text-gray-600 mb-1">In Progress</div>
-                    <div className="text-2xl font-bold text-green-600">{getInProgressCount()}</div>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="p-4">
-                    <div className="text-sm text-gray-600 mb-1">Confirmed</div>
-                    <div className="text-2xl font-bold text-blue-600">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div className="bg-white/95 backdrop-blur-md border-2 border-white shadow-xl rounded-2xl overflow-hidden">
+                  <div className="p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="p-3 bg-gradient-to-br from-amber-400 to-amber-600 rounded-xl">
+                        <Route className="h-7 w-7 text-white" />
+                      </div>
+                    </div>
+                    <div className="text-sm font-poppins font-medium text-gray-600 mb-2">Total Trips</div>
+                    <div className="text-3xl font-bold font-poppins text-gray-900">{trips.length}</div>
+                  </div>
+                </div>
+                <div className="bg-white/95 backdrop-blur-md border-2 border-white shadow-xl rounded-2xl overflow-hidden">
+                  <div className="p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="p-3 bg-gradient-to-br from-green-400 to-green-600 rounded-xl">
+                        <Play className="h-7 w-7 text-white" />
+                      </div>
+                    </div>
+                    <div className="text-sm font-poppins font-medium text-gray-600 mb-2">In Progress</div>
+                    <div className="text-3xl font-bold font-poppins text-green-600">{getInProgressCount()}</div>
+                  </div>
+                </div>
+                <div className="bg-white/95 backdrop-blur-md border-2 border-white shadow-xl rounded-2xl overflow-hidden">
+                  <div className="p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="p-3 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl">
+                        <CheckCircle className="h-7 w-7 text-white" />
+                      </div>
+                    </div>
+                    <div className="text-sm font-poppins font-medium text-gray-600 mb-2">Confirmed</div>
+                    <div className="text-3xl font-bold font-poppins text-blue-600">
                       {trips.filter((t) => t.status === "CONFIRMED").length}
                     </div>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="p-4">
-                    <div className="text-sm text-gray-600 mb-1">Completed</div>
-                    <div className="text-2xl font-bold text-gray-600">
+                  </div>
+                </div>
+                <div className="bg-white/95 backdrop-blur-md border-2 border-white shadow-xl rounded-2xl overflow-hidden">
+                  <div className="p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="p-3 bg-gradient-to-br from-gray-400 to-gray-600 rounded-xl">
+                        <CheckCircle className="h-7 w-7 text-white" />
+                      </div>
+                    </div>
+                    <div className="text-sm font-poppins font-medium text-gray-600 mb-2">Completed</div>
+                    <div className="text-3xl font-bold font-poppins text-gray-600">
                       {trips.filter((t) => t.status === "COMPLETED").length}
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
               </div>
 
               {/* Filters */}
