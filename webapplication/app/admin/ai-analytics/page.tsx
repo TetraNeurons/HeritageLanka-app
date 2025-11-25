@@ -116,9 +116,9 @@ export default function AIAnalyticsPage() {
       return { status: "unknown", color: "gray", label: "No Data" };
     }
     
-    if (stats.successRate >= 95) {
+    if (stats.successRate >= 90) {
       return { status: "healthy", color: "green", label: "Healthy" };
-    } else if (stats.successRate >= 85) {
+    } else if (stats.successRate >= 75) {
       return { status: "warning", color: "yellow", label: "Warning" };
     } else {
       return { status: "critical", color: "red", label: "Critical" };
@@ -263,70 +263,54 @@ export default function AIAnalyticsPage() {
               </div>
             )}
 
-            {/* Request Volume Chart */}
-            {timeSeriesData.length > 0 && (
-              <Card className="mb-6">
-                <CardHeader>
-                  <CardTitle>Request Volume Over Time</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <LineChart data={timeSeriesData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="date" />
-                      <YAxis />
-                      <Tooltip />
-                      <Legend />
-                      <Line type="monotone" dataKey="requests" stroke="#3b82f6" name="Total Requests" strokeWidth={2} />
-                      <Line type="monotone" dataKey="successes" stroke="#10b981" name="Successful" strokeWidth={2} />
-                      <Line type="monotone" dataKey="failures" stroke="#ef4444" name="Failed" strokeWidth={2} />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
-            )}
+            {/* Charts Grid */}
+            {(timeSeriesData.length > 0 || workflowBreakdown.length > 0) && (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                {/* Request Volume Chart */}
+                {timeSeriesData.length > 0 && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Request Volume Over Time</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ResponsiveContainer width="100%" height={300}>
+                        <LineChart data={timeSeriesData}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="date" />
+                          <YAxis />
+                          <Tooltip />
+                          <Legend />
+                          <Line type="monotone" dataKey="requests" stroke="#3b82f6" name="Total Requests" strokeWidth={2} />
+                          <Line type="monotone" dataKey="successes" stroke="#10b981" name="Successful" strokeWidth={2} />
+                          <Line type="monotone" dataKey="failures" stroke="#ef4444" name="Failed" strokeWidth={2} />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </CardContent>
+                  </Card>
+                )}
 
-            {/* Workflow Breakdown Chart */}
-            {workflowBreakdown.length > 0 && (
-              <Card className="mb-6">
-                <CardHeader>
-                  <CardTitle>Workflow Breakdown</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={workflowBreakdown}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="workflowType" />
-                      <YAxis />
-                      <Tooltip />
-                      <Legend />
-                      <Bar dataKey="count" fill="#3b82f6" name="Total Requests" />
-                      <Bar dataKey="successRate" fill="#10b981" name="Success Rate (%)" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Token Usage Chart */}
-            {timeSeriesData.length > 0 && (
-              <Card className="mb-6">
-                <CardHeader>
-                  <CardTitle>Token Usage Over Time</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <AreaChart data={timeSeriesData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="date" />
-                      <YAxis />
-                      <Tooltip />
-                      <Legend />
-                      <Area type="monotone" dataKey="tokens" stroke="#a855f7" fill="#a855f7" fillOpacity={0.6} name="Tokens Used" />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
+                {/* Workflow Breakdown Chart */}
+                {workflowBreakdown.length > 0 && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Workflow Breakdown</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ResponsiveContainer width="100%" height={300}>
+                        <BarChart data={workflowBreakdown}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="workflowType" />
+                          <YAxis />
+                          <Tooltip />
+                          <Legend />
+                          <Bar dataKey="count" fill="#3b82f6" name="Total Requests" />
+                          <Bar dataKey="successRate" fill="#10b981" name="Success Rate (%)" />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
             )}
 
             {/* Top Users Table */}
