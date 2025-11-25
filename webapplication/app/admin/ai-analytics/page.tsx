@@ -12,7 +12,6 @@ import {
   CheckCircle,
   XCircle,
   Clock,
-  Zap,
   AlertCircle,
   ChevronDown,
   ChevronUp,
@@ -22,8 +21,6 @@ import {
   Line,
   BarChart,
   Bar,
-  AreaChart,
-  Area,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -210,7 +207,7 @@ export default function AIAnalyticsPage() {
 
             {/* Key Metrics */}
             {stats && stats.totalRequests > 0 && (
-              <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                 <Card>
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between mb-2">
@@ -250,16 +247,6 @@ export default function AIAnalyticsPage() {
                     <div className="text-2xl font-bold text-orange-900">{stats.avgResponseTime}ms</div>
                   </CardContent>
                 </Card>
-
-                <Card>
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <Zap className="h-5 w-5 text-purple-600" />
-                    </div>
-                    <div className="text-sm text-gray-600 mb-1">Total Tokens</div>
-                    <div className="text-2xl font-bold text-purple-900">{stats.totalTokens}</div>
-                  </CardContent>
-                </Card>
               </div>
             )}
 
@@ -289,24 +276,38 @@ export default function AIAnalyticsPage() {
                   </Card>
                 )}
 
-                {/* Workflow Breakdown Chart */}
+                {/* Workflow Breakdown */}
                 {workflowBreakdown.length > 0 && (
                   <Card>
                     <CardHeader>
                       <CardTitle>Workflow Breakdown</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <ResponsiveContainer width="100%" height={300}>
-                        <BarChart data={workflowBreakdown}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="workflowType" />
-                          <YAxis />
-                          <Tooltip />
-                          <Legend />
-                          <Bar dataKey="count" fill="#3b82f6" name="Total Requests" />
-                          <Bar dataKey="successRate" fill="#10b981" name="Success Rate (%)" />
-                        </BarChart>
-                      </ResponsiveContainer>
+                      <div className="space-y-3">
+                        {workflowBreakdown.map((workflow) => (
+                          <div key={workflow.workflowType} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <div className="flex-1">
+                              <div className="font-medium text-gray-900 mb-1">{workflow.workflowType}</div>
+                              <div className="flex items-center gap-2">
+                                <div className="text-sm text-gray-600">{workflow.count} requests</div>
+                                <div className="text-gray-300">•</div>
+                                <div className={`text-sm font-medium ${
+                                  workflow.successRate >= 90 ? 'text-green-600' : 
+                                  workflow.successRate >= 75 ? 'text-yellow-600' : 
+                                  'text-red-600'
+                                }`}>
+                                  {workflow.successRate.toFixed(1)}% success
+                                </div>
+                              </div>
+                            </div>
+                            <div className="ml-4">
+                              <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center">
+                                <div className="text-xl font-bold text-blue-700">{workflow.count}</div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     </CardContent>
                   </Card>
                 )}
