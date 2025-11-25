@@ -264,19 +264,19 @@ export default function TravelerPlansPage() {
   };
 
   const getStatusBadge = (status: string) => {
-    const statusConfig: Record<string, { label: string; variant: any; icon: any }> = {
-      PLANNING: { label: "Planning", variant: "secondary", icon: Clock },
-      CONFIRMED: { label: "Confirmed", variant: "default", icon: CheckCircle },
-      IN_PROGRESS: { label: "In Progress", variant: "default", icon: Play },
-      COMPLETED: { label: "Completed", variant: "outline", icon: CheckCircle },
-      CANCELLED: { label: "Cancelled", variant: "destructive", icon: AlertCircle },
+    const statusConfig: Record<string, { label: string; variant: any; icon: any; className: string }> = {
+      PLANNING: { label: "Planning", variant: "secondary", icon: Clock, className: "bg-gray-100 text-gray-700 border-2 border-gray-300" },
+      CONFIRMED: { label: "Confirmed", variant: "default", icon: CheckCircle, className: "bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 shadow-md" },
+      IN_PROGRESS: { label: "In Progress", variant: "default", icon: Play, className: "bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 shadow-md" },
+      COMPLETED: { label: "Completed", variant: "outline", icon: CheckCircle, className: "bg-green-50 text-green-700 border-2 border-green-300" },
+      CANCELLED: { label: "Cancelled", variant: "destructive", icon: AlertCircle, className: "bg-red-50 text-red-700 border-2 border-red-300" },
     };
 
     const config = statusConfig[status] || statusConfig.PLANNING;
     const Icon = config.icon;
 
     return (
-      <Badge variant={config.variant} className="flex items-center gap-1">
+      <Badge className={`flex items-center gap-1 font-semibold font-poppins ${config.className}`}>
         <Icon className="h-3 w-3" />
         {config.label}
       </Badge>
@@ -408,10 +408,10 @@ export default function TravelerPlansPage() {
   if (loading) {
     return (
       <SidebarProvider>
-        <div className="flex h-screen w-full bg-gray-50">
+        <div className="flex h-screen w-full bg-gradient-to-br from-gray-50 to-gray-100">
           <AppSidebar />
           <div className="flex-1 flex items-center justify-center">
-            <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+            <Loader2 className="h-10 w-10 animate-spin text-amber-500" />
           </div>
         </div>
       </SidebarProvider>
@@ -420,43 +420,43 @@ export default function TravelerPlansPage() {
 
   return (
     <SidebarProvider>
-      <div className="flex h-screen w-full bg-gray-50">
+      <div className="flex h-screen w-full bg-gradient-to-br from-gray-50 to-gray-100">
         <AppSidebar />
 
         <div className="flex-1 flex flex-col overflow-hidden">
-          <main className="flex-1 overflow-y-auto p-4 lg:p-6">
+          <main className="flex-1 overflow-y-auto p-4 lg:p-8">
             {/* Header */}
-            <div className="mb-6">
+            <div className="mb-8">
               <div className="lg:hidden mb-4">
                 <SidebarTrigger />
               </div>
-              <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Your Travel Plans</h1>
-              <p className="text-gray-600 mt-1">Manage and track your trips</p>
+              <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 font-poppins">Your Travel Plans</h1>
+              <p className="text-gray-600 mt-2 text-base font-medium">Manage and track your trips</p>
             </div>
 
             {/* Empty State */}
             {trips.length === 0 ? (
-              <Card className="border-dashed">
-                <CardContent className="flex flex-col items-center justify-center py-12">
-                  <MapPin className="h-16 w-16 text-gray-300 mb-4" />
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">No travel plans yet</h3>
-                  <p className="text-gray-600 text-center mb-6">
+              <Card className="border-dashed border-2 bg-white/95 backdrop-blur-md shadow-xl">
+                <CardContent className="flex flex-col items-center justify-center py-16">
+                  <MapPin className="h-20 w-20 text-amber-300 mb-6" />
+                  <h3 className="text-xl font-bold text-gray-900 mb-3 font-poppins">No travel plans yet</h3>
+                  <p className="text-gray-600 text-center mb-8 text-base">
                     Start planning your next adventure in Sri Lanka
                   </p>
-                  <Button onClick={() => router.push("/traveler/plan")}>
+                  <Button onClick={() => router.push("/traveler/plan")} className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 font-bold font-poppins h-12 px-8 shadow-xl">
                     Create Your First Plan
                   </Button>
                 </CardContent>
               </Card>
             ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-5 lg:gap-6">
                 {trips.map((trip) => (
-                  <Card key={trip.id} className="hover:shadow-lg transition-shadow">
-                    <CardHeader>
+                  <Card key={trip.id} className="hover:shadow-2xl transition-all bg-white/95 backdrop-blur-md border-2 border-gray-200 shadow-xl">
+                    <CardHeader className="pb-4">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
-                          <CardTitle className="text-lg flex items-center gap-2">
-                            <MapPin className="h-5 w-5 text-blue-600" />
+                          <CardTitle className="text-xl flex items-center gap-2 font-poppins font-bold">
+                            <MapPin className="h-6 w-6 text-amber-600" />
                             {trip.country}
                           </CardTitle>
                         </div>
@@ -464,27 +464,27 @@ export default function TravelerPlansPage() {
                       </div>
                     </CardHeader>
 
-                    <CardContent className="space-y-4">
+                    <CardContent className="space-y-4 p-6">
                       {/* Trip Details */}
-                      <div className="space-y-2 text-sm">
-                        <div className="flex items-center gap-2 text-gray-600">
-                          <Calendar className="h-4 w-4" />
-                          <span>
+                      <div className="space-y-3 text-sm">
+                        <div className="flex items-center gap-2 text-gray-700 font-medium">
+                          <Calendar className="h-4 w-4 text-amber-600" />
+                          <span className="font-poppins">
                             {formatDate(trip.fromDate)} - {formatDate(trip.toDate)}
                           </span>
                         </div>
-                        <div className="flex items-center gap-2 text-gray-600">
-                          <Users className="h-4 w-4" />
-                          <span>{trip.numberOfPeople} {trip.numberOfPeople === 1 ? "person" : "people"}</span>
+                        <div className="flex items-center gap-2 text-gray-700 font-medium">
+                          <Users className="h-4 w-4 text-amber-600" />
+                          <span className="font-poppins">{trip.numberOfPeople} {trip.numberOfPeople === 1 ? "person" : "people"}</span>
                         </div>
                         {trip.totalDistance && (
-                          <div className="flex items-center gap-2 text-gray-600">
-                            <Route className="h-4 w-4" />
-                            <span>{Math.round(trip.totalDistance)} km</span>
+                          <div className="flex items-center gap-2 text-gray-700 font-medium">
+                            <Route className="h-4 w-4 text-amber-600" />
+                            <span className="font-poppins">{Math.round(trip.totalDistance)} km</span>
                           </div>
                         )}
                         {trip.needsGuide && (
-                          <Badge variant="outline" className="text-xs">
+                          <Badge variant="outline" className="text-xs border-2 border-amber-300 text-amber-700 font-semibold">
                             With Guide
                           </Badge>
                         )}
@@ -499,23 +499,23 @@ export default function TravelerPlansPage() {
 
                       {/* Guide Info */}
                       {trip.guide && trip.status !== 'PLANNING' && (
-                        <div className="pt-2 border-t space-y-1">
+                        <div className="pt-3 border-t-2 border-gray-200 space-y-2 bg-gradient-to-br from-amber-50 to-orange-50 p-4 rounded-xl">
                           <div className="flex items-center gap-2 text-sm">
-                            <Users className="h-4 w-4 text-blue-600" />
-                            <span className="font-medium">Guide: {trip.guide.name}</span>
+                            <Users className="h-4 w-4 text-amber-600" />
+                            <span className="font-bold font-poppins">Guide: {trip.guide.name}</span>
                           </div>
                           <div className="flex items-center gap-1 flex-wrap ml-6">
-                            <Globe className="h-3 w-3 text-gray-400" />
+                            <Globe className="h-3 w-3 text-gray-500" />
                             {trip.guide.languages.map((lang) => (
-                              <Badge key={lang} variant="secondary" className="text-xs">
+                              <Badge key={lang} variant="secondary" className="text-xs border-2 border-amber-200 font-semibold">
                                 {lang}
                               </Badge>
                             ))}
                           </div>
                           {trip.guide.phone && trip.status === 'IN_PROGRESS' && (
                             <div className="flex items-center gap-2 text-sm ml-6">
-                              <Phone className="h-3 w-3 text-gray-400" />
-                              <a href={`tel:${trip.guide.phone}`} className="text-blue-600 hover:underline">
+                              <Phone className="h-3 w-3 text-gray-500" />
+                              <a href={`tel:${trip.guide.phone}`} className="text-amber-600 hover:underline font-semibold font-poppins">
                                 {trip.guide.phone}
                               </a>
                             </div>
@@ -532,18 +532,17 @@ export default function TravelerPlansPage() {
 
                       {/* Payment Status */}
                       {trip.payment && (
-                        <div className="pt-2 border-t">
+                        <div className="pt-3 border-t-2 border-gray-200">
                           <div className="flex items-center justify-between text-sm">
-                            <span className="text-gray-600">Payment:</span>
+                            <span className="text-gray-700 font-semibold font-poppins">Payment:</span>
                             <Badge
-                              variant={trip.payment.status === "PAID" ? "default" : "secondary"}
-                              className="text-xs"
+                              className={trip.payment.status === "PAID" ? "bg-green-500 text-white border-0 font-semibold" : "bg-gray-100 text-gray-700 border-2 border-gray-300 font-semibold"}
                             >
                               {trip.payment.status === "PAID" ? "Paid" : "Pending"}
                             </Badge>
                           </div>
                           {trip.payment.status === "PAID" && trip.payment.paidAt && (
-                            <p className="text-xs text-gray-500 mt-1">
+                            <p className="text-xs text-gray-600 mt-1 font-medium">
                               Paid on {formatDate(trip.payment.paidAt)}
                             </p>
                           )}
@@ -551,13 +550,13 @@ export default function TravelerPlansPage() {
                       )}
 
                       {/* Action Buttons */}
-                      <div className="flex flex-wrap gap-2 pt-2">
+                      <div className="flex flex-wrap gap-2 pt-3">
                         {/* View Details Button - Always visible */}
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => handleViewDetails(trip)}
-                          className="flex-1"
+                          className="flex-1 font-semibold font-poppins border-2 hover:bg-amber-50 hover:border-amber-300"
                         >
                           <Eye className="h-4 w-4 mr-1" />
                           View Details
@@ -570,7 +569,7 @@ export default function TravelerPlansPage() {
                             size="sm"
                             onClick={() => handleDeleteClick(trip)}
                             disabled={actionLoading === trip.id}
-                            className="flex-1"
+                            className="flex-1 font-semibold font-poppins border-2 hover:bg-red-50 hover:border-red-300 text-red-600"
                           >
                             <Trash2 className="h-4 w-4 mr-1" />
                             Delete
@@ -580,11 +579,10 @@ export default function TravelerPlansPage() {
                         {/* Payment Button */}
                         {canPay(trip) && (
                           <Button
-                            variant="default"
                             size="sm"
                             onClick={() => handlePaymentClick(trip)}
                             disabled={actionLoading === trip.id}
-                            className="flex-1"
+                            className="flex-1 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 font-bold font-poppins shadow-lg"
                           >
                             {actionLoading === trip.id ? (
                               <Loader2 className="h-4 w-4 mr-1 animate-spin" />
@@ -598,11 +596,10 @@ export default function TravelerPlansPage() {
                         {/* Start Button */}
                         {canStart(trip) && (
                           <Button
-                            variant="default"
                             size="sm"
                             onClick={() => handleStartClick(trip)}
                             disabled={actionLoading === trip.id}
-                            className="flex-1 bg-green-600 hover:bg-green-700"
+                            className="flex-1 bg-green-600 hover:bg-green-700 font-bold font-poppins shadow-lg"
                           >
                             <Play className="h-4 w-4 mr-1" />
                             Start Trip
@@ -612,10 +609,9 @@ export default function TravelerPlansPage() {
                         {/* Track Trip Button - For IN_PROGRESS trips */}
                         {trip.status === "IN_PROGRESS" && (
                           <Button
-                            variant="default"
                             size="sm"
                             onClick={() => router.push(`/traveler/trip-tracker/${trip.id}`)}
-                            className="flex-1 bg-blue-600 hover:bg-blue-700"
+                            className="flex-1 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 font-bold font-poppins shadow-lg"
                           >
                             <MapPin className="h-4 w-4 mr-1" />
                             Track Trip
@@ -641,10 +637,9 @@ export default function TravelerPlansPage() {
                         {/* Review Button */}
                         {canReview(trip) && (
                           <Button
-                            variant="default"
                             size="sm"
                             onClick={() => handleReviewClick(trip)}
-                            className="flex-1 bg-yellow-500 hover:bg-yellow-600"
+                            className="flex-1 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-500 hover:to-amber-600 text-white font-bold font-poppins shadow-lg"
                           >
                             <Star className="h-4 w-4 mr-1" />
                             Write Review
@@ -653,7 +648,7 @@ export default function TravelerPlansPage() {
 
                         {/* Review Submitted Badge */}
                         {hasReviewed(trip) && (
-                          <div className="flex-1 flex items-center justify-center gap-2 text-sm text-green-600 bg-green-50 rounded px-3 py-2">
+                          <div className="flex-1 flex items-center justify-center gap-2 text-sm text-green-700 bg-green-50 rounded border-2 border-green-300 px-3 py-2 font-semibold">
                             <CheckCircle className="h-4 w-4" />
                             Review Submitted
                           </div>

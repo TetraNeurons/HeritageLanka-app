@@ -106,14 +106,14 @@ export default function PaymentHistoryPage() {
   const getStatusBadge = (status: string) => {
     if (status === "PAID") {
       return (
-        <Badge variant="default" className="bg-green-600 flex items-center gap-1">
+        <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 flex items-center gap-1 font-semibold shadow-md">
           <CheckCircle className="h-3 w-3" />
           Paid
         </Badge>
       );
     }
     return (
-      <Badge variant="secondary" className="flex items-center gap-1">
+      <Badge className="bg-gray-100 text-gray-700 border-2 border-gray-300 flex items-center gap-1 font-semibold">
         <Clock className="h-3 w-3" />
         Pending
       </Badge>
@@ -123,10 +123,10 @@ export default function PaymentHistoryPage() {
   if (loading) {
     return (
       <SidebarProvider>
-        <div className="flex h-screen w-full bg-gray-50">
+        <div className="flex h-screen w-full bg-gradient-to-br from-gray-50 to-gray-100">
           <AppSidebar />
           <div className="flex-1 flex items-center justify-center">
-            <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+            <Loader2 className="h-10 w-10 animate-spin text-amber-500" />
           </div>
         </div>
       </SidebarProvider>
@@ -135,34 +135,34 @@ export default function PaymentHistoryPage() {
 
   return (
     <SidebarProvider>
-      <div className="flex h-screen w-full bg-gray-50">
+      <div className="flex h-screen w-full bg-gradient-to-br from-gray-50 to-gray-100">
         <AppSidebar />
 
         <div className="flex-1 flex flex-col overflow-hidden">
-          <main className="flex-1 overflow-y-auto p-4 lg:p-6">
+          <main className="flex-1 overflow-y-auto p-4 lg:p-8">
             {/* Header */}
-            <div className="mb-6">
+            <div className="mb-8">
               <div className="lg:hidden mb-4">
                 <SidebarTrigger />
               </div>
-              <div className="flex items-center gap-3">
-                <div className="bg-blue-100 p-3 rounded-lg">
-                  <Receipt className="h-6 w-6 text-blue-600" />
+              <div className="flex items-center gap-4">
+                <div className="bg-gradient-to-br from-amber-100 to-orange-100 p-4 rounded-xl shadow-lg">
+                  <Receipt className="h-7 w-7 text-amber-600" />
                 </div>
                 <div>
-                  <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Payment History</h1>
-                  <p className="text-gray-600 mt-1">Track all your trip payments and event tickets</p>
+                  <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 font-poppins">Payment History</h1>
+                  <p className="text-gray-700 mt-2 font-medium">Track all your trip payments and event tickets</p>
                 </div>
               </div>
             </div>
 
             {/* Empty State */}
             {payments.length === 0 ? (
-              <Card className="border-dashed">
-                <CardContent className="flex flex-col items-center justify-center py-12">
-                  <CreditCard className="h-16 w-16 text-gray-300 mb-4" />
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">No payment history</h3>
-                  <p className="text-gray-600 text-center">
+              <Card className="border-dashed border-2 bg-white/95 backdrop-blur-md shadow-xl">
+                <CardContent className="flex flex-col items-center justify-center py-16">
+                  <CreditCard className="h-20 w-20 text-amber-300 mb-6" />
+                  <h3 className="text-xl font-bold text-gray-900 mb-3 font-poppins">No payment history</h3>
+                  <p className="text-gray-600 text-center text-base">
                     Your payment transactions will appear here
                   </p>
                 </CardContent>
@@ -170,32 +170,32 @@ export default function PaymentHistoryPage() {
             ) : (
               <>
                 {/* Desktop Table View */}
-                <Card className="hidden lg:block">
-                  <CardHeader>
-                    <CardTitle className="text-lg">All Payments ({payments.length})</CardTitle>
+                <Card className="hidden lg:block bg-white/95 backdrop-blur-md border-2 border-gray-200 shadow-xl">
+                  <CardHeader className="pb-4">
+                    <CardTitle className="text-xl font-bold font-poppins">All Payments ({payments.length})</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <Table>
                       <TableHeader>
-                        <TableRow>
-                          <TableHead>Type</TableHead>
-                          <TableHead>Details</TableHead>
-                          <TableHead>Date/Info</TableHead>
-                          <TableHead>Amount</TableHead>
-                          <TableHead>Status</TableHead>
-                          <TableHead>Payment Date</TableHead>
+                        <TableRow className="border-b-2 border-gray-200">
+                          <TableHead className="font-bold font-poppins text-gray-900">Type</TableHead>
+                          <TableHead className="font-bold font-poppins text-gray-900">Details</TableHead>
+                          <TableHead className="font-bold font-poppins text-gray-900">Date/Info</TableHead>
+                          <TableHead className="font-bold font-poppins text-gray-900">Amount</TableHead>
+                          <TableHead className="font-bold font-poppins text-gray-900">Status</TableHead>
+                          <TableHead className="font-bold font-poppins text-gray-900">Payment Date</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {payments.map((payment) => (
-                          <TableRow key={payment.id}>
+                          <TableRow key={payment.id} className="hover:bg-amber-50 transition-colors">
                             <TableCell>
                               {payment.type === 'trip' ? (
-                                <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                                <Badge variant="outline" className="bg-gradient-to-br from-amber-50 to-orange-50 text-amber-700 border-2 border-amber-200 font-semibold">
                                   Trip
                                 </Badge>
                               ) : (
-                                <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
+                                <Badge variant="outline" className="bg-gradient-to-br from-purple-50 to-pink-50 text-purple-700 border-2 border-purple-200 font-semibold">
                                   Event
                                 </Badge>
                               )}
@@ -203,10 +203,10 @@ export default function PaymentHistoryPage() {
                             <TableCell>
                               {payment.type === 'trip' ? (
                                 <div className="flex items-center gap-2">
-                                  <MapPin className="h-4 w-4 text-blue-600" />
+                                  <MapPin className="h-4 w-4 text-amber-600" />
                                   <div>
-                                    <div className="font-medium">{payment.trip.country}</div>
-                                    <div className="text-xs text-gray-500">
+                                    <div className="font-semibold font-poppins">{payment.trip.country}</div>
+                                    <div className="text-xs text-gray-600 font-medium">
                                       Status: {payment.trip.status}
                                     </div>
                                   </div>
@@ -215,8 +215,8 @@ export default function PaymentHistoryPage() {
                                 <div className="flex items-center gap-2">
                                   <Calendar className="h-4 w-4 text-purple-600" />
                                   <div>
-                                    <div className="font-medium">{payment.event.title}</div>
-                                    <div className="text-xs text-gray-500">
+                                    <div className="font-semibold font-poppins">{payment.event.title}</div>
+                                    <div className="text-xs text-gray-600 font-medium">
                                       {payment.event.place}
                                     </div>
                                   </div>
@@ -245,18 +245,18 @@ export default function PaymentHistoryPage() {
                               )}
                             </TableCell>
                             <TableCell>
-                              <span className="font-semibold text-gray-900">
+                              <span className="font-bold text-lg text-gray-900 font-poppins">
                                 {formatCurrency(payment.amount)}
                               </span>
                             </TableCell>
                             <TableCell>{getStatusBadge(payment.status)}</TableCell>
                             <TableCell>
                               {payment.status === "PAID" && payment.paidAt ? (
-                                <span className="text-sm text-gray-600">
+                                <span className="text-sm text-gray-700 font-medium font-poppins">
                                   {formatDate(payment.paidAt)}
                                 </span>
                               ) : (
-                                <span className="text-sm text-gray-500 italic">
+                                <span className="text-sm text-gray-500 italic font-medium">
                                   Awaiting payment
                                 </span>
                               )}
@@ -271,37 +271,37 @@ export default function PaymentHistoryPage() {
                 {/* Mobile Card View */}
                 <div className="lg:hidden space-y-4">
                   {payments.map((payment) => (
-                    <Card key={payment.id}>
-                      <CardContent className="p-4 space-y-3">
+                    <Card key={payment.id} className="bg-white/95 backdrop-blur-md border-2 border-gray-200 shadow-xl hover:shadow-2xl transition-all">
+                      <CardContent className="p-5 space-y-3">
                         {/* Payment Type Badge */}
                         <div className="flex items-start justify-between">
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-3">
                             {payment.type === 'trip' ? (
                               <>
-                                <MapPin className="h-5 w-5 text-blue-600" />
+                                <MapPin className="h-6 w-6 text-amber-600" />
                                 <div>
-                                  <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 mb-1">
+                                  <Badge variant="outline" className="bg-gradient-to-br from-amber-50 to-orange-50 text-amber-700 border-2 border-amber-200 mb-1 font-semibold">
                                     Trip
                                   </Badge>
-                                  <div className="font-semibold text-gray-900">
+                                  <div className="font-bold text-gray-900 font-poppins">
                                     {payment.trip.country}
                                   </div>
-                                  <div className="text-xs text-gray-500">
+                                  <div className="text-xs text-gray-600 font-medium">
                                     {payment.trip.status}
                                   </div>
                                 </div>
                               </>
                             ) : (
                               <>
-                                <Calendar className="h-5 w-5 text-purple-600" />
+                                <Calendar className="h-6 w-6 text-purple-600" />
                                 <div>
-                                  <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200 mb-1">
+                                  <Badge variant="outline" className="bg-gradient-to-br from-purple-50 to-pink-50 text-purple-700 border-2 border-purple-200 mb-1 font-semibold">
                                     Event
                                   </Badge>
-                                  <div className="font-semibold text-gray-900">
+                                  <div className="font-bold text-gray-900 font-poppins">
                                     {payment.event.title}
                                   </div>
-                                  <div className="text-xs text-gray-500">
+                                  <div className="text-xs text-gray-600 font-medium">
                                     {payment.event.place}
                                   </div>
                                 </div>
@@ -315,15 +315,15 @@ export default function PaymentHistoryPage() {
                         <div className="space-y-2 text-sm">
                           {payment.type === 'trip' ? (
                             <>
-                              <div className="flex items-center gap-2 text-gray-600">
-                                <Calendar className="h-4 w-4" />
-                                <span>
+                              <div className="flex items-center gap-2 text-gray-700 font-medium">
+                                <Calendar className="h-4 w-4 text-amber-600" />
+                                <span className="font-poppins">
                                   {formatDate(payment.trip.fromDate)} - {formatDate(payment.trip.toDate)}
                                 </span>
                               </div>
-                              <div className="flex items-center gap-2 text-gray-600">
-                                <Users className="h-4 w-4" />
-                                <span>
+                              <div className="flex items-center gap-2 text-gray-700 font-medium">
+                                <Users className="h-4 w-4 text-amber-600" />
+                                <span className="font-poppins">
                                   {payment.trip.numberOfPeople}{" "}
                                   {payment.trip.numberOfPeople === 1 ? "person" : "people"}
                                 </span>
@@ -331,13 +331,13 @@ export default function PaymentHistoryPage() {
                             </>
                           ) : (
                             <>
-                              <div className="flex items-center gap-2 text-gray-600">
-                                <Calendar className="h-4 w-4" />
-                                <span>{payment.event.date}</span>
+                              <div className="flex items-center gap-2 text-gray-700 font-medium">
+                                <Calendar className="h-4 w-4 text-purple-600" />
+                                <span className="font-poppins">{payment.event.date}</span>
                               </div>
-                              <div className="flex items-center gap-2 text-gray-600">
-                                <Users className="h-4 w-4" />
-                                <span>
+                              <div className="flex items-center gap-2 text-gray-700 font-medium">
+                                <Users className="h-4 w-4 text-purple-600" />
+                                <span className="font-poppins">
                                   {payment.event.ticketQuantity}{" "}
                                   {payment.event.ticketQuantity === 1 ? "ticket" : "tickets"}
                                 </span>
@@ -347,7 +347,7 @@ export default function PaymentHistoryPage() {
                         </div>
 
                         {/* Payment Info */}
-                        <div className="pt-3 border-t flex items-center justify-between">
+                        <div className="pt-3 border-t-2 border-gray-200 flex items-center justify-between">
                           <div>
                             <div className="text-xs text-gray-500 mb-1">Amount</div>
                             <div className="text-lg font-bold text-gray-900">

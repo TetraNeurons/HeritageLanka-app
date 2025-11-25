@@ -107,19 +107,19 @@ export default function TravelerReviewsPage() {
 
   return (
     <SidebarProvider>
-      <div className="flex h-screen w-full bg-gray-50">
+      <div className="flex h-screen w-full bg-gradient-to-br from-gray-50 to-gray-100">
         <AppSidebar />
 
         <div className="flex-1 flex flex-col overflow-hidden">
-          <main className="flex-1 overflow-y-auto p-4 lg:p-6">
+          <main className="flex-1 overflow-y-auto p-4 lg:p-8">
             <div className="max-w-7xl mx-auto">
               {/* Header */}
               <div className="mb-8">
                 <div className="lg:hidden mb-4">
                   <SidebarTrigger />
                 </div>
-                <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">My Reviews</h1>
-                <p className="text-gray-600">
+                <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-3 font-poppins">My Reviews</h1>
+                <p className="text-gray-700 font-medium">
                   View reviews you've given and received from guides
                 </p>
               </div>
@@ -128,12 +128,12 @@ export default function TravelerReviewsPage() {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Reviews Given */}
                 <div>
-                  <div className="flex items-center gap-2 mb-4">
-                    <MessageSquare className="h-6 w-6 text-blue-600" />
-                    <h2 className="text-xl font-semibold text-gray-900">
+                  <div className="flex items-center gap-3 mb-5 bg-white/95 backdrop-blur-md p-4 rounded-xl shadow-lg border-2 border-gray-200">
+                    <MessageSquare className="h-6 w-6 text-amber-600" />
+                    <h2 className="text-xl font-bold text-gray-900 font-poppins">
                       Reviews Given
                     </h2>
-                    <span className="bg-blue-100 text-blue-600 px-2 py-1 rounded-full text-sm font-medium">
+                    <span className="bg-gradient-to-r from-amber-100 to-orange-100 text-amber-700 px-3 py-1 rounded-full text-sm font-bold border-2 border-amber-200">
                       {reviewsGiven.length}
                     </span>
                   </div>
@@ -165,12 +165,12 @@ export default function TravelerReviewsPage() {
                       ))}
                     </div>
                   ) : (
-                    <div className="bg-white border rounded-lg p-12 text-center">
-                      <Star className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                      <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    <div className="bg-white/95 backdrop-blur-md border-2 border-gray-200 rounded-xl p-16 text-center shadow-xl">
+                      <Star className="h-16 w-16 text-amber-300 mx-auto mb-6" />
+                      <h3 className="text-lg font-bold text-gray-900 mb-3 font-poppins">
                         No reviews given yet
                       </h3>
-                      <p className="text-gray-500">
+                      <p className="text-gray-600 font-medium">
                         Complete a trip with a guide to leave your first review
                       </p>
                     </div>
@@ -179,12 +179,12 @@ export default function TravelerReviewsPage() {
 
                 {/* Reviews Received */}
                 <div>
-                  <div className="flex items-center gap-2 mb-4">
+                  <div className="flex items-center gap-3 mb-5 bg-white/95 backdrop-blur-md p-4 rounded-xl shadow-lg border-2 border-gray-200">
                     <Star className="h-6 w-6 text-yellow-500" />
-                    <h2 className="text-xl font-semibold text-gray-900">
+                    <h2 className="text-xl font-bold text-gray-900 font-poppins">
                       Reviews Received
                     </h2>
-                    <span className="bg-yellow-100 text-yellow-600 px-2 py-1 rounded-full text-sm font-medium">
+                    <span className="bg-gradient-to-r from-yellow-100 to-amber-100 text-yellow-700 px-3 py-1 rounded-full text-sm font-bold border-2 border-yellow-200">
                       {reviewsReceived.length}
                     </span>
                   </div>
@@ -214,12 +214,12 @@ export default function TravelerReviewsPage() {
                       ))}
                     </div>
                   ) : (
-                    <div className="bg-white border rounded-lg p-12 text-center">
-                      <Star className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                      <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    <div className="bg-white/95 backdrop-blur-md border-2 border-gray-200 rounded-xl p-16 text-center shadow-xl">
+                      <Star className="h-16 w-16 text-amber-300 mx-auto mb-6" />
+                      <h3 className="text-lg font-bold text-gray-900 mb-3 font-poppins">
                         No reviews received yet
                       </h3>
-                      <p className="text-gray-500">
+                      <p className="text-gray-600 font-medium">
                         Guides will be able to review you after completing trips
                       </p>
                     </div>
@@ -233,19 +233,19 @@ export default function TravelerReviewsPage() {
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
+        <AlertDialogContent className="bg-white/95 backdrop-blur-md border-2 border-gray-200 shadow-2xl">
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Review</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogTitle className="text-xl font-bold font-poppins">Delete Review</AlertDialogTitle>
+            <AlertDialogDescription className="text-base">
               Are you sure you want to delete this review? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={deleting} className="border-2 font-semibold font-poppins">Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteConfirm}
               disabled={deleting}
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-red-600 hover:bg-red-700 font-bold font-poppins shadow-lg"
             >
               {deleting ? "Deleting..." : "Delete"}
             </AlertDialogAction>

@@ -56,9 +56,6 @@ const preferenceOptions = [
   { value: "RELIGIOUS", label: "Religious" },
   { value: "CASUAL", label: "Casual / Relaxed" },
   { value: "ADVENTURE", label: "Adventure" },
-  { value: "NATURE", label: "Nature & Wildlife" },
-  { value: "CULTURAL", label: "Cultural" },
-  { value: "FOOD", label: "Food & Cuisine" },
 ];
 
 export default function PlanMakerContent() {
@@ -470,22 +467,22 @@ export default function PlanMakerContent() {
 
   return (
     <SidebarProvider>
-      <div className="flex h-screen w-full bg-gray-100">
+      <div className="flex h-screen w-full bg-gradient-to-br from-gray-50 to-gray-100">
         <AppSidebar />
 
         <div className="flex flex-col lg:flex-row flex-1 overflow-hidden">
           {/* Form Panel */}
-          <div className={`${useAI ? 'w-full lg:w-[600px]' : 'w-full lg:w-[480px]'} bg-white shadow-sm overflow-y-auto p-5 lg:p-6 border-b lg:border-r lg:border-b-0 border-gray-200 transition-all`}>
-            <h1 className="text-xl lg:text-2xl font-bold mb-4 lg:mb-6 text-gray-900">Create Travel Plan</h1>
+          <div className={`${useAI ? 'w-full lg:w-[600px]' : 'w-full lg:w-[480px]'} bg-white shadow-xl overflow-y-auto p-5 lg:p-8 border-b lg:border-r lg:border-b-0 border-gray-200 transition-all`}>
+            <h1 className="text-2xl lg:text-3xl font-bold mb-6 lg:mb-8 text-gray-900 font-poppins">Create Travel Plan</h1>
             
-            <form onSubmit={handleManualSubmit} className="space-y-4 lg:space-y-6">
+            <form onSubmit={handleManualSubmit} className="space-y-5 lg:space-y-6">
               {/* AI Toggle */}
-              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+              <div className="flex items-center justify-between p-5 bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl border-2 border-amber-200 shadow-md">
                 <div className="flex items-center gap-3">
-                  {useAI ? <Sparkles className="h-5 w-5 text-gray-900" /> : <MapPin className="h-5 w-5 text-gray-900" />}
+                  {useAI ? <Sparkles className="h-6 w-6 text-amber-600" /> : <MapPin className="h-6 w-6 text-amber-600" />}
                   <div>
-                    <Label className="text-base font-semibold">{useAI ? "AI-Powered Planning" : "Manual Selection"}</Label>
-                    <p className="text-xs text-gray-600">{useAI ? "Let AI create your itinerary" : "Choose places yourself"}</p>
+                    <Label className="text-base font-bold font-poppins text-gray-900">{useAI ? "AI-Powered Planning" : "Manual Selection"}</Label>
+                    <p className="text-xs text-gray-600 font-medium mt-0.5">{useAI ? "Let AI create your itinerary" : "Choose places yourself"}</p>
                   </div>
                 </div>
                 <Switch checked={useAI} onCheckedChange={setUseAI} />
@@ -493,75 +490,75 @@ export default function PlanMakerContent() {
 
               {/* Basic Info */}
               <div className="grid grid-cols-2 gap-3 lg:gap-4">
-                <div className="space-y-1">
-                  <Label className="text-sm">From Date</Label>
+                <div className="space-y-2">
+                  <Label className="text-sm font-semibold text-gray-700 font-poppins">From Date</Label>
                   <Input 
                     type="date" 
                     value={fromDate} 
                     onChange={(e) => setFromDate(e.target.value)} 
                     required 
-                    className="text-sm"
+                    className="h-12 text-sm border-2 focus:border-amber-500"
                   />
                 </div>
-                <div className="space-y-1">
-                  <Label className="text-sm">To Date</Label>
+                <div className="space-y-2">
+                  <Label className="text-sm font-semibold text-gray-700 font-poppins">To Date</Label>
                   <Input 
                     type="date" 
                     value={toDate} 
                     onChange={(e) => setToDate(e.target.value)} 
                     required 
-                    className="text-sm"
+                    className="h-12 text-sm border-2 focus:border-amber-500"
                   />
                 </div>
               </div>
 
               {totalDays > 0 && (
-                <div className="bg-gray-900 text-white p-3 rounded-lg flex items-center gap-2">
-                  <Calendar className="h-4 w-4" />
-                  <span className="text-sm font-medium">
+                <div className="bg-gradient-to-br from-amber-500 to-orange-500 text-white p-4 rounded-xl flex items-center gap-3 shadow-lg">
+                  <Calendar className="h-5 w-5" />
+                  <span className="text-sm font-bold font-poppins">
                     Trip Duration: {totalDays} {totalDays === 1 ? 'day' : 'days'}
                   </span>
                 </div>
               )}
 
-              <div className="space-y-1">
-                <Label className="text-sm">Number of People</Label>
+              <div className="space-y-2">
+                <Label className="text-sm font-semibold text-gray-700 font-poppins">Number of People</Label>
                 <Input 
                   type="number" 
                   min="1" 
                   value={people} 
                   onChange={(e) => setPeople(e.target.value)} 
                   required 
-                  className="text-sm"
+                  className="h-12 text-sm border-2 focus:border-amber-500"
                   placeholder="1"
                 />
               </div>
 
               {/* Need Guide Switch */}
-              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <Label htmlFor="needs-guide" className="text-sm font-medium cursor-pointer">Need a Tour Guide?</Label>
+              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border-2 border-gray-200">
+                <Label htmlFor="needs-guide" className="text-sm font-semibold cursor-pointer font-poppins text-gray-900">Need a Tour Guide?</Label>
                 <Switch id="needs-guide" checked={needsGuide} onCheckedChange={setNeedsGuide} />
               </div>
 
               {/* Travel Preferences */}
               {useAI && (
-                <div className="space-y-3 border-t pt-4">
-                  <Label className="text-base font-medium">Travel Preferences *</Label>
+                <div className="space-y-3 border-t-2 border-gray-200 pt-5">
+                  <Label className="text-base font-bold text-gray-900 font-poppins">Travel Preferences *</Label>
                   <div className="grid grid-cols-2 gap-2 lg:gap-3">
                     {preferenceOptions.map((opt) => (
-                      <label key={opt.value} className="flex items-center space-x-2 cursor-pointer p-2 hover:bg-gray-50 rounded">
+                      <label key={opt.value} className="flex items-center space-x-2 cursor-pointer p-3 hover:bg-amber-50 rounded-lg border-2 border-transparent hover:border-amber-200 transition-all">
                         <Checkbox
                           checked={preferences.includes(opt.value)}
                           onCheckedChange={() => togglePreference(opt.value)}
                         />
-                        <span className="text-xs lg:text-sm text-gray-700">{opt.label}</span>
+                        <span className="text-xs lg:text-sm text-gray-700 font-medium">{opt.label}</span>
                       </label>
                     ))}
                   </div>
                   {preferences.length > 0 && (
                     <div className="flex flex-wrap gap-2 mt-3">
                       {preferences.map((p) => (
-                        <span key={p} className="bg-gray-900 text-white text-xs px-3 py-1 rounded-full">
+                        <span key={p} className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs px-4 py-2 rounded-full font-semibold shadow-md">
                           {preferenceOptions.find(o => o.value === p)?.label}
                         </span>
                       ))}
@@ -570,40 +567,40 @@ export default function PlanMakerContent() {
                 </div>
               )}
 
-              <div className="space-y-1">
-                <Label className="text-sm">Notes (Optional)</Label>
+              <div className="space-y-2">
+                <Label className="text-sm font-semibold text-gray-700 font-poppins">Notes (Optional)</Label>
                 <Textarea
                   placeholder="Any special requests or notes..."
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   rows={3}
-                  className="text-sm"
+                  className="text-sm border-2 focus:border-amber-500"
                 />
               </div>
 
               {/* Manual Mode: Show locations list */}
               {!useAI && (
-                <div className="space-y-3 border-t pt-4">
-                  <Label className="text-base lg:text-lg font-semibold">
+                <div className="space-y-3 border-t-2 border-gray-200 pt-5">
+                  <Label className="text-base lg:text-lg font-bold text-gray-900 font-poppins">
                     Places to Visit ({locations.length})
                   </Label>
                   {locations.length === 0 ? (
-                    <p className="text-xs lg:text-sm text-gray-500">
+                    <p className="text-xs lg:text-sm text-gray-500 font-medium">
                       Click map or search to add places
                     </p>
                   ) : (
                     <div className="space-y-2 max-h-48 lg:max-h-64 overflow-y-auto">
                       {locations.map((loc, idx) => (
-                        <div key={loc.id} className="flex items-start justify-between bg-gray-50 p-2 lg:p-3 rounded-lg text-xs lg:text-sm">
+                        <div key={loc.id} className="flex items-start justify-between bg-gradient-to-br from-gray-50 to-gray-100 p-3 lg:p-4 rounded-xl text-xs lg:text-sm border-2 border-gray-200 hover:border-amber-300 transition-all shadow-sm">
                           <div className="flex-1 pr-2">
                             <div className="flex items-center gap-2">
-                              <span className="bg-gray-900 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">
+                              <span className="bg-gradient-to-br from-amber-500 to-orange-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold shadow-md">
                                 {idx + 1}
                               </span>
-                              <strong className="text-sm">{loc.name}</strong>
+                              <strong className="text-sm font-semibold font-poppins">{loc.name}</strong>
                             </div>
                             {loc.address && (
-                              <p className="text-xs text-gray-600 mt-1 ml-7">{loc.address}</p>
+                              <p className="text-xs text-gray-600 mt-1 ml-8">{loc.address}</p>
                             )}
                           </div>
                           <Button
@@ -611,7 +608,7 @@ export default function PlanMakerContent() {
                             size="sm"
                             variant="ghost"
                             onClick={() => removeLocation(loc.id)}
-                            className="text-red-600 hover:bg-red-50 p-1"
+                            className="text-red-600 hover:bg-red-50 p-1 border-2 border-transparent hover:border-red-200"
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -624,15 +621,15 @@ export default function PlanMakerContent() {
 
               {/* Action Buttons */}
               {!useAI ? (
-                <Button type="submit" className="w-full bg-gray-900 hover:bg-gray-800" size="lg" disabled={isSubmitting}>
+                <Button type="submit" className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold font-poppins shadow-xl h-12" size="lg" disabled={isSubmitting}>
                   {isSubmitting ? (
                     <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      <Loader2 className="h-5 w-5 mr-2 animate-spin" />
                       Creating Plan...
                     </>
                   ) : (
                     <>
-                      <MapPin className="h-4 w-4 mr-2" />
+                      <MapPin className="h-5 w-5 mr-2" />
                       Create Travel Plan
                     </>
                   )}
@@ -641,18 +638,18 @@ export default function PlanMakerContent() {
                 <Button 
                   type="button" 
                   onClick={handleAIGeneration} 
-                  className="w-full bg-gray-900 hover:bg-gray-800" 
+                  className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold font-poppins shadow-xl h-12" 
                   size="lg"
                   disabled={isGenerating || preferences.length === 0}
                 >
                   {isGenerating ? (
                     <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      <Loader2 className="h-5 w-5 mr-2 animate-spin" />
                       Generating Plan...
                     </>
                   ) : (
                     <>
-                      <Sparkles className="h-4 w-4 mr-2" />
+                      <Sparkles className="h-5 w-5 mr-2" />
                       Generate AI Plan
                     </>
                   )}
@@ -665,26 +662,26 @@ export default function PlanMakerContent() {
           {(!useAI) && (
             <div className="flex-1 relative h-[400px] lg:h-full">
               {/* Search Bar */}
-              <div className="absolute top-2 lg:top-4 right-2 lg:right-4 z-10 bg-white rounded-lg shadow-lg p-2 lg:p-3 flex gap-2 items-center w-[calc(100%-1rem)] lg:w-96">
+              <div className="absolute top-2 lg:top-4 right-2 lg:right-4 z-10 bg-white/95 backdrop-blur-md rounded-xl shadow-2xl p-3 lg:p-4 flex gap-2 items-center w-[calc(100%-1rem)] lg:w-96 border-2 border-gray-200">
                 <Input
                   placeholder="Search in Sri Lanka..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                  className="text-sm"
+                  className="text-sm h-10 border-2 focus:border-amber-500 font-poppins"
                 />
                 <Button 
                   onClick={handleSearch} 
                   size="sm" 
                   disabled={isSearching.current}
-                  className="text-xs lg:text-sm"
+                  className="text-xs lg:text-sm bg-amber-500 hover:bg-amber-600 text-white font-semibold font-poppins px-4 shadow-lg"
                 >
                   Search
                 </Button>
               </div>
 
               {/* Map Label */}
-              <div className="absolute bottom-2 lg:bottom-4 right-2 lg:right-4 z-10 bg-black bg-opacity-70 text-white px-3 lg:px-5 py-2 lg:py-3 rounded-lg shadow-lg text-xs lg:text-sm font-medium backdrop-blur-sm">
+              <div className="absolute bottom-2 lg:bottom-4 right-2 lg:right-4 z-10 bg-gradient-to-br from-amber-500 to-orange-500 text-white px-4 lg:px-6 py-3 lg:py-4 rounded-xl shadow-2xl text-sm lg:text-base font-bold backdrop-blur-sm font-poppins">
                 Click map to add places
               </div>
 
@@ -708,18 +705,18 @@ export default function PlanMakerContent() {
                           <img 
                             src={locationImages[loc.id]} 
                             alt={loc.name}
-                            className="w-full h-32 object-cover rounded mb-2"
+                            className="w-full h-32 object-cover rounded-lg mb-2 border-2 border-gray-200"
                           />
                         )}
                         <div className="flex items-center gap-2 mb-2">
-                          <Badge variant="default" className="bg-gray-900">
+                          <Badge variant="default" className="bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold shadow-md">
                             Stop {idx + 1}
                           </Badge>
                         </div>
-                        <p className="font-semibold text-sm">{loc.name}</p>
+                        <p className="font-bold text-sm font-poppins text-gray-900">{loc.name}</p>
                         {loc.address && <p className="text-xs text-gray-600 mt-1">{loc.address}</p>}
                         {loc.category && (
-                          <Badge variant="outline" className="text-xs mt-2">
+                          <Badge variant="outline" className="text-xs mt-2 border-amber-300 text-amber-700">
                             {loc.category}
                           </Badge>
                         )}
@@ -738,57 +735,57 @@ export default function PlanMakerContent() {
 
         {/* AI Plan Preview Modal with Map */}
         {showPlanPreview && generatedPlan && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4" style={{ zIndex: 9999 }}>
-            <div className="bg-white rounded-lg shadow-xl w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col" style={{ zIndex: 10000 }}>
-              <div className="p-4 lg:p-6 border-b flex justify-between items-center">
-                <h2 className="text-xl lg:text-2xl font-bold">Your AI-Generated Travel Plan</h2>
-                <Button variant="ghost" size="sm" onClick={handleRejectPlan}>
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4" style={{ zIndex: 9999 }}>
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col border-2 border-gray-200" style={{ zIndex: 10000 }}>
+              <div className="p-5 lg:p-6 border-b-2 border-gray-200 flex justify-between items-center bg-gradient-to-r from-amber-50 to-orange-50">
+                <h2 className="text-xl lg:text-2xl font-bold text-gray-900 font-poppins">Your AI-Generated Travel Plan</h2>
+                <Button variant="ghost" size="sm" onClick={handleRejectPlan} className="hover:bg-white/50 rounded-full p-2">
                   <X className="h-5 w-5" />
                 </Button>
               </div>
 
               <div className="flex-1 overflow-hidden flex flex-col lg:flex-row">
                 {/* Plan Details */}
-                <div className="w-full lg:w-1/2 p-4 lg:p-6 overflow-y-auto">
+                <div className="w-full lg:w-1/2 p-4 lg:p-6 overflow-y-auto bg-gray-50">
                   <div className="space-y-4">
-                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                      <h3 className="font-semibold mb-2">Trip Summary</h3>
-                      <p className="text-sm text-gray-700">{generatedPlan.summary}</p>
+                    <div className="bg-white p-5 rounded-xl border-2 border-amber-200 shadow-md">
+                      <h3 className="font-bold text-lg mb-3 font-poppins text-gray-900">Trip Summary</h3>
+                      <p className="text-sm text-gray-700 leading-relaxed">{generatedPlan.summary}</p>
                     </div>
 
                     <div>
-                      <h3 className="font-semibold mb-3">Daily Itinerary</h3>
+                      <h3 className="font-bold text-lg mb-3 font-poppins text-gray-900">Daily Itinerary</h3>
                       <div className="space-y-3">
                         {generatedPlan.dailyItinerary?.map((day: any, idx: number) => (
-                          <div key={idx} className="border rounded-lg p-3">
-                            <div className="font-medium text-blue-600 mb-2">
+                          <div key={idx} className="border-2 border-gray-200 rounded-xl p-4 bg-white shadow-sm hover:shadow-md transition-all">
+                            <div className="font-bold text-amber-600 mb-3 font-poppins text-base">
                               Day {day.day} - {day.date}
                             </div>
-                            <ul className="space-y-1 text-sm">
+                            <ul className="space-y-2 text-sm">
                               {day.places?.map((place: string, pIdx: number) => (
                                 <li key={pIdx} className="flex items-start gap-2">
-                                  <span className="text-gray-400">•</span>
-                                  <span>{place}</span>
+                                  <span className="text-amber-500 font-bold">•</span>
+                                  <span className="text-gray-700">{place}</span>
                                 </li>
                               ))}
                             </ul>
                             {day.estimatedDistance && (
-                              <p className="text-xs text-gray-500 mt-2">📍 {day.estimatedDistance}</p>
+                              <p className="text-xs text-gray-500 mt-3 font-medium bg-gray-50 px-3 py-1.5 rounded-lg inline-block">📍 {day.estimatedDistance}</p>
                             )}
                             {day.notes && (
-                              <p className="text-xs text-gray-500 mt-1 italic">{day.notes}</p>
+                              <p className="text-xs text-gray-500 mt-2 italic bg-amber-50 px-3 py-1.5 rounded-lg">{day.notes}</p>
                             )}
                           </div>
                         ))}
                       </div>
                     </div>
 
-                    <div>
-                      <h3 className="font-semibold mb-2">Travel Tips & Recommendations</h3>
-                      <ul className="text-sm text-gray-700 space-y-1">
+                    <div className="bg-white p-5 rounded-xl border-2 border-gray-200 shadow-md">
+                      <h3 className="font-bold text-lg mb-3 font-poppins text-gray-900">Travel Tips & Recommendations</h3>
+                      <ul className="text-sm text-gray-700 space-y-2">
                         {generatedPlan.recommendations?.map((rec: string, idx: number) => (
                           <li key={idx} className="flex items-start gap-2">
-                            <span className="text-blue-600">•</span>
+                            <span className="text-amber-500 font-bold">•</span>
                             <span>{rec}</span>
                           </li>
                         ))}
@@ -796,13 +793,13 @@ export default function PlanMakerContent() {
                     </div>
 
                     {generatedPlan.feasibilityScore && (
-                      <div className="bg-green-50 p-3 rounded-lg">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="font-semibold text-sm">Feasibility Score:</span>
-                          <span className="text-green-700 font-bold">{generatedPlan.feasibilityScore}/100</span>
+                      <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-4 rounded-xl border-2 border-green-200 shadow-md">
+                        <div className="flex items-center gap-3 mb-2">
+                          <span className="font-bold text-sm font-poppins text-gray-900">Feasibility Score:</span>
+                          <span className="text-green-700 font-bold text-lg">{generatedPlan.feasibilityScore}/100</span>
                         </div>
                         {generatedPlan.feasibilityNotes && (
-                          <p className="text-xs text-gray-600">{generatedPlan.feasibilityNotes}</p>
+                          <p className="text-xs text-gray-600 leading-relaxed">{generatedPlan.feasibilityNotes}</p>
                         )}
                       </div>
                     )}
@@ -834,18 +831,18 @@ export default function PlanMakerContent() {
                                 <img 
                                   src={locationImages[loc.id]} 
                                   alt={loc.name}
-                                  className="w-full h-32 object-cover rounded mb-2"
+                                  className="w-full h-32 object-cover rounded-lg mb-2 border-2 border-gray-200"
                                 />
                               )}
                               <div className="flex items-center gap-2 mb-2">
-                                <Badge variant="default" className="bg-gray-900">
+                                <Badge variant="default" className="bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold shadow-md">
                                   Stop {idx + 1}
                                 </Badge>
                               </div>
-                              <p className="font-semibold text-sm">{loc.name}</p>
+                              <p className="font-bold text-sm font-poppins text-gray-900">{loc.name}</p>
                               {loc.district && <p className="text-xs text-gray-600 mt-1">{loc.district}</p>}
                               {loc.rating && (
-                                <div className="text-xs text-yellow-600 mt-1">★ {loc.rating}</div>
+                                <div className="text-xs text-amber-600 mt-1 font-semibold">★ {loc.rating}</div>
                               )}
                             </div>
                           </Popup>
@@ -864,16 +861,16 @@ export default function PlanMakerContent() {
                 </div>
               </div>
 
-              <div className="p-4 lg:p-6 border-t flex gap-3">
+              <div className="p-5 lg:p-6 border-t-2 border-gray-200 flex gap-3 bg-gradient-to-r from-gray-50 to-gray-100">
                 <Button 
                   onClick={handleAcceptPlan} 
-                  className="flex-1 bg-gray-900 hover:bg-gray-800" 
+                  className="flex-1 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold font-poppins shadow-xl h-12" 
                   size="lg"
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? (
                     <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      <Loader2 className="h-5 w-5 mr-2 animate-spin" />
                       Saving Plan...
                     </>
                   ) : (
@@ -883,7 +880,7 @@ export default function PlanMakerContent() {
                 <Button 
                   onClick={handleRejectPlan} 
                   variant="outline" 
-                  className="flex-1 hover:bg-gray-100" 
+                  className="flex-1 hover:bg-white border-2 border-gray-300 font-semibold font-poppins h-12" 
                   size="lg"
                   disabled={isSubmitting}
                 >

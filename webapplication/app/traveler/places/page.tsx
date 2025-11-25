@@ -227,12 +227,12 @@ export default function PlacesPage() {
 
   return (
     <SidebarProvider>
-      <div className="flex h-screen w-full bg-white">
+      <div className="flex h-screen w-full bg-gradient-to-br from-gray-50 to-gray-100">
         <AppSidebar />
 
-        <div className="flex-1 overflow-y-auto p-8">
+        <div className="flex-1 overflow-y-auto p-6 lg:p-8">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-black mb-4">
+            <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4 font-poppins">
               Tourist Attractions in Sri Lanka
             </h1>
             
@@ -245,15 +245,15 @@ export default function PlacesPage() {
                   placeholder="Search attractions..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 h-12 border-2 focus:border-amber-500 font-poppins shadow-md"
                 />
               </div>
               
               {/* District Filter */}
               <div className="flex items-center gap-3">
-                <Filter className="w-5 h-5 text-gray-600" />
+                <Filter className="w-5 h-5 text-amber-600" />
                 <Select value={selectedDistrict} onValueChange={setSelectedDistrict}>
-                  <SelectTrigger className="w-52">
+                  <SelectTrigger className="w-52 h-12 border-2 focus:border-amber-500 font-poppins font-semibold shadow-md">
                     <SelectValue placeholder="Filter by district" />
                   </SelectTrigger>
                   <SelectContent>
@@ -269,9 +269,9 @@ export default function PlacesPage() {
 
               {/* Sort By */}
               <div className="flex items-center gap-3">
-                <Star className="w-5 h-5 text-gray-600" />
+                <Star className="w-5 h-5 text-amber-600" />
                 <Select value={sortBy} onValueChange={setSortBy}>
-                  <SelectTrigger className="w-52">
+                  <SelectTrigger className="w-52 h-12 border-2 focus:border-amber-500 font-poppins font-semibold shadow-md">
                     <SelectValue placeholder="Sort by" />
                   </SelectTrigger>
                   <SelectContent>
@@ -284,12 +284,12 @@ export default function PlacesPage() {
               </div>
 
               {/* View Mode Toggle */}
-              <div className="flex items-center gap-2 border rounded-lg p-1">
+              <div className="flex items-center gap-2 border-2 border-gray-300 rounded-xl p-1 shadow-md bg-white">
                 <Button
                   variant={viewMode === "grid" ? "default" : "ghost"}
                   size="sm"
                   onClick={() => setViewMode("grid")}
-                  className="gap-2"
+                  className={`gap-2 font-semibold font-poppins ${viewMode === "grid" ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white" : ""}`}
                 >
                   <LayoutGrid className="w-4 h-4" />
                   Grid
@@ -298,14 +298,14 @@ export default function PlacesPage() {
                   variant={viewMode === "map" ? "default" : "ghost"}
                   size="sm"
                   onClick={() => setViewMode("map")}
-                  className="gap-2"
+                  className={`gap-2 font-semibold font-poppins ${viewMode === "map" ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white" : ""}`}
                 >
                   <MapIcon className="w-4 h-4" />
                   Map
                 </Button>
               </div>
               
-              <span className="text-sm text-gray-600">
+              <span className="text-sm text-gray-700 font-semibold font-poppins bg-white px-4 py-3 rounded-xl shadow-md border-2 border-gray-200">
                 {filteredAttractions.length} places found
               </span>
             </div>
@@ -330,7 +330,7 @@ export default function PlacesPage() {
             {displayedAttractions.map(place => (
               <div
                 key={place.cid}
-                className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-all bg-white w-full max-w-[280px]"
+                className="border-2 border-gray-200 rounded-xl overflow-hidden hover:shadow-2xl transition-all bg-white/95 backdrop-blur-md w-full max-w-[280px] shadow-lg"
               >
                 <div className="relative overflow-hidden">
                   <img
@@ -344,42 +344,43 @@ export default function PlacesPage() {
                   />
 
                   {place.rating >= 4.5 && (
-                    <span className="absolute top-3 left-3 bg-black text-white px-3 py-1 rounded text-xs font-semibold flex items-center gap-1">
-                      <Star className="w-3 h-3 fill-white" />
+                    <span className="absolute top-3 left-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-1 shadow-lg">
+                      <Star className="w-4 h-4 fill-white" />
                       TOP RATED
                     </span>
                   )}
                 </div>
 
-                <div className="p-4 space-y-3">
-                  <h2 className="text-lg font-bold text-black line-clamp-2">
+                <div className="p-5 space-y-3">
+                  <h2 className="text-lg font-bold text-gray-900 line-clamp-2 font-poppins">
                     {place.title}
                   </h2>
 
-                  <div className="space-y-2 text-sm text-gray-600">
-                    <p className="flex items-center gap-2">
-                      <Map className="w-4 h-4" /> {place.district}
+                  <div className="space-y-2 text-sm text-gray-700">
+                    <p className="flex items-center gap-2 font-medium">
+                      <Map className="w-4 h-4 text-amber-600" /> 
+                      <span className="font-poppins">{place.district}</span>
                     </p>
-                    <p className="flex items-center gap-2">
-                      <MapPin className="w-4 h-4" /> 
-                      <span className="line-clamp-1">{place.address}</span>
+                    <p className="flex items-center gap-2 font-medium">
+                      <MapPin className="w-4 h-4 text-amber-600" /> 
+                      <span className="line-clamp-1 font-poppins">{place.address}</span>
                     </p>
-                    <p className="flex items-center gap-2 font-semibold text-black">
-                      <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                      {place.rating}
+                    <p className="flex items-center gap-2 font-bold text-gray-900">
+                      <Star className="w-5 h-5 fill-amber-400 text-amber-400" />
+                      <span className="text-base font-poppins">{place.rating}</span>
                     </p>
                   </div>
 
                   <Dialog>
                     <DialogTrigger asChild>
-                      <Button variant="outline" className="w-full mt-3" size="sm">
+                      <Button variant="outline" className="w-full mt-3 border-2 hover:bg-amber-50 hover:border-amber-300 font-semibold font-poppins shadow-md" size="sm">
                         View Details
                       </Button>
                     </DialogTrigger>
 
-                    <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto p-6">
+                    <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto p-6 bg-white/95 backdrop-blur-md border-2 border-gray-200 shadow-2xl">
                       <DialogHeader>
-                        <DialogTitle className="text-2xl font-bold pr-8">
+                        <DialogTitle className="text-2xl font-bold pr-8 font-poppins text-gray-900">
                           {place.title}
                         </DialogTitle>
                       </DialogHeader>
@@ -531,7 +532,7 @@ export default function PlacesPage() {
 
                       <DialogFooter className="mt-6">
                         <Button
-                          className="w-full bg-black hover:bg-gray-800 text-white"
+                          className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold font-poppins shadow-xl h-12"
                           size="lg"
                           onClick={() =>
                             openGoogleMaps(
@@ -559,7 +560,7 @@ export default function PlacesPage() {
                 variant="outline"
                 size="lg"
                 onClick={() => setDisplayCount(prev => prev + 100)}
-                className="min-w-[200px]"
+                className="min-w-[200px] border-2 border-amber-300 hover:bg-amber-50 font-bold font-poppins text-base shadow-lg"
               >
                 Load More ({sortedAttractions.length - displayCount} remaining)
               </Button>

@@ -85,25 +85,25 @@ export default function EventsPage() {
 
   return (
     <SidebarProvider>
-      <div className="flex h-screen w-full bg-white">
+      <div className="flex h-screen w-full bg-gradient-to-br from-gray-50 to-gray-100">
         <AppSidebar />
 
-        <div className="flex-1 overflow-y-auto p-8">
+        <div className="flex-1 overflow-y-auto p-6 lg:p-8">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-black mb-4">Upcoming Events</h1>
+            <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4 font-poppins">Upcoming Events</h1>
             
             <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600">
+              <span className="text-sm text-gray-700 font-semibold font-poppins bg-white px-4 py-3 rounded-xl shadow-md border-2 border-gray-200">
                 {events.length} events available
               </span>
               
               {/* View Mode Toggle */}
-              <div className="flex items-center gap-2 border rounded-lg p-1">
+              <div className="flex items-center gap-2 border-2 border-gray-300 rounded-xl p-1 shadow-md bg-white">
                 <Button
                   variant={viewMode === "grid" ? "default" : "ghost"}
                   size="sm"
                   onClick={() => setViewMode("grid")}
-                  className="gap-2"
+                  className={`gap-2 font-semibold font-poppins ${viewMode === "grid" ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white" : ""}`}
                 >
                   <LayoutGrid className="w-4 h-4" />
                   Grid
@@ -112,7 +112,7 @@ export default function EventsPage() {
                   variant={viewMode === "map" ? "default" : "ghost"}
                   size="sm"
                   onClick={() => setViewMode("map")}
-                  className="gap-2"
+                  className={`gap-2 font-semibold font-poppins ${viewMode === "map" ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white" : ""}`}
                 >
                   <MapIcon className="w-4 h-4" />
                   Map
@@ -141,7 +141,7 @@ export default function EventsPage() {
             {events.length > 0 && events.map(event => (
               <div
                 key={event.id}
-                className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-all bg-white"
+                className="border-2 border-gray-200 rounded-xl overflow-hidden hover:shadow-2xl transition-all bg-white/95 backdrop-blur-md shadow-lg"
               >
                 <div className="relative overflow-hidden">
                   <img
@@ -151,29 +151,29 @@ export default function EventsPage() {
                   />
 
                   {event.price === "Free" && (
-                    <span className="absolute top-3 left-3 bg-black text-white px-3 py-1 rounded text-xs font-semibold">
+                    <span className="absolute top-3 left-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white px-4 py-2 rounded-lg text-xs font-bold shadow-lg">
                       FREE
                     </span>
                   )}
                 </div>
 
                 <div className="p-5 space-y-3">
-                  <h2 className="text-xl font-bold text-black line-clamp-2">
+                  <h2 className="text-xl font-bold text-gray-900 line-clamp-2 font-poppins">
                     {event.title}
                   </h2>
 
-                  <div className="space-y-2 text-sm text-gray-600">
-                    <p className="flex items-center gap-2">
-                      <Calendar className="w-4 h-4" /> {event.date}
+                  <div className="space-y-2 text-sm text-gray-700">
+                    <p className="flex items-center gap-2 font-medium font-poppins">
+                      <Calendar className="w-4 h-4 text-amber-600" /> {event.date}
                     </p>
-                    <p className="flex items-center gap-2">
-                      <MapPin className="w-4 h-4" /> {event.place}
+                    <p className="flex items-center gap-2 font-medium font-poppins">
+                      <MapPin className="w-4 h-4 text-amber-600" /> {event.place}
                     </p>
-                    <p className="flex items-center gap-2 font-semibold text-black">
-                      <Tag className="w-4 h-4" /> {event.price}
+                    <p className="flex items-center gap-2 font-bold text-gray-900 font-poppins">
+                      <Tag className="w-4 h-4 text-amber-600" /> {event.price}
                     </p>
-                    <p className="flex items-center gap-2">
-                      <Ticket className="w-4 h-4" /> {event.ticketCount} tickets
+                    <p className="flex items-center gap-2 font-medium font-poppins">
+                      <Ticket className="w-4 h-4 text-amber-600" /> {event.ticketCount} tickets
                       available
                     </p>
                   </div>
@@ -181,14 +181,14 @@ export default function EventsPage() {
                   {/* Dialog */}
                   <Dialog>
                     <DialogTrigger asChild>
-                      <Button variant="outline" className="w-full mt-3">
+                      <Button variant="outline" className="w-full mt-3 border-2 hover:bg-amber-50 hover:border-amber-300 font-semibold font-poppins shadow-md">
                         View Details
                       </Button>
                     </DialogTrigger>
 
-                    <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto p-6">
+                    <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto p-6 bg-white/95 backdrop-blur-md border-2 border-gray-200 shadow-2xl">
                       <DialogHeader>
-                        <DialogTitle className="text-2xl font-bold pr-8">
+                        <DialogTitle className="text-2xl font-bold pr-8 font-poppins text-gray-900">
                           {event.title}
                         </DialogTitle>
                       </DialogHeader>
@@ -314,7 +314,7 @@ export default function EventsPage() {
                       </div>
 
                       <DialogFooter className="mt-6">
-                        <Button className="w-full bg-black hover:bg-gray-800 text-white" size="lg">
+                        <Button className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold font-poppins shadow-xl h-12" size="lg">
                           {event.price.includes("Free")
                             ? "Register Interest"
                             : "Buy Tickets Now"}

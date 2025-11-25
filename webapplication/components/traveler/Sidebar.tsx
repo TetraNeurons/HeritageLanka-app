@@ -70,12 +70,16 @@ export function AppSidebar() {
   return (
     <Sidebar className="w-64">
       <SidebarHeader className="p-6 border-b">
-        <div className="flex items-center gap-3">
-          <Globe className="h-10 w-10 text-blue-600" />
-          <div>
-            <h2 className="text-xl font-bold">Heritage Lanka</h2>
-            <p className="text-sm text-muted-foreground">Traveler</p>
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg overflow-hidden" style={{ filter: 'drop-shadow(0 0 8px rgba(245, 158, 11, 0.6))' }}>
+              <img src="/images/logo.png" alt="Heritage Lanka Logo" className="h-full w-full object-contain" />
+            </div>
+            <span className="text-xl font-bold tracking-tight text-gray-900 font-dancing-script">
+              Heritage <span className="ml-1">Lanka</span>
+            </span>
           </div>
+          <p className="text-sm text-muted-foreground font-poppins font-medium pl-1">Traveler Dashboard</p>
         </div>
       </SidebarHeader>
 
@@ -86,9 +90,9 @@ export function AppSidebar() {
               <SidebarMenuButton asChild>
                 <a
                   href={item.href}
-                  className={`flex items-center gap-4 p-4 h-8 text-lg font-medium rounded-lg transition-colors ${
+                  className={`flex items-center gap-4 p-4 h-8 text-lg font-medium rounded-lg transition-colors font-poppins ${
                     isActive(item.href)
-                      ? "bg-blue-100 text-blue-700 font-semibold"
+                      ? "bg-amber-100 text-amber-700 font-semibold"
                       : "hover:bg-muted"
                   }`}
                 >
