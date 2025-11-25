@@ -11,15 +11,29 @@ function isValidUrl(url: string): boolean {
   }
 }
 
+// Email validation helper
+function isValidEmail(email: string): boolean {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { imageUrl, description, redirectUrl } = body;
+    const { email, imageUrl, description, redirectUrl } = body;
 
     // Validate required fields
-    if (!imageUrl || !description || !redirectUrl) {
+    if (!email || !imageUrl || !description || !redirectUrl) {
       return NextResponse.json(
-        { success: false, message: "All fields are required: imageUrl, description, redirectUrl" },
+        { success: false, message: "All fields are required: email, imageUrl, description, redirectUrl" },
+        { status: 400 }
+      );
+    }
+
+    // Validate email
+    if (!isValidEmail(email)) {
+      return NextResponse.json(
+        { success: false, message: "Invalid email format" },
         { status: 400 }
       );
     }
@@ -49,6 +63,7 @@ export async function POST(request: NextRequest) {
 
     // Create advertisement
     const advertisement = await createAdvertisement({
+      email,
       imageUrl,
       description,
       redirectUrl,

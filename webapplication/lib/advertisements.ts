@@ -6,6 +6,7 @@ export type AdStatus = "PENDING" | "ACTIVE" | "INACTIVE" | "REJECTED";
 
 export interface Advertisement {
   id: string;
+  email: string;
   imageUrl: string;
   description: string;
   redirectUrl: string;
@@ -27,6 +28,7 @@ export function generatePaymentReference(): string {
 
 // Insert new advertisement
 export async function createAdvertisement(data: {
+  email: string;
   imageUrl: string;
   description: string;
   redirectUrl: string;
@@ -36,6 +38,7 @@ export async function createAdvertisement(data: {
   const [ad] = await db
     .insert(advertisements)
     .values({
+      email: data.email,
       imageUrl: data.imageUrl,
       description: data.description,
       redirectUrl: data.redirectUrl,

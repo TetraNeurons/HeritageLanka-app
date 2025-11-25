@@ -4,16 +4,16 @@ import { getAdvertisementByReference } from "@/lib/advertisements";
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
-    const ref = searchParams.get("ref");
+    const reference = searchParams.get("reference");
 
-    if (!ref) {
+    if (!reference) {
       return NextResponse.json(
         { success: false, message: "Payment reference is required" },
         { status: 400 }
       );
     }
 
-    const advertisement = await getAdvertisementByReference(ref);
+    const advertisement = await getAdvertisementByReference(reference);
 
     if (!advertisement) {
       return NextResponse.json(
@@ -24,9 +24,15 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      status: advertisement.status,
-      viewCount: advertisement.viewCount,
-      submittedAt: advertisement.submittedAt,
+      advertisement: {
+        email: advertisement.email,
+        imageUrl: advertisement.imageUrl,
+        description: advertisement.description,
+        redirectUrl: advertisement.redirectUrl,
+        status: advertisement.status,
+        viewCount: advertisement.viewCount,
+        submittedAt: advertisement.submittedAt,
+      },
     });
   } catch (error) {
     console.error("Error fetching advertisement status:", error);

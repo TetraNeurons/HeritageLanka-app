@@ -1,229 +1,425 @@
-"use client";
+"use client"
 
-import { useState } from "react";
-import Link from "next/link";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Label } from "@/components/ui/label";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import { Search, Loader2, Eye, Calendar, CheckCircle, Clock, XCircle, Power } from "lucide-react";
-
-type AdStatus = "PENDING" | "ACTIVE" | "INACTIVE" | "REJECTED";
-
-interface AdStatusData {
-  status: AdStatus;
-  viewCount: number;
-  submittedAt: string;
-}
+import { useState } from "react"
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Label } from "@/components/ui/label"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import Header from "@/components/Header"
+import Footer from "@/components/Footer"
+import { 
+  Megaphone,
+  Copy,
+  Check,
+  Search,
+  ArrowLeft
+} from "lucide-react"
 
 export default function CheckAdPage() {
-  const [paymentRef, setPaymentRef] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [adData, setAdData] = useState<AdStatusData | null>(null);
-  const [error, setError] = useState("");
+  const [activeTab, setActiveTab] = useState<"submit" | "check">("submit")
+  
+  // Submit form state
+  const [submitForm, setSubmitForm] = useState({
+    email: "",
+    imageUrl: "",
+    description: "",
+    redirectUrl: "",
+  })
+  const [submitting, setSubmitting] = useState(false)
+  const [submitSuccess, setSubmitSuccess] = useState(false)
+  const [paymentRef, setPaymentRef] = useState("")
+  const [submitError, setSubmitError] = useState("")
+  const [copied, setCopied] = useState(false)
+
+  // Check status form state
+  const [checkReference, setCheckReference] = useState("")
+  const [checking, setChecking] = useState(false)
+  const [adData, setAdData] = useState<any>(null)
+  const [checkError, setCheckError] = useState("")
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
-    setAdData(null);
+    e.preventDefault()
+    setSubmitting(true)
+    setSubmitError("")
 
     try {
-      const response = await fetch(`/api/public/advertisements/status?ref=${encodeURIComponent(paymentRef)}`);
-      const data = await response.json();
+      const response = await fetch("/api/public/advertisements", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(submitForm),
+      })
+
+      const data = await response.json()
 
       if (data.success) {
-        setAdData({
-          status: data.status,
-          viewCount: data.viewCount,
-          submittedAt: data.submittedAt,
-        });
+        setSubmitSuccess(true)
+        setPaymentRef(data.paymentReference)
+        setSubmitForm({ email: "", imageUrl: "", description: "", redirectUrl: "" })
       } else {
-        setError(data.message || "Advertisement not found");
+        setSubmitError(data.message || "Failed to submit advertisement")
       }
-    } catch (err) {
-      setError("An error occurred. Please try again.");
+    } catch (error) {
+      setSubmitError("An error occurred. Please try again.")
     } finally {
-      setLoading(false);
+      setSubmitting(false)
     }
-  };
+  }
 
-  const getStatusInfo = (status: AdStatus) => {
-    const statusConfig: Record<AdStatus, { icon: any; color: string; label: string; description: string }> = {
-      PENDING: {
-        icon: Clock,
-        color: "bg-yellow-100 text-yellow-800 border-yellow-200",
-        label: "Pending Review",
-        description: "Your advertisement is awaiting admin approval. This usually takes 24-48 hours.",
-      },
-      ACTIVE: {
-        icon: CheckCircle,
-        color: "bg-green-100 text-green-800 border-green-200",
-        label: "Active",
-        description: "Your advertisement is live and being displayed to travelers!",
-      },
-      INACTIVE: {
-        icon: Power,
-        color: "bg-gray-100 text-gray-800 border-gray-200",
-        label: "Inactive",
-        description: "Your advertisement has been deactivated by an administrator.",
-      },
-      REJECTED: {
-        icon: XCircle,
-        color: "bg-red-100 text-red-800 border-red-200",
-        label: "Rejected",
-        description: "Your advertisement was not approved. Please contact support for more information.",
-      },
-    };
+  const handleCheckStatus = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setChecking(true)
+    setCheckError("")
+    setAdData(null)
 
-    return statusConfig[status];
-  };
+    try {
+      const response = await fetch(`/api/public/advertisements/status?reference=${encodeURIComponent(checkReference)}`)
+      const data = await response.json()
+
+      if (data.success) {
+        setAdData(data.advertisement)
+      } else {
+        setCheckError(data.message || "Advertisement not found")
+      }
+    } catch (error) {
+      setCheckError("An error occurred. Please try again.")
+    } finally {
+      setChecking(false)
+    }
+  }
+
+  const copyToClipboard = () => {
+    if (typeof window !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(paymentRef)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }
+  }
+
+  const getStatusBadge = (status: string) => {
+    const variants: Record<string, { variant: any; label: string }> = {
+      PENDING: { variant: "secondary", label: "Pending Review" },
+      ACTIVE: { variant: "default", label: "Active" },
+      INACTIVE: { variant: "outline", label: "Inactive" },
+      REJECTED: { variant: "destructive", label: "Rejected" },
+    }
+    const config = variants[status] || variants.PENDING
+    return <Badge variant={config.variant}>{config.label}</Badge>
+  }
 
   return (
-    <div className="flex min-h-screen flex-col bg-gradient-to-br from-gray-50 to-gray-100">
-      {/* Custom Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b border-gray-200 bg-white/80 backdrop-blur-lg shadow-sm">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex h-20 items-center justify-between">
-            {/* Logo */}
-            <Link href="/" className="flex items-center space-x-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg overflow-hidden" style={{ filter: 'drop-shadow(0 0 6px rgba(100, 100, 100, 0.4))' }}>
-                <img src="/images/logo_whitebg.png" alt="Heritage Lanka Logo" className="h-full w-full object-contain" />
-              </div>
-              <span className="text-2xl font-bold tracking-tight text-gray-900 font-dancing-script">
-                Heritage <span className="ml-2">Lanka</span>
-              </span>
-            </Link>
+    <div className="flex min-h-screen flex-col">
+      <Header />
 
-            {/* Navigation */}
-            <div className="flex items-center space-x-4">
-              <Link href="/auth/signin">
-                <Button variant="ghost" className="text-gray-700 hover:bg-gray-100 font-poppins font-semibold">
-                  Sign In
-                </Button>
-              </Link>
-              <Link href="/auth/signup">
-                <Button className="bg-amber-500 hover:bg-amber-600 text-white font-poppins font-bold shadow-xl">
-                  Get Started
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </header>
+      <section className="pt-32 pb-16 px-6 md:px-8 lg:px-12 bg-gradient-to-b from-gray-50 to-white">
+        <div className="container mx-auto max-w-4xl">
+          {/* Back to Home */}
+          <Link href="/" className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 mb-6">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Home
+          </Link>
 
-      <main className="flex-1 py-24 px-6 md:px-8 lg:px-12">
-        <div className="container mx-auto max-w-2xl">
+          {/* Header */}
           <div className="text-center mb-12">
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 font-poppins">
-              Check Your <span className="text-amber-500">Advertisement</span>
+            <div className="flex justify-center mb-6">
+              <div className="h-16 w-16 rounded-xl bg-amber-100 flex items-center justify-center">
+                <Megaphone className="h-8 w-8 text-amber-600" />
+              </div>
+            </div>
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-4">
+              Advertise <span className="text-amber-500">With Us</span>
             </h1>
-            <p className="text-gray-600 text-lg">
-              Enter your payment reference ID to check the status and performance of your advertisement
+            <p className="text-lg text-gray-600">
+              Reach thousands of travelers exploring Sri Lanka. Only 50 LKR per day!
             </p>
           </div>
 
-          <Card className="bg-white/95 backdrop-blur-md border-2 border-gray-100 shadow-2xl">
-            <CardHeader className="pb-6 pt-8 px-8 text-center">
-              <CardTitle className="text-2xl font-bold font-poppins">Advertisement Status Checker</CardTitle>
-            </CardHeader>
-            <CardContent className="px-8 pb-8">
-              <form onSubmit={handleSubmit} className="space-y-5">
-                <div>
-                  <Label htmlFor="paymentRef" className="text-base font-semibold">Payment Reference ID</Label>
-                  <div className="flex gap-2 mt-2">
-                    <Input
-                      id="paymentRef"
-                      type="text"
-                      placeholder="AD-1234567890-XXXX"
-                      value={paymentRef}
-                      onChange={(e) => setPaymentRef(e.target.value)}
-                      required
-                      className="flex-1 h-12"
-                    />
-                    <Button type="submit" disabled={loading || !paymentRef} className="h-12 bg-amber-500 hover:bg-amber-600 text-white font-poppins font-bold shadow-xl">
-                      {loading ? (
-                        <Loader2 className="h-5 w-5 animate-spin" />
-                      ) : (
-                        <Search className="h-5 w-5" />
-                      )}
-                    </Button>
-                  </div>
-                </div>
+          {/* Tabs */}
+          <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "submit" | "check")} className="w-full">
+            <TabsList className="grid w-full grid-cols-2 mb-8">
+              <TabsTrigger value="submit">Submit Advertisement</TabsTrigger>
+              <TabsTrigger value="check">Check Status</TabsTrigger>
+            </TabsList>
 
-                {error && (
-                  <div className="p-4 bg-red-50 border-2 border-red-200 rounded-lg text-red-600 text-sm font-medium">
-                    {error}
-                  </div>
-                )}
-              </form>
+            {/* Submit Tab */}
+            <TabsContent value="submit">
+              {!submitSuccess ? (
+                <Card className="bg-white/95 backdrop-blur-md border-2 border-gray-100 shadow-2xl">
+                  <CardHeader className="pb-6 pt-6 px-8 text-center">
+                    <CardTitle className="text-2xl font-bold tracking-tight">Submit Your Advertisement</CardTitle>
+                  </CardHeader>
+                  <CardContent className="px-8 pb-8">
+                    <form onSubmit={handleSubmit} className="space-y-5">
+                      <div>
+                        <Label htmlFor="email" className="text-base font-semibold">Email Address *</Label>
+                        <Input
+                          id="email"
+                          type="email"
+                          placeholder="your@email.com"
+                          value={submitForm.email}
+                          onChange={(e) => setSubmitForm({ ...submitForm, email: e.target.value })}
+                          required
+                          className="mt-2 h-12"
+                        />
+                      </div>
 
-              {adData && (
-                <div className="mt-8 space-y-6">
-                  <div className="border-t-2 border-gray-200 pt-6">
-                    <div className="flex items-center justify-between mb-6">
-                      <h3 className="font-bold text-xl font-poppins">Status</h3>
-                      <Badge className={`${getStatusInfo(adData.status).color} border-2 text-base px-4 py-1.5`} variant="outline">
-                        {getStatusInfo(adData.status).label}
-                      </Badge>
-                    </div>
+                      <div>
+                        <Label htmlFor="imageUrl" className="text-base font-semibold">Image URL *</Label>
+                        <Input
+                          id="imageUrl"
+                          type="url"
+                          placeholder="https://example.com/image.jpg"
+                          value={submitForm.imageUrl}
+                          onChange={(e) => setSubmitForm({ ...submitForm, imageUrl: e.target.value })}
+                          required
+                          className="mt-2 h-12"
+                        />
+                      </div>
 
-                    <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-5 mb-6 border-2 border-amber-100">
-                      <div className="flex items-start gap-3">
-                        {(() => {
-                          const StatusIcon = getStatusInfo(adData.status).icon;
-                          return <StatusIcon className="h-6 w-6 mt-0.5 text-amber-600" />;
-                        })()}
-                        <p className="text-sm text-gray-700 leading-relaxed">
-                          {getStatusInfo(adData.status).description}
+                      <div>
+                        <Label htmlFor="description" className="text-base font-semibold">Description * (Max 500 characters)</Label>
+                        <Textarea
+                          id="description"
+                          placeholder="Describe your advertisement..."
+                          value={submitForm.description}
+                          onChange={(e) => setSubmitForm({ ...submitForm, description: e.target.value })}
+                          maxLength={500}
+                          rows={4}
+                          required
+                          className="mt-2"
+                        />
+                        <p className="text-xs text-gray-500 mt-2">
+                          {submitForm.description.length}/500 characters
                         </p>
                       </div>
-                    </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-5 border-2 border-blue-200">
-                        <div className="flex items-center gap-2 text-blue-600 mb-3">
-                          <Eye className="h-5 w-5" />
-                          <span className="text-sm font-semibold">Total Views</span>
-                        </div>
-                        <div className="text-3xl font-bold text-blue-900">{adData.viewCount}</div>
+                      <div>
+                        <Label htmlFor="redirectUrl" className="text-base font-semibold">Redirect URL *</Label>
+                        <Input
+                          id="redirectUrl"
+                          type="url"
+                          placeholder="https://your-website.com"
+                          value={submitForm.redirectUrl}
+                          onChange={(e) => setSubmitForm({ ...submitForm, redirectUrl: e.target.value })}
+                          required
+                          className="mt-2 h-12"
+                        />
                       </div>
 
-                      <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-5 border-2 border-purple-200">
-                        <div className="flex items-center gap-2 text-purple-600 mb-3">
-                          <Calendar className="h-5 w-5" />
-                          <span className="text-sm font-semibold">Submitted</span>
+                      {submitError && (
+                        <div className="p-4 bg-red-50 border-2 border-red-200 rounded-lg text-red-600 text-sm font-medium">
+                          {submitError}
                         </div>
-                        <div className="text-base font-bold text-purple-900">
-                          {new Date(adData.submittedAt).toLocaleDateString("en-US", {
-                            month: "short",
-                            day: "numeric",
-                            year: "numeric",
-                          })}
+                      )}
+
+                      <div className="bg-amber-50 border-2 border-amber-200 rounded-lg p-5">
+                        <h4 className="font-bold text-base mb-3 text-gray-900">Payment Instructions</h4>
+                        <ul className="text-sm text-gray-700 space-y-2">
+                          <li className="flex items-start">
+                            <span className="mr-2">•</span>
+                            <span>Price: 50 LKR per day</span>
+                          </li>
+                          <li className="flex items-start">
+                            <span className="mr-2">•</span>
+                            <span>Payment via bank transfer</span>
+                          </li>
+                          <li className="flex items-start">
+                            <span className="mr-2">•</span>
+                            <span>Include the payment reference ID in your transfer description</span>
+                          </li>
+                          <li className="flex items-start">
+                            <span className="mr-2">•</span>
+                            <span>Your ad will be reviewed and activated after payment verification</span>
+                          </li>
+                        </ul>
+                      </div>
+
+                      <Button type="submit" className="w-full h-12 text-base font-bold" disabled={submitting}>
+                        {submitting ? "Submitting..." : "Submit Advertisement"}
+                      </Button>
+                    </form>
+                  </CardContent>
+                </Card>
+              ) : (
+                <Card className="border-green-200 bg-green-50">
+                  <CardContent className="pt-6">
+                    <div className="text-center space-y-4">
+                      <div className="flex justify-center">
+                        <div className="h-16 w-16 rounded-full bg-green-100 flex items-center justify-center">
+                          <Check className="h-8 w-8 text-green-600" />
                         </div>
                       </div>
+                      <h3 className="text-2xl font-bold text-green-900">Advertisement Submitted!</h3>
+                      <p className="text-green-700">
+                        Your advertisement has been submitted successfully. Please complete the payment to activate it.
+                      </p>
+
+                      <div className="bg-white border border-green-200 rounded-lg p-4">
+                        <p className="text-sm font-medium text-gray-700 mb-2">Your Payment Reference ID:</p>
+                        <div className="flex items-center gap-2 justify-center">
+                          <code className="text-lg font-mono font-bold text-green-600 bg-green-100 px-4 py-2 rounded">
+                            {paymentRef}
+                          </code>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={copyToClipboard}
+                            className="flex items-center gap-2"
+                          >
+                            {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                            {copied ? "Copied!" : "Copy"}
+                          </Button>
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-3">
+                          Include this reference ID in your bank transfer description
+                        </p>
+                      </div>
+
+                      <div className="text-left bg-white border border-green-200 rounded-lg p-4">
+                        <h4 className="font-semibold text-sm mb-2">Next Steps:</h4>
+                        <ol className="text-sm text-muted-foreground space-y-1 list-decimal list-inside">
+                          <li>Make a bank transfer of 50 LKR per day</li>
+                          <li>Include the reference ID <strong>{paymentRef}</strong> in the description</li>
+                          <li>Your ad will be reviewed and activated within 24 hours</li>
+                          <li>Check your ad status using the "Check Status" tab</li>
+                        </ol>
+                      </div>
+
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setSubmitSuccess(false)
+                          setPaymentRef("")
+                        }}
+                      >
+                        Submit Another Advertisement
+                      </Button>
                     </div>
-                  </div>
-                </div>
+                  </CardContent>
+                </Card>
               )}
-            </CardContent>
-          </Card>
+            </TabsContent>
 
-          <div className="mt-8 text-center">
-            <p className="text-sm text-gray-600 mb-4 font-medium">
-              Want to advertise with us?
-            </p>
-            <Button variant="outline" className="border-2 border-amber-500 text-amber-600 hover:bg-amber-50 font-poppins font-semibold shadow-lg" asChild>
-              <Link href="/">Submit New Advertisement</Link>
-            </Button>
-          </div>
+            {/* Check Status Tab */}
+            <TabsContent value="check">
+              <Card className="bg-white/95 backdrop-blur-md border-2 border-gray-100 shadow-2xl">
+                <CardHeader className="pb-6 pt-6 px-8 text-center">
+                  <CardTitle className="text-2xl font-bold tracking-tight">Check Advertisement Status</CardTitle>
+                </CardHeader>
+                <CardContent className="px-8 pb-8">
+                  <form onSubmit={handleCheckStatus} className="space-y-5">
+                    <div>
+                      <Label htmlFor="reference" className="text-base font-semibold">Payment Reference ID</Label>
+                      <div className="flex gap-2 mt-2">
+                        <Input
+                          id="reference"
+                          type="text"
+                          placeholder="AD-1234567890-ABCD"
+                          value={checkReference}
+                          onChange={(e) => setCheckReference(e.target.value)}
+                          required
+                          className="h-12"
+                        />
+                        <Button type="submit" disabled={checking} className="h-12 px-6">
+                          {checking ? "Checking..." : <><Search className="h-4 w-4 mr-2" /> Check</>}
+                        </Button>
+                      </div>
+                    </div>
+
+                    {checkError && (
+                      <div className="p-4 bg-red-50 border-2 border-red-200 rounded-lg text-red-600 text-sm font-medium">
+                        {checkError}
+                      </div>
+                    )}
+
+                    {adData && (
+                      <div className="space-y-4 mt-6">
+                        <div className="bg-gray-50 border-2 border-gray-200 rounded-lg p-6 space-y-4">
+                          <div className="flex items-center justify-between">
+                            <h4 className="font-bold text-lg">Advertisement Details</h4>
+                            {getStatusBadge(adData.status)}
+                          </div>
+
+                          <div className="space-y-3">
+                            <div>
+                              <p className="text-sm font-semibold text-gray-600">Email</p>
+                              <p className="text-base text-gray-900">{adData.email}</p>
+                            </div>
+
+                            <div>
+                              <p className="text-sm font-semibold text-gray-600">Description</p>
+                              <p className="text-base text-gray-900">{adData.description}</p>
+                            </div>
+
+                            <div>
+                              <p className="text-sm font-semibold text-gray-600">Image URL</p>
+                              <a href={adData.imageUrl} target="_blank" rel="noopener noreferrer" className="text-base text-blue-600 hover:underline break-all">
+                                {adData.imageUrl}
+                              </a>
+                            </div>
+
+                            <div>
+                              <p className="text-sm font-semibold text-gray-600">Redirect URL</p>
+                              <a href={adData.redirectUrl} target="_blank" rel="noopener noreferrer" className="text-base text-blue-600 hover:underline break-all">
+                                {adData.redirectUrl}
+                              </a>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4 pt-2">
+                              <div>
+                                <p className="text-sm font-semibold text-gray-600">Views</p>
+                                <p className="text-2xl font-bold text-gray-900">{adData.viewCount}</p>
+                              </div>
+                              <div>
+                                <p className="text-sm font-semibold text-gray-600">Submitted</p>
+                                <p className="text-base text-gray-900">
+                                  {new Date(adData.submittedAt).toLocaleDateString()}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {adData.status === "PENDING" && (
+                          <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-4">
+                            <p className="text-sm text-blue-800">
+                              <strong>Status: Pending Review</strong><br />
+                              Your advertisement is awaiting admin approval. Please ensure payment has been completed with the reference ID.
+                            </p>
+                          </div>
+                        )}
+
+                        {adData.status === "ACTIVE" && (
+                          <div className="bg-green-50 border-2 border-green-200 rounded-lg p-4">
+                            <p className="text-sm text-green-800">
+                              <strong>Status: Active</strong><br />
+                              Your advertisement is currently live and being displayed to travelers!
+                            </p>
+                          </div>
+                        )}
+
+                        {adData.status === "REJECTED" && (
+                          <div className="bg-red-50 border-2 border-red-200 rounded-lg p-4">
+                            <p className="text-sm text-red-800">
+                              <strong>Status: Rejected</strong><br />
+                              Your advertisement was not approved. Please contact support for more information.
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </form>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
         </div>
-      </main>
+      </section>
 
       <Footer />
     </div>
-  );
+  )
 }
