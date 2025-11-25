@@ -115,7 +115,7 @@ export default function TravelerReviewsPage() {
             <div className="max-w-7xl mx-auto">
               {/* Header */}
               <div className="mb-8">
-                <div className="lg:hidden mb-4">
+                <div className="hidden md:block mb-4">
                   <SidebarTrigger />
                 </div>
                 <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-3 font-poppins">My Reviews</h1>

@@ -115,7 +115,7 @@ export default function GuideReviewsPage() {
             <div className="max-w-7xl mx-auto">
               {/* Header */}
               <div className="mb-8">
-                <div className="lg:hidden mb-4">
+                <div className="hidden md:block mb-4">
                   <SidebarTrigger />
                 </div>
                 <h1 className="text-3xl font-bold font-poppins text-gray-900 mb-2">My Reviews</h1>

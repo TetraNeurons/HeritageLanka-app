@@ -257,7 +257,7 @@ export default function AdminDashboardPage() {
           <main className="flex-1 overflow-y-auto p-4 lg:p-8">
             {/* Header */}
             <div className="mb-8">
-              <div className="lg:hidden mb-4">
+              <div className="hidden md:block mb-4">
                 <SidebarTrigger />
               </div>
               <h1 className="text-3xl lg:text-4xl font-bold font-poppins bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">Admin Dashboard</h1>

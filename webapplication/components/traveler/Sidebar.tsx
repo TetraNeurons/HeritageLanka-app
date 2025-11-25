@@ -77,7 +77,7 @@ export function AppSidebar() {
   return (
     <>
       {/* Desktop Sidebar */}
-      <Sidebar className="w-64 hidden lg:flex">
+      <Sidebar className="w-64 hidden md:flex">
         <SidebarHeader className="p-6 border-b">
           <div className="flex flex-col gap-3">
             <div className="flex items-center gap-3">
@@ -219,7 +219,7 @@ export function AppSidebar() {
       </Sidebar>
 
       {/* Mobile Bottom App Bar */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 lg:hidden bg-white/95 backdrop-blur-md border-t-2 border-gray-200 shadow-2xl">
+      <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-white/95 backdrop-blur-md border-t-2 border-gray-200 shadow-2xl">
         <nav className="flex items-center justify-around px-2 py-3 max-w-screen-xl mx-auto">
           {/* Home */}
           <a

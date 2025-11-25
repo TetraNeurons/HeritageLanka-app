@@ -154,7 +154,7 @@ export default function AIAnalyticsPage() {
           <main className="flex-1 overflow-y-auto p-4 lg:p-8">
             {/* Header */}
             <div className="mb-8">
-              <div className="lg:hidden mb-4">
+              <div className="hidden md:block mb-4">
                 <SidebarTrigger />
               </div>
               <div className="flex items-center justify-between">
