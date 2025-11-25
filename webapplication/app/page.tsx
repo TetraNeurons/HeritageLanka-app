@@ -72,7 +72,101 @@ export default function Home() {
             Connect with verified local guides and discover hidden places across Sri Lanka
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center pt-6 px-4 sm:px-0 animate-fade-in-up animation-delay-400">
+          {/* Search Section */}
+          <div className="max-w-4xl mx-auto animate-fade-in-up animation-delay-300">
+            <div className="bg-white/10 backdrop-blur-md rounded-2xl shadow-2xl p-4 md:p-5 border-2 border-white/20">
+              {/* Category Tabs */}
+              <div className="flex flex-wrap justify-center gap-2 md:gap-3 mb-4">
+                <Button
+                  variant="ghost"
+                  className="flex items-center gap-2 text-sm md:text-base font-semibold text-white hover:text-white hover:bg-white/20 rounded-lg px-3 py-1.5"
+                  asChild
+                >
+                  <Link href="/auth/signin">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                    Search All
+                  </Link>
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="flex items-center gap-2 text-sm md:text-base font-semibold text-white hover:text-white hover:bg-white/20 rounded-lg px-3 py-1.5"
+                  asChild
+                >
+                  <Link href="/auth/signin">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 20l-5.447-2.724A1 1 0 0 1 3 16.382V5.618a1 1 0 0 1 1.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0 0 21 18.382V7.618a1 1 0 0 0-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
+                    Plan Trip
+                  </Link>
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="flex items-center gap-2 text-sm md:text-base font-semibold text-white hover:text-white hover:bg-white/20 rounded-lg px-3 py-1.5"
+                  asChild
+                >
+                  <Link href="/auth/signin">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                    Explore Places
+                  </Link>
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="flex items-center gap-2 text-sm md:text-base font-semibold text-white hover:text-white hover:bg-white/20 rounded-lg px-3 py-1.5"
+                  asChild
+                >
+                  <Link href="/auth/signin">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></svg>
+                    New Events
+                  </Link>
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="flex items-center gap-2 text-sm md:text-base font-semibold text-white hover:text-white hover:bg-white/20 rounded-lg px-3 py-1.5"
+                  asChild
+                >
+                  <Link href="/auth/signin">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                    Exclusive Offers
+                  </Link>
+                </Button>
+              </div>
+
+              {/* Search Bar */}
+              <div className="flex flex-col sm:flex-row gap-2">
+                <div className="flex-1 relative">
+                  <svg 
+                    xmlns="http://www.w3.org/2000/svg" 
+                    width="18" 
+                    height="18" 
+                    viewBox="0 0 24 24" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    strokeWidth="2" 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round"
+                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60"
+                  >
+                    <circle cx="11" cy="11" r="8"/>
+                    <path d="m21 21-4.3-4.3"/>
+                  </svg>
+                  <input
+                    type="text"
+                    placeholder="Places to go, things to do, hotels..."
+                    className="w-full h-12 pl-11 pr-4 rounded-xl border-2 border-white/30 bg-white/20 focus:border-white/50 focus:bg-white/30 focus:outline-none text-sm text-white placeholder-white/60 font-medium"
+                  />
+                </div>
+                <Button 
+                  size="lg" 
+                  className="h-12 px-6 bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 text-white font-bold rounded-xl shadow-lg text-sm"
+                  asChild
+                >
+                  <Link href="/auth/signin">
+                    Search
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-4 justify-center px-4 sm:px-0 animate-fade-in-up animation-delay-400 mt-4">
             <Button size="lg" className="w-full sm:w-auto h-12 text-base px-6 bg-white text-black hover:bg-gray-100 font-semibold shadow-2xl transition-all transform hover:scale-105" asChild>
               <Link href="/auth/signup">
                 Join as Traveler
