@@ -170,7 +170,7 @@ export default function SignUpPage() {
               <div className="flex h-10 w-10 items-center justify-center rounded-lg overflow-hidden" style={{ filter: 'drop-shadow(0 0 8px rgba(245, 245, 245, 0.8))' }}>
                 <img src="/images/logo_whitebg.png" alt="Heritage Lanka Logo" className="h-full w-full object-contain" />
               </div>
-              <span className="text-2xl font-bold tracking-tight text-white font-dancing-script">
+              <span className="text-2xl font-bold tracking-tight text-white font-dancing-script" style={{ textShadow: '1px 1px 2px rgba(0, 0, 0, 0.8), -1px -1px 2px rgba(0, 0, 0, 0.8), 1px -1px 2px rgba(0, 0, 0, 0.8), -1px 1px 2px rgba(0, 0, 0, 0.8)' }}>
                 Heritage <span className="ml-2">Lanka</span>
               </span>
             </Link>

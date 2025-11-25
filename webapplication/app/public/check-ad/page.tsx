@@ -84,7 +84,36 @@ export default function CheckAdPage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-gradient-to-br from-gray-50 to-gray-100">
-      <Header />
+      {/* Custom Header */}
+      <header className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b border-gray-200 bg-white/80 backdrop-blur-lg shadow-sm">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex h-20 items-center justify-between">
+            {/* Logo */}
+            <Link href="/" className="flex items-center space-x-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg overflow-hidden" style={{ filter: 'drop-shadow(0 0 6px rgba(100, 100, 100, 0.4))' }}>
+                <img src="/images/logo_whitebg.png" alt="Heritage Lanka Logo" className="h-full w-full object-contain" />
+              </div>
+              <span className="text-2xl font-bold tracking-tight text-gray-900 font-dancing-script">
+                Heritage <span className="ml-2">Lanka</span>
+              </span>
+            </Link>
+
+            {/* Navigation */}
+            <div className="flex items-center space-x-4">
+              <Link href="/auth/signin">
+                <Button variant="ghost" className="text-gray-700 hover:bg-gray-100 font-poppins font-semibold">
+                  Sign In
+                </Button>
+              </Link>
+              <Link href="/auth/signup">
+                <Button className="bg-amber-500 hover:bg-amber-600 text-white font-poppins font-bold shadow-xl">
+                  Get Started
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </header>
 
       <main className="flex-1 py-24 px-6 md:px-8 lg:px-12">
         <div className="container mx-auto max-w-2xl">
