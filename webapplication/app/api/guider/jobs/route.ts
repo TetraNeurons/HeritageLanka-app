@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db/drizzle';
-import { trips, travelers, users, guides, tripLocations } from '@/db/schema';
+import { trips, travelers, users, guides, tripLocations, tripVerifications } from '@/db/schema';
 import { eq, and, or, desc } from 'drizzle-orm';
 import { getSession } from '@/lib/jwt';
 
@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Query in-progress trips (status = IN_PROGRESS, assigned to this guide)
+    // Query in-progress trips (status = CONFIRMED or IN_PROGRESS, assigned to this guide)
     const inProgressTripsData = await db
       .select({
         trip: trips,
@@ -49,7 +49,10 @@ export async function GET(request: NextRequest) {
       .where(
         and(
           eq(trips.guideId, guide.id),
-          eq(trips.status, 'IN_PROGRESS')
+          or(
+            eq(trips.status, 'CONFIRMED'),
+            eq(trips.status, 'IN_PROGRESS')
+          )
         )
       )
       .orderBy(trips.fromDate);
@@ -85,6 +88,13 @@ export async function GET(request: NextRequest) {
           .where(eq(tripLocations.tripId, trip.id))
           .orderBy(tripLocations.dayNumber, tripLocations.visitOrder);
 
+        // Get verification status
+        const [verification] = await db
+          .select()
+          .from(tripVerifications)
+          .where(eq(tripVerifications.tripId, trip.id))
+          .limit(1);
+
         // Calculate days remaining
         const now = new Date();
         const endDate = new Date(trip.toDate);
@@ -102,6 +112,7 @@ export async function GET(request: NextRequest) {
           country: trip.country,
           totalDistance: trip.totalDistance,
           status: trip.status,
+          verified: verification?.verified || false,
           locations: locations.map(loc => ({
             id: loc.id,
             title: loc.title,

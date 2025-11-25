@@ -26,7 +26,7 @@ import { usePathname } from "next/navigation";
 
 const menuItems = [
   { icon: Home, label: "Dashboard", href: "/guider/dashboard" },
-  { icon: PlaneTakeoff, label: "Available Jobs", href: "/guider/jobs" },
+  { icon: PlaneTakeoff, label: "My Jobs", href: "/guider/jobs" },
   { icon: Star, label: "My Reviews", href: "/guider/reviews" },
 ];
 

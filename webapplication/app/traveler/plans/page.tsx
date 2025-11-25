@@ -81,6 +81,9 @@ export default function TravelerPlansPage() {
   const [fuseInstance, setFuseInstance] = useState<Fuse<any> | null>(null);
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
   const [reviewEligibility, setReviewEligibility] = useState<Record<string, any>>({});
+  const [otpDialogOpen, setOtpDialogOpen] = useState(false);
+  const [generatedOtp, setGeneratedOtp] = useState<string | null>(null);
+  const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
 
   useEffect(() => {
     fetchTrips();
@@ -204,21 +207,47 @@ export default function TravelerPlansPage() {
 
   const handleStartClick = (trip: Trip) => {
     setSelectedTrip(trip);
-    setStartDialogOpen(true);
+    // Get user's current location
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          });
+          setStartDialogOpen(true);
+        },
+        (error) => {
+          console.error('Error getting location:', error);
+          toast.error('Please enable location access to start the trip');
+        }
+      );
+    } else {
+      toast.error('Geolocation is not supported by your browser');
+    }
   };
 
   const handleStartConfirm = async () => {
-    if (!selectedTrip) return;
+    if (!selectedTrip || !userLocation) return;
 
     try {
       setActionLoading(selectedTrip.id);
       const response = await fetch(`/api/traveler/trips/${selectedTrip.id}/start`, {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          latitude: userLocation.latitude,
+          longitude: userLocation.longitude,
+        }),
       });
       const data = await response.json();
 
       if (data.success) {
-        toast.success("Trip started successfully! Enjoy your journey!");
+        setGeneratedOtp(data.otp);
+        setOtpDialogOpen(true);
+        toast.success("Trip started successfully! Share the OTP with your guide.");
         await fetchTrips();
       } else {
         toast.error(`Failed to start trip: ${data.error}`);
@@ -230,6 +259,7 @@ export default function TravelerPlansPage() {
       setActionLoading(null);
       setStartDialogOpen(false);
       setSelectedTrip(null);
+      setUserLocation(null);
     }
   };
 
@@ -262,11 +292,17 @@ export default function TravelerPlansPage() {
   };
 
   const canStart = (trip: Trip) => {
-    return (
-      trip.status === "CONFIRMED" &&
-      trip.payment?.status === "PAID" &&
-      !hasActiveTrip
-    );
+    if (trip.status !== "CONFIRMED" || trip.payment?.status !== "PAID" || hasActiveTrip) {
+      return false;
+    }
+    
+    // Check if today is the trip's start date or later
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tripStartDate = new Date(trip.fromDate);
+    tripStartDate.setHours(0, 0, 0, 0);
+    
+    return today >= tripStartDate;
   };
 
   const isReadOnly = (trip: Trip) => {
@@ -318,18 +354,27 @@ export default function TravelerPlansPage() {
   };
 
   const handleReviewSubmit = async (rating: number, comment: string) => {
-    if (!selectedTrip || !selectedTrip.guide) return;
+    if (!selectedTrip || !selectedTrip.guide) {
+      throw new Error("Trip or guide information is missing");
+    }
 
     try {
-      // Get the guide's user ID from the trip
-      const response = await axios.post("/api/traveler/reviews", {
+      console.log("Submitting review:", {
         tripId: selectedTrip.id,
         revieweeId: selectedTrip.guide.userId,
         rating,
         comment,
       });
 
+      const response = await axios.post("/api/traveler/reviews", {
+        tripId: selectedTrip.id,
+        revieweeId: selectedTrip.guide.userId,
+        rating,
+        comment: comment || "", // Ensure comment is at least an empty string
+      });
+
       if (response.data.success) {
+        toast.success("Review submitted successfully!");
         // Refresh eligibility
         await checkReviewEligibility(selectedTrip.id);
         // Close dialog after a short delay
@@ -339,7 +384,12 @@ export default function TravelerPlansPage() {
         }, 2000);
       }
     } catch (error: any) {
-      throw new Error(error.response?.data?.error || "Failed to submit review");
+      console.error("Review submission error:", error);
+      console.error("Error response:", error.response?.data);
+      const errorMessage = error.response?.data?.error || "Failed to submit review";
+      const errorDetails = error.response?.data?.details;
+      toast.error(errorDetails ? `${errorMessage}: ${errorDetails}` : errorMessage);
+      throw new Error(errorMessage);
     }
   };
 
@@ -556,6 +606,19 @@ export default function TravelerPlansPage() {
                           >
                             <Play className="h-4 w-4 mr-1" />
                             Start Trip
+                          </Button>
+                        )}
+
+                        {/* Track Trip Button - For IN_PROGRESS trips */}
+                        {trip.status === "IN_PROGRESS" && (
+                          <Button
+                            variant="default"
+                            size="sm"
+                            onClick={() => router.push(`/traveler/trip-tracker/${trip.id}`)}
+                            className="flex-1 bg-blue-600 hover:bg-blue-700"
+                          >
+                            <MapPin className="h-4 w-4 mr-1" />
+                            Track Trip
                           </Button>
                         )}
 
@@ -927,6 +990,48 @@ export default function TravelerPlansPage() {
               setSelectedTrip(null);
             }}
           />
+        </DialogContent>
+      </Dialog>
+
+      {/* OTP Display Dialog */}
+      <Dialog open={otpDialogOpen} onOpenChange={setOtpDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CheckCircle className="h-5 w-5 text-green-600" />
+              Trip Started Successfully!
+            </DialogTitle>
+            <DialogDescription>
+              Share this OTP with your guide to verify and begin your journey
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="flex flex-col items-center justify-center py-6 space-y-4">
+            <div className="text-sm text-gray-600 font-medium">Your Verification OTP</div>
+            <div className="text-6xl font-bold text-blue-600 tracking-widest bg-blue-50 px-8 py-4 rounded-lg">
+              {generatedOtp}
+            </div>
+            <div className="text-xs text-gray-500 text-center max-w-xs">
+              This OTP is valid for 30 minutes. Your guide must enter this code along with their location to start the trip.
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              onClick={() => {
+                if (generatedOtp) {
+                  navigator.clipboard.writeText(generatedOtp);
+                  toast.success("OTP copied to clipboard!");
+                }
+              }}
+              variant="outline"
+            >
+              Copy OTP
+            </Button>
+            <Button onClick={() => setOtpDialogOpen(false)}>
+              Close
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </SidebarProvider>

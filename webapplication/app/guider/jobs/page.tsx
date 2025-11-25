@@ -16,8 +16,22 @@ import {
   ChevronUp,
   Clock,
   CheckCircle,
-  XCircle
+  XCircle,
+  Shield,
+  Star
 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
+import { ReviewForm } from "@/components/reviews/ReviewForm";
 
 interface TripLocation {
   id: string;
@@ -41,6 +55,7 @@ interface InProgressJob {
   country: string;
   totalDistance: number | null;
   status: string;
+  verified: boolean;
   locations: TripLocation[];
   daysRemaining: number;
 }
@@ -49,6 +64,7 @@ interface JobHistoryItem {
   id: string;
   traveler: {
     name: string;
+    userId: string;
   };
   fromDate: string;
   toDate: string;
@@ -78,6 +94,14 @@ export default function JobsPage() {
   const [error, setError] = useState<string | null>(null);
   const [expandedJobs, setExpandedJobs] = useState<Set<string>>(new Set());
   const [historyFilter, setHistoryFilter] = useState<'ALL' | 'COMPLETED' | 'CANCELLED'>('ALL');
+  const [otpDialogOpen, setOtpDialogOpen] = useState(false);
+  const [selectedJobForVerification, setSelectedJobForVerification] = useState<InProgressJob | null>(null);
+  const [otpInput, setOtpInput] = useState("");
+  const [verifying, setVerifying] = useState(false);
+  const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
+  const [selectedJobForReview, setSelectedJobForReview] = useState<JobHistoryItem | null>(null);
+  const [reviewEligibility, setReviewEligibility] = useState<Record<string, any>>({});
 
   // Update time
   useEffect(() => {
@@ -93,6 +117,15 @@ export default function JobsPage() {
   useEffect(() => {
     fetchJobsData();
   }, []);
+
+  useEffect(() => {
+    // Check review eligibility for history jobs
+    jobsData?.history.forEach((job) => {
+      if (job.status === 'COMPLETED' || job.status === 'CANCELLED') {
+        checkReviewEligibility(job.id);
+      }
+    });
+  }, [jobsData]);
 
   const fetchJobsData = async () => {
     try {
@@ -138,6 +171,145 @@ export default function JobsPage() {
     if (historyFilter === 'ALL') return true;
     return job.status === historyFilter;
   }) || [];
+
+  const checkReviewEligibility = async (tripId: string) => {
+    try {
+      const response = await fetch(`/api/guider/trips/${tripId}/review-eligibility`);
+      const data = await response.json();
+      if (data.success) {
+        setReviewEligibility((prev) => ({
+          ...prev,
+          [tripId]: data.eligibility,
+        }));
+      }
+    } catch (error) {
+      console.error("Error checking review eligibility:", error);
+    }
+  };
+
+  const handleReviewClick = (job: JobHistoryItem) => {
+    setSelectedJobForReview(job);
+    setReviewDialogOpen(true);
+  };
+
+  const handleReviewSubmit = async (rating: number, comment: string) => {
+    if (!selectedJobForReview) {
+      throw new Error("Job information is missing");
+    }
+
+    try {
+      const response = await fetch("/api/guider/reviews", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          tripId: selectedJobForReview.id,
+          revieweeId: selectedJobForReview.traveler.userId,
+          rating,
+          comment: comment || "",
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast.success("Review submitted successfully!");
+        // Refresh eligibility
+        await checkReviewEligibility(selectedJobForReview.id);
+        // Close dialog after a short delay
+        setTimeout(() => {
+          setReviewDialogOpen(false);
+          setSelectedJobForReview(null);
+        }, 2000);
+      } else {
+        throw new Error(data.error || "Failed to submit review");
+      }
+    } catch (error: any) {
+      console.error("Review submission error:", error);
+      const errorMessage = error.message || "Failed to submit review";
+      toast.error(errorMessage);
+      throw new Error(errorMessage);
+    }
+  };
+
+  const canReview = (job: JobHistoryItem) => {
+    if (job.status !== 'COMPLETED' && job.status !== 'CANCELLED') return false;
+    const eligibility = reviewEligibility[job.id];
+    return eligibility?.canReview === true;
+  };
+
+  const hasReviewed = (job: JobHistoryItem) => {
+    const eligibility = reviewEligibility[job.id];
+    return eligibility?.hasReviewed === true;
+  };
+
+  const handleVerifyOtpClick = (job: InProgressJob) => {
+    setSelectedJobForVerification(job);
+    // Get user's current location
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          });
+          setOtpDialogOpen(true);
+        },
+        (error) => {
+          console.error('Error getting location:', error);
+          toast.error('Please enable location access to verify the trip');
+        }
+      );
+    } else {
+      toast.error('Geolocation is not supported by your browser');
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    if (!selectedJobForVerification || !userLocation || !otpInput) {
+      toast.error('Please enter the OTP');
+      return;
+    }
+
+    if (otpInput.length !== 4) {
+      toast.error('OTP must be 4 digits');
+      return;
+    }
+
+    try {
+      setVerifying(true);
+      const response = await fetch(`/api/guider/trips/${selectedJobForVerification.id}/verify-otp`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          otp: otpInput,
+          latitude: userLocation.latitude,
+          longitude: userLocation.longitude,
+        }),
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        toast.success(data.message);
+        setOtpDialogOpen(false);
+        setOtpInput("");
+        setSelectedJobForVerification(null);
+        setUserLocation(null);
+        // Refresh jobs data
+        await fetchJobsData();
+      } else {
+        toast.error(data.error);
+      }
+    } catch (error) {
+      console.error("Error verifying OTP:", error);
+      toast.error("Failed to verify OTP. Please try again.");
+    } finally {
+      setVerifying(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -272,7 +444,9 @@ export default function JobsPage() {
                               <h3 className="font-semibold text-gray-900 text-base">{job.traveler.name}</h3>
                               <p className="text-sm text-gray-500 mt-1">{job.country}</p>
                             </div>
-                            <Badge className="bg-blue-600 text-white">IN PROGRESS</Badge>
+                            <Badge className={job.status === 'IN_PROGRESS' ? 'bg-blue-600 text-white' : 'bg-green-600 text-white'}>
+                              {job.status === 'IN_PROGRESS' ? 'IN PROGRESS' : 'CONFIRMED'}
+                            </Badge>
                           </div>
 
                           {/* Trip Details */}
@@ -297,15 +471,45 @@ export default function JobsPage() {
                             </div>
                           </div>
 
-                          {/* Contact Info */}
-                          <div className="flex items-center gap-2 pt-2 border-t">
-                            <Phone className="h-4 w-4 text-gray-400" />
-                            <a 
-                              href={`tel:${job.traveler.phone}`} 
-                              className="text-sm font-medium text-blue-600 hover:underline"
-                            >
-                              {job.traveler.phone}
-                            </a>
+                          {/* Contact Info and Action Buttons */}
+                          <div className="flex items-center justify-between pt-2 border-t">
+                            <div className="flex items-center gap-2">
+                              <Phone className="h-4 w-4 text-gray-400" />
+                              <a 
+                                href={`tel:${job.traveler.phone}`} 
+                                className="text-sm font-medium text-blue-600 hover:underline"
+                              >
+                                {job.traveler.phone}
+                              </a>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {job.status === 'IN_PROGRESS' && !job.verified && (
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleVerifyOtpClick(job)}
+                                  className="bg-green-600 hover:bg-green-700 text-white"
+                                >
+                                  <Shield className="h-4 w-4 mr-1" />
+                                  Verify OTP
+                                </Button>
+                              )}
+                              {job.status === 'IN_PROGRESS' && job.verified && (
+                                <>
+                                  <Badge className="bg-green-600 text-white">
+                                    <CheckCircle className="h-3 w-3 mr-1" />
+                                    Verified
+                                  </Badge>
+                                  <Button
+                                    size="sm"
+                                    onClick={() => window.location.href = `/guider/trip-tracker/${job.id}`}
+                                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                                  >
+                                    <MapPin className="h-4 w-4 mr-1" />
+                                    Track Trip
+                                  </Button>
+                                </>
+                              )}
+                            </div>
                           </div>
 
                           {/* Expandable Locations */}
@@ -446,9 +650,31 @@ export default function JobsPage() {
                               </span>
                             </div>
                           </div>
-                          <div className="text-left sm:text-right">
-                            <p className="text-xs text-gray-400">Completed</p>
-                            <p className="text-sm text-gray-600">{formatDate(job.completedAt)}</p>
+                          <div className="text-left sm:text-right flex flex-col gap-2">
+                            <div>
+                              <p className="text-xs text-gray-400">Completed</p>
+                              <p className="text-sm text-gray-600">{formatDate(job.completedAt)}</p>
+                            </div>
+                            
+                            {/* Review Button */}
+                            {canReview(job) && (
+                              <Button
+                                size="sm"
+                                onClick={() => handleReviewClick(job)}
+                                className="bg-yellow-500 hover:bg-yellow-600 text-white"
+                              >
+                                <Star className="h-4 w-4 mr-1" />
+                                Write Review
+                              </Button>
+                            )}
+
+                            {/* Review Submitted Badge */}
+                            {hasReviewed(job) && (
+                              <div className="flex items-center justify-center gap-2 text-sm text-green-600 bg-green-50 rounded px-3 py-2">
+                                <CheckCircle className="h-4 w-4" />
+                                Review Submitted
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -460,6 +686,106 @@ export default function JobsPage() {
           </main>
         </div>
       </div>
+
+      {/* OTP Verification Dialog */}
+      <Dialog open={otpDialogOpen} onOpenChange={setOtpDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Shield className="h-5 w-5 text-green-600" />
+              Verify Trip Start
+            </DialogTitle>
+            <DialogDescription>
+              Enter the 4-digit OTP provided by {selectedJobForVerification?.traveler.name} to verify and start the trip
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="otp">Enter OTP</Label>
+              <Input
+                id="otp"
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                maxLength={4}
+                placeholder="Enter 4-digit OTP"
+                value={otpInput}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/\D/g, '');
+                  setOtpInput(value);
+                }}
+                className="text-center text-2xl tracking-widest font-bold"
+                disabled={verifying}
+              />
+            </div>
+            
+            <div className="bg-blue-50 p-3 rounded-lg text-sm text-gray-700">
+              <p className="font-medium mb-1">Important:</p>
+              <ul className="list-disc list-inside space-y-1 text-xs">
+                <li>You must be near the traveler's location</li>
+                <li>The OTP is valid for 30 minutes</li>
+                <li>Your location will be verified automatically</li>
+              </ul>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setOtpDialogOpen(false);
+                setOtpInput("");
+                setSelectedJobForVerification(null);
+                setUserLocation(null);
+              }}
+              disabled={verifying}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleVerifyOtp}
+              disabled={verifying || otpInput.length !== 4}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              {verifying ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Verifying...
+                </>
+              ) : (
+                <>
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  Verify & Start
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Review Dialog */}
+      <Dialog open={reviewDialogOpen} onOpenChange={setReviewDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Star className="h-5 w-5 text-yellow-500" />
+              Review Traveler
+            </DialogTitle>
+            <DialogDescription>
+              Share your experience with {selectedJobForReview?.traveler.name}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <ReviewForm
+            onSubmit={handleReviewSubmit}
+            onCancel={() => {
+              setReviewDialogOpen(false);
+              setSelectedJobForReview(null);
+            }}
+          />
+        </DialogContent>
+      </Dialog>
     </SidebarProvider>
   );
 }

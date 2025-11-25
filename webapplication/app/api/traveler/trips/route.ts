@@ -94,6 +94,7 @@ export async function GET(request: NextRequest) {
 
             if (guideUser) {
               guideInfo = {
+                userId: guideData.userId, // Include userId for reviews
                 name: guideUser.name,
                 languages: guideUser.languages,
                 // Only include phone if trip is IN_PROGRESS

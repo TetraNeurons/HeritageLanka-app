@@ -224,6 +224,19 @@ export const aiUsageLogs = pgTable('ai_usage_logs', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
+// Trip Verification table - Stores OTP and geohash for trip start verification
+export const tripVerifications = pgTable('trip_verifications', {
+  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+  tripId: text('trip_id').notNull().references(() => trips.id, { onDelete: 'cascade' }).unique(),
+  otp: text('otp').notNull(),
+  travelerGeohash: text('traveler_geohash').notNull(),
+  guideGeohash: text('guide_geohash'),
+  verified: boolean('verified').default(false).notNull(),
+  verifiedAt: timestamp('verified_at'),
+  expiresAt: timestamp('expires_at').notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ one }) => ({
   traveler: one(travelers, {
@@ -339,5 +352,12 @@ export const aiUsageLogsRelations = relations(aiUsageLogs, ({ one }) => ({
   user: one(users, {
     fields: [aiUsageLogs.userId],
     references: [users.id],
+  }),
+}));
+
+export const tripVerificationsRelations = relations(tripVerifications, ({ one }) => ({
+  trip: one(trips, {
+    fields: [tripVerifications.tripId],
+    references: [trips.id],
   }),
 }));

@@ -5,6 +5,10 @@ import { checkReviewEligibility } from '@/lib/review-eligibility';
 import { recalculateGuideRating } from '@/lib/rating-calculator';
 
 export async function POST(request: NextRequest) {
+  let tripId: string | undefined;
+  let revieweeId: string | undefined;
+  let rating: number | undefined;
+  
   try {
     // Verify authentication
     const authResult = await verifyAuth(request);
@@ -25,7 +29,8 @@ export async function POST(request: NextRequest) {
 
     const userId = authResult.user.userId;
     const body = await request.json();
-    const { tripId, revieweeId, rating, comment } = body;
+    ({ tripId, revieweeId, rating } = body);
+    const { comment } = body;
 
     // Validate required fields
     if (!tripId || !revieweeId || rating === undefined) {
@@ -70,8 +75,20 @@ export async function POST(request: NextRequest) {
     }
 
     console.error('Error creating review:', error);
+    console.error('Error details:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      tripId,
+      revieweeId,
+      rating,
+    });
+    
     return NextResponse.json(
-      { success: false, error: 'Failed to create review' },
+      { 
+        success: false, 
+        error: 'Failed to create review',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
       { status: 500 }
     );
   }

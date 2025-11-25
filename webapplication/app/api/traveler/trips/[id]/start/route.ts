@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db/drizzle';
-import { trips, travelers, payments, guides, users } from '@/db/schema';
+import { trips, travelers, payments, guides, users, tripVerifications } from '@/db/schema';
 import { eq, and } from 'drizzle-orm';
 import { getSession } from '@/lib/jwt';
+import geohash from 'ngeohash';
 
 export async function POST(
   request: NextRequest,
@@ -19,6 +20,17 @@ export async function POST(
     }
 
     const { id: tripId } = await params;
+    
+    // Get latitude and longitude from request body
+    const body = await request.json();
+    const { latitude, longitude } = body;
+    
+    if (!latitude || !longitude) {
+      return NextResponse.json(
+        { success: false, error: 'Location coordinates are required' },
+        { status: 400 }
+      );
+    }
 
     // Get traveler for authenticated user
     const [traveler] = await db
@@ -109,34 +121,68 @@ export async function POST(
       );
     }
 
-    // Use transaction to update trip, traveler, and guide atomically
-    const result = await db.transaction(async (tx) => {
-      // Update trip status to IN_PROGRESS and bookingStatus to ACCEPTED
-      await tx
-        .update(trips)
+    // Generate 4-digit OTP
+    const otp = Math.floor(1000 + Math.random() * 9000).toString();
+    
+    // Generate geohash with precision 5 (approximately 5km x 5km)
+    const travelerGeohash = geohash.encode(latitude, longitude, 5);
+    
+    // Set OTP expiration to 30 minutes from now
+    const expiresAt = new Date(Date.now() + 30 * 60 * 1000);
+
+    // Check if verification already exists
+    const [existingVerification] = await db
+      .select()
+      .from(tripVerifications)
+      .where(eq(tripVerifications.tripId, tripId))
+      .limit(1);
+    
+    if (existingVerification) {
+      // Update existing verification
+      await db
+        .update(tripVerifications)
         .set({
-          status: 'IN_PROGRESS',
-          bookingStatus: 'ACCEPTED',
-          updatedAt: new Date(),
+          otp,
+          travelerGeohash,
+          guideGeohash: null,
+          verified: false,
+          verifiedAt: null,
+          expiresAt,
         })
-        .where(eq(trips.id, tripId));
+        .where(eq(tripVerifications.tripId, tripId));
+    } else {
+      // Create new verification record
+      await db.insert(tripVerifications).values({
+        tripId,
+        otp,
+        travelerGeohash,
+        expiresAt,
+      });
+    }
 
-      // Update traveler.tripInProgress to true
-      await tx
-        .update(travelers)
+    // Update trip status to IN_PROGRESS and bookingStatus to ACCEPTED
+    await db
+      .update(trips)
+      .set({
+        status: 'IN_PROGRESS',
+        bookingStatus: 'ACCEPTED',
+        updatedAt: new Date(),
+      })
+      .where(eq(trips.id, tripId));
+
+    // Update traveler.tripInProgress to true
+    await db
+      .update(travelers)
+      .set({ tripInProgress: true })
+      .where(eq(travelers.id, traveler.id));
+
+    // If trip has a guide, update guide.tripInProgress to true
+    if (trip.guideId) {
+      await db
+        .update(guides)
         .set({ tripInProgress: true })
-        .where(eq(travelers.id, traveler.id));
-
-      // If trip has a guide, update guide.tripInProgress to true
-      if (trip.guideId) {
-        await tx
-          .update(guides)
-          .set({ tripInProgress: true })
-          .where(eq(guides.id, trip.guideId));
-      }
-
-      return { success: true };
-    });
+        .where(eq(guides.id, trip.guideId));
+    }
 
     // Get guide phone number if guide is assigned
     let guidePhone = null;
@@ -160,12 +206,13 @@ export async function POST(
       }
     }
 
-    // Return success response with guide phone
+    // Return success response with OTP and guide phone
     return NextResponse.json(
       {
         success: true,
-        message: 'Trip started successfully',
+        message: 'Trip started successfully. Share the OTP with your guide.',
         tripId: tripId,
+        otp: otp,
         guidePhone: guidePhone,
       },
       { status: 200 }

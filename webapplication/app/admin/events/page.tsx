@@ -8,11 +8,22 @@ import { Button } from "@/components/ui/button";
 import { Plus, Edit, Trash2, MapPin, Calendar, Ticket } from "lucide-react";
 import { EventItem } from "@/lib/types";
 import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function AdminEventsPage() {
   const router = useRouter();
   const [events, setEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deleteEventId, setDeleteEventId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchEvents();
@@ -30,16 +41,16 @@ export default function AdminEventsPage() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this event?')) return;
+  const handleDelete = async () => {
+    if (!deleteEventId) return;
 
     try {
-      const res = await fetch(`/api/admin/events/${id}`, {
+      const res = await fetch(`/api/admin/events/${deleteEventId}`, {
         method: 'DELETE',
       });
 
       if (res.ok) {
-        setEvents(events.filter(e => e.id !== id));
+        setEvents(events.filter(e => e.id !== deleteEventId));
         toast.success('Event deleted successfully');
       } else {
         toast.error('Failed to delete event');
@@ -47,6 +58,8 @@ export default function AdminEventsPage() {
     } catch (error) {
       console.error('Error deleting event:', error);
       toast.error('Failed to delete event');
+    } finally {
+      setDeleteEventId(null);
     }
   };
 
@@ -130,7 +143,7 @@ export default function AdminEventsPage() {
                         <Button
                           variant="destructive"
                           size="sm"
-                          onClick={() => handleDelete(event.id)}
+                          onClick={() => setDeleteEventId(event.id)}
                           className="bg-red-600 hover:bg-red-700"
                         >
                           <Trash2 className="w-4 h-4 mr-2" />
@@ -145,6 +158,23 @@ export default function AdminEventsPage() {
           )}
         </div>
       </div>
+
+      <AlertDialog open={!!deleteEventId} onOpenChange={(open) => !open && setDeleteEventId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the event.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </SidebarProvider>
   );
 }

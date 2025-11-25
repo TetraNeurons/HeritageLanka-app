@@ -3,15 +3,16 @@ import { reviews, guides, travelers, users } from '@/db/schema';
 import { eq, and, sql } from 'drizzle-orm';
 
 export async function recalculateGuideRating(guideUserId: string): Promise<void> {
-  // Get the guide record
+  // Get the guide record - Fixed: should query guides table, not users
   const guide = await db.query.guides.findFirst({
-    where: eq(users.id, guideUserId),
+    where: eq(guides.userId, guideUserId),
     with: {
       user: true,
     },
   });
 
   if (!guide) {
+    console.error('Guide not found for userId:', guideUserId);
     throw new Error('Guide not found');
   }
 
@@ -42,15 +43,16 @@ export async function recalculateGuideRating(guideUserId: string): Promise<void>
 }
 
 export async function recalculateTravelerRating(travelerUserId: string): Promise<void> {
-  // Get the traveler record
+  // Get the traveler record - Fixed: should query travelers table, not users
   const traveler = await db.query.travelers.findFirst({
-    where: eq(users.id, travelerUserId),
+    where: eq(travelers.userId, travelerUserId),
     with: {
       user: true,
     },
   });
 
   if (!traveler) {
+    console.error('Traveler not found for userId:', travelerUserId);
     throw new Error('Traveler not found');
   }
 

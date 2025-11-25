@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db/drizzle";
 import { trips, travelers, guides, payments } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { verifyAuth } from "@/lib/auth";
 
 export async function POST(
@@ -10,7 +10,7 @@ export async function POST(
 ) {
   try {
     const authResult = await verifyAuth(request);
-    if (!authResult.success || !authResult.user || authResult.user.role !== "TRAVELER") {
+    if (!authResult.success || !authResult.user || authResult.user.role !== "GUIDE") {
       return NextResponse.json(
         { success: false, error: "Unauthorized" },
         { status: 401 }

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db/drizzle";
 import { trips, travelers, guides, payments } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { verifyAuth } from "@/lib/auth";
 
 export async function POST(
@@ -10,7 +10,7 @@ export async function POST(
 ) {
   try {
     const authResult = await verifyAuth(request);
-    if (!authResult.success || !authResult.user || authResult.user.role !== "TRAVELER") {
+    if (!authResult.success || !authResult.user || authResult.user.role !== "GUIDE") {
       return NextResponse.json(
         { success: false, error: "Unauthorized" },
         { status: 401 }
@@ -40,12 +40,12 @@ export async function POST(
       );
     }
 
-    // Update trip status to COMPLETED
+    // Update trip status to CANCELLED
     await db
       .update(trips)
       .set({
-        status: "COMPLETED",
-        bookingStatus: "COMPLETED",
+        status: "CANCELLED",
+        bookingStatus: "CANCELLED",
         updatedAt: new Date(),
       })
       .where(eq(trips.id, tripId));
@@ -63,24 +63,23 @@ export async function POST(
         .set({ tripInProgress: false })
         .where(eq(guides.id, trip.guideId));
 
-      // Release payment to guide
+      // Cancel payment
       await db
         .update(payments)
         .set({
-          status: "RELEASED",
-          releasedAt: new Date(),
+          status: "CANCELLED",
         })
         .where(eq(payments.tripId, tripId));
     }
 
     return NextResponse.json({
       success: true,
-      message: "Trip completed successfully",
+      message: "Trip cancelled successfully",
     });
   } catch (error) {
-    console.error("Error completing trip:", error);
+    console.error("Error cancelling trip:", error);
     return NextResponse.json(
-      { success: false, error: "Failed to complete trip" },
+      { success: false, error: "Failed to cancel trip" },
       { status: 500 }
     );
   }

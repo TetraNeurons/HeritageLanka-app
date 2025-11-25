@@ -7,13 +7,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
 import { Trash2, Sparkles, MapPin, Calendar, Loader2, X } from "lucide-react";
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMapEvents, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
+import "leaflet-routing-machine/dist/leaflet-routing-machine.css";
 import L from "leaflet";
 import { toast } from "sonner";
+import Fuse from "fuse.js";
 
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -23,11 +26,11 @@ L.Icon.Default.mergeOptions({
 });
 
 const customIcon = L.icon({
-  iconUrl: "https://cdn0.iconfinder.com/data/icons/small-n-flat/24/678111-map-marker-512.png",
-  iconSize: [38, 38],
-  iconAnchor: [19, 38],
-  popupAnchor: [0, -38],
+  iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-black.png",
   shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
   shadowSize: [41, 41],
 });
 
@@ -70,6 +73,8 @@ export default function PlanMakerContent() {
   const [search, setSearch] = useState("");
   const [flyToLoc, setFlyToLoc] = useState<Location | null>(null);
   const [attractionsData, setAttractionsData] = useState<AttractionData[]>([]);
+  const [touristData, setTouristData] = useState<any[]>([]);
+  const [locationImages, setLocationImages] = useState<{ [key: string]: string }>({});
   const [routes, setRoutes] = useState<[number, number][][]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedPlan, setGeneratedPlan] = useState<any>(null);
@@ -84,7 +89,7 @@ export default function PlanMakerContent() {
         const response = await fetch('/sl_tourist_data.json');
         const data = await response.json();
         
-        // Extract only essential fields
+        // Extract only essential fields for AI
         const simplified = data.flatMap((district: any) => 
           district.attractions.map((attr: any) => ({
             title: attr.title,
@@ -94,6 +99,18 @@ export default function PlanMakerContent() {
           }))
         );
         setAttractionsData(simplified);
+        
+        // Flatten the data structure for fuzzy search
+        const allAttractions: any[] = [];
+        data.forEach((district: any) => {
+          district.attractions.forEach((attraction: any) => {
+            allAttractions.push({
+              ...attraction,
+              district: district.district,
+            });
+          });
+        });
+        setTouristData(allAttractions);
       } catch (error) {
         console.error('Failed to load attractions data:', error);
       }
@@ -101,42 +118,68 @@ export default function PlanMakerContent() {
     loadAttractionsData();
   }, []);
 
-  // Calculate routes
-  useEffect(() => {
-    if (locations.length > 1) {
-      calculateRoutes();
-    } else {
-      setRoutes([]);
+  const findMatchingImage = (locationName: string) => {
+    if (!touristData.length) return null;
+    
+    // Use fuzzy search to find matching attraction
+    const fuse = new Fuse(touristData, {
+      keys: ["title", "address"],
+      threshold: 0.4,
+      includeScore: true,
+    });
+    
+    const results = fuse.search(locationName);
+    
+    if (results.length > 0 && results[0].item.images && results[0].item.images.length > 0) {
+      return results[0].item.images[0].thumbnailUrl || results[0].item.images[0].imageUrl;
     }
-  }, [locations]);
-
-  const calculateRoutes = async () => {
-    if (locations.length < 2) return;
-
-    const newRoutes: [number, number][][] = [];
-    for (let i = 0; i < locations.length - 1; i++) {
-      const start = locations[i];
-      const end = locations[i + 1];
-      
-      try {
-        const response = await fetch(
-          `https://router.project-osrm.org/route/v1/driving/${start.lng},${start.lat};${end.lng},${end.lat}?overview=full&geometries=geojson`
-        );
-        const data = await response.json();
-        
-        if (data.routes && data.routes[0]) {
-          const coords = data.routes[0].geometry.coordinates.map(
-            (coord: [number, number]) => [coord[1], coord[0]] as [number, number]
-          );
-          newRoutes.push(coords);
-        }
-      } catch (error) {
-        console.error('Route calculation failed:', error);
-        newRoutes.push([[start.lat, start.lng], [end.lat, end.lng]]);
-      }
-    }
-    setRoutes(newRoutes);
+    
+    return null;
   };
+
+  // Update images when locations change
+  useEffect(() => {
+    const images: { [key: string]: string } = {};
+    locations.forEach((loc) => {
+      const image = findMatchingImage(loc.name);
+      if (image) {
+        images[loc.id] = image;
+      }
+    });
+    setLocationImages(images);
+  }, [locations, touristData]);
+
+  // Routing component using Leaflet Routing Machine
+  function RoutingMachine({ waypoints }: { waypoints: [number, number][] }) {
+    const map = useMap();
+    
+    useEffect(() => {
+      if (!map || waypoints.length < 2) return;
+      
+      require("leaflet-routing-machine");
+      
+      const routingControl = (L as any).Routing.control({
+        waypoints: waypoints.map((wp) => L.latLng(wp[0], wp[1])),
+        routeWhileDragging: false,
+        addWaypoints: false,
+        draggableWaypoints: false,
+        fitSelectedRoutes: false,
+        showAlternatives: false,
+        lineOptions: {
+          styles: [{ color: "#000000", opacity: 0.6, weight: 4 }],
+        },
+        createMarker: () => null, // Don't create default markers
+      }).addTo(map);
+      
+      return () => {
+        if (map && routingControl) {
+          map.removeControl(routingControl);
+        }
+      };
+    }, [map, waypoints]);
+    
+    return null;
+  }
 
   function LocationPicker() {
     useMapEvents({
@@ -170,6 +213,21 @@ export default function PlanMakerContent() {
         map.flyTo([location.lat, location.lng], 13, { duration: 1.5 });
       }
     }, [location, map]);
+    return null;
+  }
+
+  // Component to fix map rendering in dialog
+  function MapResizer() {
+    const map = useMap();
+    useEffect(() => {
+      // Multiple attempts to ensure map renders correctly
+      const timers = [
+        setTimeout(() => map.invalidateSize(), 100),
+        setTimeout(() => map.invalidateSize(), 300),
+        setTimeout(() => map.invalidateSize(), 500),
+      ];
+      return () => timers.forEach(timer => clearTimeout(timer));
+    }, [map]);
     return null;
   }
 
@@ -417,14 +475,14 @@ export default function PlanMakerContent() {
 
         <div className="flex flex-col lg:flex-row flex-1 overflow-hidden">
           {/* Form Panel */}
-          <div className={`${useAI ? 'w-full lg:w-[500px]' : 'w-full lg:w-96'} bg-white shadow-lg overflow-y-auto p-4 lg:p-6 border-b lg:border-r lg:border-b-0 border-gray-200 transition-all`}>
-            <h1 className="text-xl lg:text-2xl font-bold mb-4 lg:mb-6 text-gray-800">Create Travel Plan</h1>
+          <div className={`${useAI ? 'w-full lg:w-[600px]' : 'w-full lg:w-[480px]'} bg-white shadow-sm overflow-y-auto p-5 lg:p-6 border-b lg:border-r lg:border-b-0 border-gray-200 transition-all`}>
+            <h1 className="text-xl lg:text-2xl font-bold mb-4 lg:mb-6 text-gray-900">Create Travel Plan</h1>
             
             <form onSubmit={handleManualSubmit} className="space-y-4 lg:space-y-6">
               {/* AI Toggle */}
-              <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
+              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
                 <div className="flex items-center gap-3">
-                  {useAI ? <Sparkles className="h-5 w-5 text-purple-600" /> : <MapPin className="h-5 w-5 text-blue-600" />}
+                  {useAI ? <Sparkles className="h-5 w-5 text-gray-900" /> : <MapPin className="h-5 w-5 text-gray-900" />}
                   <div>
                     <Label className="text-base font-semibold">{useAI ? "AI-Powered Planning" : "Manual Selection"}</Label>
                     <p className="text-xs text-gray-600">{useAI ? "Let AI create your itinerary" : "Choose places yourself"}</p>
@@ -458,9 +516,9 @@ export default function PlanMakerContent() {
               </div>
 
               {totalDays > 0 && (
-                <div className="bg-blue-50 p-3 rounded-lg flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-blue-600" />
-                  <span className="text-sm text-blue-800 font-medium">
+                <div className="bg-gray-900 text-white p-3 rounded-lg flex items-center gap-2">
+                  <Calendar className="h-4 w-4" />
+                  <span className="text-sm font-medium">
                     Trip Duration: {totalDays} {totalDays === 1 ? 'day' : 'days'}
                   </span>
                 </div>
@@ -503,7 +561,7 @@ export default function PlanMakerContent() {
                   {preferences.length > 0 && (
                     <div className="flex flex-wrap gap-2 mt-3">
                       {preferences.map((p) => (
-                        <span key={p} className="bg-blue-100 text-blue-800 text-xs px-3 py-1 rounded-full">
+                        <span key={p} className="bg-gray-900 text-white text-xs px-3 py-1 rounded-full">
                           {preferenceOptions.find(o => o.value === p)?.label}
                         </span>
                       ))}
@@ -539,7 +597,7 @@ export default function PlanMakerContent() {
                         <div key={loc.id} className="flex items-start justify-between bg-gray-50 p-2 lg:p-3 rounded-lg text-xs lg:text-sm">
                           <div className="flex-1 pr-2">
                             <div className="flex items-center gap-2">
-                              <span className="bg-blue-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">
+                              <span className="bg-gray-900 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">
                                 {idx + 1}
                               </span>
                               <strong className="text-sm">{loc.name}</strong>
@@ -566,7 +624,7 @@ export default function PlanMakerContent() {
 
               {/* Action Buttons */}
               {!useAI ? (
-                <Button type="submit" className="w-full" size="lg" disabled={isSubmitting}>
+                <Button type="submit" className="w-full bg-gray-900 hover:bg-gray-800" size="lg" disabled={isSubmitting}>
                   {isSubmitting ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -583,7 +641,7 @@ export default function PlanMakerContent() {
                 <Button 
                   type="button" 
                   onClick={handleAIGeneration} 
-                  className="w-full" 
+                  className="w-full bg-gray-900 hover:bg-gray-800" 
                   size="lg"
                   disabled={isGenerating || preferences.length === 0}
                 >
@@ -645,24 +703,34 @@ export default function PlanMakerContent() {
                 {validLocations.map((loc, idx) => (
                   <Marker key={loc.id} position={[loc.lat, loc.lng]} icon={customIcon}>
                     <Popup>
-                      <div className="text-sm">
-                        <strong>#{idx + 1} - {loc.name}</strong>
-                        <br />
-                        {loc.address && <span className="text-xs text-gray-600">{loc.address}</span>}
+                      <div className="min-w-[250px] max-w-[300px]">
+                        {locationImages[loc.id] && (
+                          <img 
+                            src={locationImages[loc.id]} 
+                            alt={loc.name}
+                            className="w-full h-32 object-cover rounded mb-2"
+                          />
+                        )}
+                        <div className="flex items-center gap-2 mb-2">
+                          <Badge variant="default" className="bg-gray-900">
+                            Stop {idx + 1}
+                          </Badge>
+                        </div>
+                        <p className="font-semibold text-sm">{loc.name}</p>
+                        {loc.address && <p className="text-xs text-gray-600 mt-1">{loc.address}</p>}
+                        {loc.category && (
+                          <Badge variant="outline" className="text-xs mt-2">
+                            {loc.category}
+                          </Badge>
+                        )}
                       </div>
                     </Popup>
                   </Marker>
                 ))}
 
-                {routes.map((route, idx) => (
-                  <Polyline
-                    key={`route-${idx}`}
-                    positions={route}
-                    color="#3b82f6"
-                    weight={3}
-                    opacity={0.7}
-                  />
-                ))}
+                {validLocations.length > 1 && (
+                  <RoutingMachine waypoints={validLocations.map(loc => [loc.lat, loc.lng])} />
+                )}
               </MapContainer>
             </div>
           )}
@@ -683,7 +751,7 @@ export default function PlanMakerContent() {
                 {/* Plan Details */}
                 <div className="w-full lg:w-1/2 p-4 lg:p-6 overflow-y-auto">
                   <div className="space-y-4">
-                    <div className="bg-blue-50 p-4 rounded-lg">
+                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                       <h3 className="font-semibold mb-2">Trip Summary</h3>
                       <p className="text-sm text-gray-700">{generatedPlan.summary}</p>
                     </div>
@@ -745,6 +813,7 @@ export default function PlanMakerContent() {
                 <div className="w-full lg:w-1/2 h-[400px] lg:h-full relative" style={{ zIndex: 1 }}>
                   {validLocations.length > 0 ? (
                     <MapContainer
+                      key={`dialog-map-${showPlanPreview}`}
                       center={[validLocations[0].lat, validLocations[0].lng]}
                       zoom={7}
                       className="h-full w-full"
@@ -754,15 +823,27 @@ export default function PlanMakerContent() {
                         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                         attribution='&copy; OpenStreetMap'
                       />
+                      <MapResizer />
                       <FlyToLocation location={flyToLoc} />
 
                       {validLocations.map((loc, idx) => (
                         <Marker key={loc.id} position={[loc.lat, loc.lng]} icon={customIcon}>
                           <Popup>
-                            <div className="text-sm">
-                              <strong>#{idx + 1} - {loc.name}</strong>
-                              <br />
-                              {loc.district && <span className="text-xs text-gray-600">{loc.district}</span>}
+                            <div className="min-w-[250px] max-w-[300px]">
+                              {locationImages[loc.id] && (
+                                <img 
+                                  src={locationImages[loc.id]} 
+                                  alt={loc.name}
+                                  className="w-full h-32 object-cover rounded mb-2"
+                                />
+                              )}
+                              <div className="flex items-center gap-2 mb-2">
+                                <Badge variant="default" className="bg-gray-900">
+                                  Stop {idx + 1}
+                                </Badge>
+                              </div>
+                              <p className="font-semibold text-sm">{loc.name}</p>
+                              {loc.district && <p className="text-xs text-gray-600 mt-1">{loc.district}</p>}
                               {loc.rating && (
                                 <div className="text-xs text-yellow-600 mt-1">★ {loc.rating}</div>
                               )}
@@ -771,15 +852,9 @@ export default function PlanMakerContent() {
                         </Marker>
                       ))}
 
-                      {routes.map((route, idx) => (
-                        <Polyline
-                          key={`route-${idx}`}
-                          positions={route}
-                          color="#3b82f6"
-                          weight={3}
-                          opacity={0.7}
-                        />
-                      ))}
+                      {validLocations.length > 1 && (
+                        <RoutingMachine waypoints={validLocations.map(loc => [loc.lat, loc.lng])} />
+                      )}
                     </MapContainer>
                   ) : (
                     <div className="h-full w-full flex items-center justify-center bg-gray-100">
@@ -792,7 +867,7 @@ export default function PlanMakerContent() {
               <div className="p-4 lg:p-6 border-t flex gap-3">
                 <Button 
                   onClick={handleAcceptPlan} 
-                  className="flex-1" 
+                  className="flex-1 bg-gray-900 hover:bg-gray-800" 
                   size="lg"
                   disabled={isSubmitting}
                 >
@@ -808,7 +883,7 @@ export default function PlanMakerContent() {
                 <Button 
                   onClick={handleRejectPlan} 
                   variant="outline" 
-                  className="flex-1" 
+                  className="flex-1 hover:bg-gray-100" 
                   size="lg"
                   disabled={isSubmitting}
                 >

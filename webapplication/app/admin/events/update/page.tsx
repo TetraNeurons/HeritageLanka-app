@@ -12,6 +12,16 @@ import { Upload, X, Trash2 } from "lucide-react";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from "@/lib/firebase";
 import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function UpdateEventPage() {
   const router = useRouter();
@@ -19,6 +29,7 @@ export default function UpdateEventPage() {
   const [loading, setLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [fetching, setFetching] = useState(true);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   
   const [existingImages, setExistingImages] = useState<string[]>([]);
   const [newImages, setNewImages] = useState<File[]>([]);
@@ -145,8 +156,6 @@ export default function UpdateEventPage() {
   };
 
   const handleDelete = async () => {
-    if (!confirm('Are you sure you want to delete this event?')) return;
-
     setDeleting(true);
 
     try {
@@ -165,6 +174,7 @@ export default function UpdateEventPage() {
       toast.error('Failed to delete event');
     } finally {
       setDeleting(false);
+      setShowDeleteDialog(false);
     }
   };
 
@@ -192,12 +202,12 @@ export default function UpdateEventPage() {
               <h1 className="text-3xl font-bold text-black">Update Event</h1>
               <Button
                 variant="destructive"
-                onClick={handleDelete}
+                onClick={() => setShowDeleteDialog(true)}
                 disabled={deleting}
                 className="bg-red-600 hover:bg-red-700"
               >
                 <Trash2 className="w-4 h-4 mr-2" />
-                {deleting ? 'Deleting...' : 'Delete Event'}
+                Delete Event
               </Button>
             </div>
 
@@ -376,6 +386,23 @@ export default function UpdateEventPage() {
           </div>
         </div>
       </div>
+
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the event.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
+              {deleting ? 'Deleting...' : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </SidebarProvider>
   );
 }
