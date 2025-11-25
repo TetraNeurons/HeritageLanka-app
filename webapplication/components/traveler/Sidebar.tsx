@@ -259,131 +259,131 @@ export function AppSidebar() {
               </button>
             </DialogTrigger>
 
-            <DialogContent className="max-w-md p-6 rounded-2xl bg-white/95 backdrop-blur-md">
+            <DialogContent className="max-w-md p-4 rounded-2xl bg-white/95 backdrop-blur-md">
               <DialogHeader>
-                <DialogTitle className="text-2xl font-bold font-poppins bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
+                <DialogTitle className="text-lg font-bold font-poppins bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
                   Menu
                 </DialogTitle>
               </DialogHeader>
 
-              <div className="grid grid-cols-2 gap-3 mt-6">
+              <div className="grid grid-cols-2 gap-2.5 mt-4">
                 {/* Places */}
                 <a
                   href="/traveler/places"
-                  className="flex flex-col items-center justify-center p-4 rounded-xl bg-white border-2 border-gray-200 hover:border-amber-300 hover:shadow-md transition-all"
+                  className="flex flex-col items-center justify-center p-3 rounded-xl bg-white border-2 border-gray-200 hover:border-amber-300 hover:shadow-md transition-all"
                 >
-                  <div className="h-12 w-12 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center mb-2">
-                    <MapPin className="h-6 w-6 text-white" />
+                  <div className="h-10 w-10 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center mb-1.5">
+                    <MapPin className="h-5 w-5 text-white" />
                   </div>
-                  <span className="text-sm font-semibold font-poppins text-gray-800">Places</span>
+                  <span className="text-xs font-semibold font-poppins text-gray-800">Places</span>
                 </a>
 
                 {/* Reviews */}
                 <a
                   href="/traveler/reviews"
-                  className="flex flex-col items-center justify-center p-4 rounded-xl bg-white border-2 border-gray-200 hover:border-amber-300 hover:shadow-md transition-all"
+                  className="flex flex-col items-center justify-center p-3 rounded-xl bg-white border-2 border-gray-200 hover:border-amber-300 hover:shadow-md transition-all"
                 >
-                  <div className="h-12 w-12 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center mb-2">
-                    <Star className="h-6 w-6 text-white" />
+                  <div className="h-10 w-10 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center mb-1.5">
+                    <Star className="h-5 w-5 text-white" />
                   </div>
-                  <span className="text-sm font-semibold font-poppins text-gray-800">Reviews</span>
+                  <span className="text-xs font-semibold font-poppins text-gray-800">Reviews</span>
                 </a>
 
                 {/* History */}
                 <a
                   href="/traveler/history"
-                  className="flex flex-col items-center justify-center p-4 rounded-xl bg-white border-2 border-gray-200 hover:border-amber-300 hover:shadow-md transition-all"
+                  className="flex flex-col items-center justify-center p-3 rounded-xl bg-white border-2 border-gray-200 hover:border-amber-300 hover:shadow-md transition-all"
                 >
-                  <div className="h-12 w-12 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center mb-2">
-                    <History className="h-6 w-6 text-white" />
+                  <div className="h-10 w-10 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center mb-1.5">
+                    <History className="h-5 w-5 text-white" />
                   </div>
-                  <span className="text-sm font-semibold font-poppins text-gray-800">History</span>
+                  <span className="text-xs font-semibold font-poppins text-gray-800">History</span>
                 </a>
 
                 {/* Emergency */}
                 <Dialog>
                   <DialogTrigger asChild>
-                    <button className="flex flex-col items-center justify-center p-4 rounded-xl bg-red-50 border-2 border-red-200 hover:border-red-300 hover:shadow-md transition-all">
-                      <div className="h-12 w-12 rounded-full bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center mb-2">
-                        <PhoneCall className="h-6 w-6 text-white" />
+                    <button className="flex flex-col items-center justify-center p-3 rounded-xl bg-red-50 border-2 border-red-200 hover:border-red-300 hover:shadow-md transition-all">
+                      <div className="h-10 w-10 rounded-full bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center mb-1.5">
+                        <PhoneCall className="h-5 w-5 text-white" />
                       </div>
-                      <span className="text-sm font-semibold font-poppins text-red-700">Emergency</span>
+                      <span className="text-xs font-semibold font-poppins text-red-700">Emergency</span>
                     </button>
                   </DialogTrigger>
 
-                  <DialogContent className="max-w-md p-6 rounded-xl">
+                  <DialogContent className="max-w-md p-4 rounded-xl">
                     <DialogHeader>
-                      <DialogTitle className="text-xl font-semibold">
+                      <DialogTitle className="text-lg font-semibold">
                         Emergency Services
                       </DialogTitle>
                     </DialogHeader>
 
-                    <div className="space-y-4 mt-4">
+                    <div className="space-y-3 mt-3">
                       {/* Tourist Police */}
-                      <div className="flex items-center justify-between p-3 border rounded-lg">
-                        <div className="flex items-center gap-3">
-                          <Shield className="h-5 w-5 text-blue-600" />
-                          <span className="font-medium">Tourist Police</span>
+                      <div className="flex items-center justify-between p-2.5 border rounded-lg">
+                        <div className="flex items-center gap-2">
+                          <Shield className="h-4 w-4 text-blue-600" />
+                          <span className="text-sm font-medium">Tourist Police</span>
                         </div>
                         <a href="tel:1912">
-                          <Button variant="outline" className="flex items-center gap-2">
-                            <PhoneCall className="h-4 w-4" />
+                          <Button variant="outline" className="flex items-center gap-1.5 h-8 text-xs">
+                            <PhoneCall className="h-3 w-3" />
                             1912
                           </Button>
                         </a>
                       </div>
 
                       {/* Ambulance */}
-                      <div className="flex items-center justify-between p-3 border rounded-lg">
-                        <div className="flex items-center gap-3">
-                          <Ambulance className="h-5 w-5 text-red-600" />
-                          <span className="font-medium">Suwaseriya Ambulance</span>
+                      <div className="flex items-center justify-between p-2.5 border rounded-lg">
+                        <div className="flex items-center gap-2">
+                          <Ambulance className="h-4 w-4 text-red-600" />
+                          <span className="text-sm font-medium">Ambulance</span>
                         </div>
                         <a href="tel:1990">
-                          <Button variant="outline" className="flex items-center gap-2">
-                            <PhoneCall className="h-4 w-4" />
+                          <Button variant="outline" className="flex items-center gap-1.5 h-8 text-xs">
+                            <PhoneCall className="h-3 w-3" />
                             1990
                           </Button>
                         </a>
                       </div>
 
                       {/* Police Emergency */}
-                      <div className="flex items-center justify-between p-3 border rounded-lg">
-                        <div className="flex items-center gap-3">
-                          <CarFront className="h-5 w-5 text-black" />
-                          <span className="font-medium">Police Emergency</span>
+                      <div className="flex items-center justify-between p-2.5 border rounded-lg">
+                        <div className="flex items-center gap-2">
+                          <CarFront className="h-4 w-4 text-black" />
+                          <span className="text-sm font-medium">Police</span>
                         </div>
                         <a href="tel:118">
-                          <Button variant="outline" className="flex items-center gap-2">
-                            <PhoneCall className="h-4 w-4" />
+                          <Button variant="outline" className="flex items-center gap-1.5 h-8 text-xs">
+                            <PhoneCall className="h-3 w-3" />
                             118
                           </Button>
                         </a>
                       </div>
 
                       {/* Fire Rescue */}
-                      <div className="flex items-center justify-between p-3 border rounded-lg">
-                        <div className="flex items-center gap-3">
-                          <Flame className="h-5 w-5 text-orange-600" />
-                          <span className="font-medium">Fire Rescue</span>
+                      <div className="flex items-center justify-between p-2.5 border rounded-lg">
+                        <div className="flex items-center gap-2">
+                          <Flame className="h-4 w-4 text-orange-600" />
+                          <span className="text-sm font-medium">Fire Rescue</span>
                         </div>
                         <a href="tel:110">
-                          <Button variant="outline" className="flex items-center gap-2">
-                            <PhoneCall className="h-4 w-4" />
+                          <Button variant="outline" className="flex items-center gap-1.5 h-8 text-xs">
+                            <PhoneCall className="h-3 w-3" />
                             110
                           </Button>
                         </a>
                       </div>
 
                       {/* Coast Guard */}
-                      <div className="flex items-center justify-between p-3 border rounded-lg">
-                        <div className="flex items-center gap-3">
-                          <Ship className="h-5 w-5 text-blue-800" />
-                          <span className="font-medium">Coast Guard</span>
+                      <div className="flex items-center justify-between p-2.5 border rounded-lg">
+                        <div className="flex items-center gap-2">
+                          <Ship className="h-4 w-4 text-blue-800" />
+                          <span className="text-sm font-medium">Coast Guard</span>
                         </div>
                         <a href="tel:117">
-                          <Button variant="outline" className="flex items-center gap-2">
-                            <PhoneCall className="h-4 w-4" />
+                          <Button variant="outline" className="flex items-center gap-1.5 h-8 text-xs">
+                            <PhoneCall className="h-3 w-3" />
                             117
                           </Button>
                         </a>
@@ -396,12 +396,12 @@ export function AppSidebar() {
                 <button
                   onClick={handleSignOut}
                   disabled={loading}
-                  className="flex flex-col items-center justify-center p-4 rounded-xl bg-white border-2 border-gray-200 hover:border-gray-300 hover:shadow-md transition-all col-span-2"
+                  className="flex flex-col items-center justify-center p-3 rounded-xl bg-white border-2 border-gray-200 hover:border-gray-300 hover:shadow-md transition-all col-span-2"
                 >
-                  <div className="h-12 w-12 rounded-full bg-gradient-to-br from-gray-500 to-gray-600 flex items-center justify-center mb-2">
-                    <LogOut className="h-6 w-6 text-white" />
+                  <div className="h-10 w-10 rounded-full bg-gradient-to-br from-gray-500 to-gray-600 flex items-center justify-center mb-1.5">
+                    <LogOut className="h-5 w-5 text-white" />
                   </div>
-                  <span className="text-sm font-semibold font-poppins text-gray-800">
+                  <span className="text-xs font-semibold font-poppins text-gray-800">
                     {loading ? "Signing out..." : "Sign Out"}
                   </span>
                 </button>
