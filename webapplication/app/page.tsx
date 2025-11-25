@@ -428,8 +428,21 @@ export default function Home() {
       </section>
 
       {/* Advertise With Us Section */}
-      <section className="py-16 px-6 md:px-8 lg:px-12 bg-background">
-        <div className="container mx-auto max-w-4xl">
+      <section className="py-16 px-6 md:px-8 lg:px-12 bg-white relative overflow-hidden">
+        {/* Background SVG */}
+        <div 
+          className="absolute inset-0 opacity-60"
+          style={{ 
+            backgroundImage: "url('/images/bg01.svg')",
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            transform: 'scaleY(-1)'
+          }}
+        />
+        
+        {/* Content */}
+        <div className="container mx-auto max-w-4xl relative z-10">
           <div className="text-center mb-12">
             <div className="flex justify-center mb-4">
               <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
