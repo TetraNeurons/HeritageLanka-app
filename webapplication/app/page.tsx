@@ -526,7 +526,7 @@ export default function Home() {
         />
         
         {/* Content */}
-        <div className="container mx-auto max-w-4xl relative z-10">
+        <div className="container mx-auto max-w-2xl relative z-10">
           <div className="text-center mb-12">
             <div className="flex justify-center mb-6">
               <div className="h-16 w-16 rounded-xl bg-amber-100 flex items-center justify-center">
@@ -543,10 +543,10 @@ export default function Home() {
 
           {!adSuccess ? (
             <Card className="bg-white/95 backdrop-blur-md border-2 border-gray-100 shadow-2xl">
-              <CardHeader className="pb-4">
+              <CardHeader className="pb-6 pt-6 px-12 text-center">
                 <CardTitle className="text-2xl font-bold tracking-tight">Submit Your Advertisement</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="px-12 pb-8">
                 <form onSubmit={handleAdSubmit} className="space-y-5">
                   <div>
                     <Label htmlFor="imageUrl" className="text-base font-semibold">Image URL *</Label>
