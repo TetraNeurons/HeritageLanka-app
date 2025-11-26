@@ -1,6 +1,9 @@
 const { db } = require('../db');
-const { users, trips, payments, events, reviews } = require('../db/schema');
-const { eq, and, desc } = require('drizzle-orm');
+const { users, trips, payments, events, reviews, tripLocations, places } = require('../db/schema');
+const { eq, and, desc, asc } = require('drizzle-orm');
+const { MessageMedia, Location } = require('whatsapp-web.js');
+
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 module.exports = {
     profile: async (msg, args, client, commands, user, traveler) => {
@@ -44,6 +47,8 @@ module.exports = {
             await msg.reply('You are not registered as a traveler.');
             return;
         }
+
+        // 1. Get Active Trip
         const activeTrips = await db.select().from(trips).where(
             and(
                 eq(trips.travelerId, traveler.id),
@@ -51,21 +56,89 @@ module.exports = {
         );
         const currentTrip = activeTrips.find(t => t.status !== 'COMPLETED' && t.status !== 'CANCELLED');
 
-        if (currentTrip && currentTrip.dailyItinerary) {
-            let reply = '*Your Itinerary*\n';
-            const itinerary = currentTrip.dailyItinerary;
-            if (Array.isArray(itinerary)) {
-                itinerary.forEach((day, index) => {
-                    reply += `\n*Day ${index + 1}*\n`;
-                    reply += `- ${day.activity || day.title || 'No activity details'}\n`;
-                });
-            } else {
-                reply += JSON.stringify(itinerary, null, 2);
-            }
-            await msg.reply(reply);
-        } else {
-            await msg.reply('No active trip itinerary found.');
+        if (!currentTrip) {
+            await msg.reply('No active trip found.');
+            return;
         }
+
+        await msg.reply(`*Fetching detailed itinerary for your trip to ${currentTrip.country}...* 🗺️`);
+
+        // 2. Get Trip Locations
+        const locations = await db.select().from(tripLocations)
+            .where(eq(tripLocations.tripId, currentTrip.id))
+            .orderBy(asc(tripLocations.dayNumber), asc(tripLocations.visitOrder));
+
+        if (locations.length === 0) {
+            // Fallback to JSONB if no detailed locations
+            if (currentTrip.dailyItinerary) {
+                let reply = '*Your Itinerary (Summary)*\n';
+                const itinerary = currentTrip.dailyItinerary;
+                if (Array.isArray(itinerary)) {
+                    itinerary.forEach((day, index) => {
+                        reply += `\n*Day ${index + 1}*\n`;
+                        reply += `- ${day.activity || day.title || 'No activity details'}\n`;
+                    });
+                } else {
+                    reply += JSON.stringify(itinerary, null, 2);
+                }
+                await msg.reply(reply);
+            } else {
+                await msg.reply('No itinerary details available.');
+            }
+            return;
+        }
+
+        // 3. Iterate and Send Details
+        let currentDay = 0;
+
+        for (const loc of locations) {
+            // New Day Header
+            if (loc.dayNumber !== currentDay) {
+                currentDay = loc.dayNumber;
+                await client.sendMessage(msg.from, `📅 *DAY ${currentDay}*`);
+                await sleep(500);
+            }
+
+            // Try to find image in 'places' table
+            let imageUrl = null;
+            try {
+                // Simple name match for now. In production, use ID linking or fuzzy search.
+                const placeMatches = await db.select().from(places).where(eq(places.name, loc.title)).limit(1);
+                if (placeMatches.length > 0 && placeMatches[0].images && placeMatches[0].images.length > 0) {
+                    imageUrl = placeMatches[0].images[0];
+                }
+            } catch (err) {
+                console.error('Error fetching place image:', err);
+            }
+
+            // Construct Caption
+            const caption = `📍 *${loc.title}*\n` +
+                `_${loc.district}_\n\n` +
+                `${loc.reasonForSelection || loc.category}\n` +
+                `⏱️ Duration: ${loc.estimatedDuration || 'N/A'}`;
+
+            // Send Image + Caption OR Text
+            if (imageUrl) {
+                try {
+                    const media = await MessageMedia.fromUrl(imageUrl);
+                    await client.sendMessage(msg.from, media, { caption: caption });
+                } catch (err) {
+                    console.error('Failed to send image:', err);
+                    await client.sendMessage(msg.from, caption); // Fallback to text
+                }
+            } else {
+                await client.sendMessage(msg.from, caption);
+            }
+
+            // Send Location
+            if (loc.latitude && loc.longitude) {
+                await client.sendMessage(msg.from, new Location(loc.latitude, loc.longitude, loc.title));
+            }
+
+            await sleep(1500); // Pause between stops for better UX
+        }
+
+        await client.sendMessage(msg.from, '✅ *End of Itinerary*');
     },
     payments: async (msg, args, client, commands, user, traveler) => {
         if (!traveler) {
@@ -87,7 +160,6 @@ module.exports = {
         }
     },
     events: async (msg) => {
-        // Events table uses 'date' as text in the new schema
         const allEvents = await db.select().from(events);
 
         if (allEvents.length > 0) {

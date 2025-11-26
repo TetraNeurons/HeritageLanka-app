@@ -120,6 +120,37 @@ const reviews = pgTable('reviews', {
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
+// Trip Locations table
+const tripLocations = pgTable('trip_locations', {
+    id: text('id').primaryKey(),
+    tripId: text('trip_id').notNull().references(() => trips.id),
+    title: text('title').notNull(),
+    address: text('address').notNull(),
+    district: text('district').notNull(),
+    latitude: real('latitude').notNull(),
+    longitude: real('longitude').notNull(),
+    category: text('category').notNull(),
+    rating: real('rating'),
+    dayNumber: integer('day_number').notNull(),
+    visitOrder: integer('visit_order').notNull(),
+    estimatedDuration: text('estimated_duration'),
+    reasonForSelection: text('reason_for_selection'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+// Places table
+const places = pgTable('places', {
+    id: text('id').primaryKey(),
+    name: text('name').notNull(),
+    location: text('location').notNull(),
+    images: text('images').array().notNull(),
+    description: text('description').notNull(),
+    significance: text('significance').notNull(),
+    ticketPrice: real('ticket_price'),
+    category: tripPreferenceEnum('category').array().notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
 module.exports = {
     users,
     travelers,
@@ -128,6 +159,8 @@ module.exports = {
     events,
     payments,
     reviews,
+    tripLocations,
+    places,
     userRoleEnum,
     genderEnum,
     tripPreferenceEnum,
