@@ -2,6 +2,8 @@
 
 The all-in-one platform for Sri Lanka travel - connecting travelers with local guides, events, and experiences.
 
+<img src="./screenshot/ss.png" width=600>
+
 ## Features
 
 ### For Travelers
