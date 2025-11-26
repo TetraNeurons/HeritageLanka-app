@@ -16,5 +16,15 @@ module.exports = {
     echo: async (msg, args) => {
         const text = args.join(' ');
         await msg.reply(text);
+    },
+    help: async (msg, args, client, commands) => {
+        let str = '*Available Commands:*\n\n';
+        for (const cmd in commands) {
+            str += `*!${cmd}*\n`;
+        }
+        await msg.reply(str);
+    },
+    owner: async (msg) => {
+        await msg.reply('Bot Owner: *Antigravity*'); // You can customize this
     }
 };

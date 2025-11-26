@@ -39,5 +39,37 @@ module.exports = {
         } else {
             await msg.reply('Please quote a message with media.');
         }
+    },
+    sticker: async (msg, args) => {
+        let media = null;
+        if (msg.hasMedia) {
+            media = await msg.downloadMedia();
+        } else if (msg.hasQuotedMsg) {
+            const quotedMsg = await msg.getQuotedMessage();
+            if (quotedMsg.hasMedia) {
+                media = await quotedMsg.downloadMedia();
+            }
+        }
+
+        if (media) {
+            // Send as sticker
+            await client.sendMessage(msg.from, media, { sendMediaAsSticker: true, stickerAuthor: 'Antigravity', stickerName: 'Sticker' });
+        } else {
+            await msg.reply('Please send an image/video or quote one to convert to sticker.');
+        }
+    },
+    toimg: async (msg) => {
+        if (msg.hasQuotedMsg) {
+            const quotedMsg = await msg.getQuotedMessage();
+            if (quotedMsg.hasMedia) {
+                const media = await quotedMsg.downloadMedia();
+                // Just send it back as normal media
+                await client.sendMessage(msg.from, media, { caption: 'Here is your image.' });
+            } else {
+                await msg.reply('Quoted message does not have media.');
+            }
+        } else {
+            await msg.reply('Please quote a sticker to convert to image.');
+        }
     }
 };
