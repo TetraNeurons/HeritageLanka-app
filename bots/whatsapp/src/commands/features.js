@@ -159,15 +159,48 @@ module.exports = {
             await msg.reply('No payment history found.');
         }
     },
-    events: async (msg) => {
+    events: async (msg, args, client) => {
         const allEvents = await db.select().from(events);
 
         if (allEvents.length > 0) {
-            let reply = '*Upcoming Events*\n';
-            allEvents.forEach((e, i) => {
-                reply += `${i + 1}. ${e.title} - ${e.date} @ ${e.place}\n`;
-            });
-            await msg.reply(reply);
+            await msg.reply(`*Fetching ${allEvents.length} Upcoming Events...* 🎟️`);
+
+            for (const event of allEvents) {
+                // 1. Construct Caption
+                const caption = `🎉 *${event.title}*\n` +
+                    `📅 Date: ${event.date}\n` +
+                    `📍 Place: ${event.place}\n` +
+                    `💵 Price: ${event.price}\n` +
+                    `📞 Contact: ${event.phone}\n\n` +
+                    `${event.description}\n\n` +
+                    `_Organized by ${event.organizer}_`;
+
+                // 2. Send Image + Caption OR Text
+                let imageSent = false;
+                if (event.images && event.images.length > 0) {
+                    try {
+                        // Use the first image
+                        const media = await MessageMedia.fromUrl(event.images[0]);
+                        await client.sendMessage(msg.from, media, { caption: caption });
+                        imageSent = true;
+                    } catch (err) {
+                        console.error('Failed to send event image:', err);
+                    }
+                }
+
+                if (!imageSent) {
+                    await client.sendMessage(msg.from, caption);
+                }
+
+                // 3. Send Location
+                if (event.lat && event.lng) {
+                    await client.sendMessage(msg.from, new Location(event.lat, event.lng, event.place));
+                }
+
+                await sleep(1500); // Pause between events
+            }
+
+            await client.sendMessage(msg.from, '✅ *End of Events List*');
         } else {
             await msg.reply('No upcoming events.');
         }
