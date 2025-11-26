@@ -18,16 +18,22 @@ module.exports = {
             const senderPhone = `+${msg.from.replace('@c.us', '')}`; // Extract number
             let user;
             let traveler;
+            let guide;
 
             try {
                 const result = await db.select().from(users).where(eq(users.phone, senderPhone)).limit(1);
                 if (result.length > 0) {
                     user = result[0];
-                    // Also fetch traveler info if available
-                    const { travelers } = require('../db/schema');
-                    const travelerResult = await db.select().from(travelers).where(eq(travelers.userId, user.id)).limit(1);
-                    if (travelerResult.length > 0) {
-                        traveler = travelerResult[0];
+
+                    // Fetch Role-Specific Entity
+                    if (user.role === 'TRAVELER') {
+                        const { travelers } = require('../db/schema');
+                        const travelerResult = await db.select().from(travelers).where(eq(travelers.userId, user.id)).limit(1);
+                        if (travelerResult.length > 0) traveler = travelerResult[0];
+                    } else if (user.role === 'GUIDE') {
+                        const { guides } = require('../db/schema');
+                        const guideResult = await db.select().from(guides).where(eq(guides.userId, user.id)).limit(1);
+                        if (guideResult.length > 0) guide = guideResult[0];
                     }
                 }
             } catch (err) {
@@ -42,12 +48,12 @@ module.exports = {
             }
 
             // Only allow specific commands for now + help
-            const allowedCommands = ['profile', 'trips', 'itinerary', 'events', 'review', 'menu'];
+            const allowedCommands = ['profile', 'trips', 'itinerary', 'events', 'review', 'menu', 'assignments'];
 
             if (allowedCommands.includes(commandName) && commands[commandName]) {
                 try {
-                    // Pass traveler info as well
-                    await commands[commandName](msg, args, client, commands, user, traveler);
+                    // Pass traveler/guide info
+                    await commands[commandName](msg, args, client, commands, user, traveler, guide);
                 } catch (error) {
                     console.error(`Error executing command ${commandName}:`, error);
                     await msg.reply('An error occurred while executing the command.');

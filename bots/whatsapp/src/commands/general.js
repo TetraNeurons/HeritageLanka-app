@@ -25,6 +25,6 @@ module.exports = {
         await msg.reply(str);
     },
     owner: async (msg) => {
-        await msg.reply('Bot Owner: *Antigravity*'); // You can customize this
+        await msg.reply('Bot Owner: *HeritageLanka*'); // You can customize this
     }
 };

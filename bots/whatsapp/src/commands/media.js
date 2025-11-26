@@ -53,7 +53,7 @@ module.exports = {
 
         if (media) {
             // Send as sticker
-            await client.sendMessage(msg.from, media, { sendMediaAsSticker: true, stickerAuthor: 'Antigravity', stickerName: 'Sticker' });
+            await client.sendMessage(msg.from, media, { sendMediaAsSticker: true, stickerAuthor: 'HeritageLanka', stickerName: 'Sticker' });
         } else {
             await msg.reply('Please send an image/video or quote one to convert to sticker.');
         }
