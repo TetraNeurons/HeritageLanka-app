@@ -140,25 +140,6 @@ module.exports = {
 
         await client.sendMessage(msg.from, '✅ *End of Itinerary*');
     },
-    payments: async (msg, args, client, commands, user, traveler) => {
-        if (!traveler) {
-            await msg.reply('You are not registered as a traveler.');
-            return;
-        }
-        const userPayments = await db.select().from(payments)
-            .where(eq(payments.travelerId, traveler.id))
-            .orderBy(desc(payments.createdAt));
-
-        if (userPayments.length > 0) {
-            let reply = '*Your Payments*\n';
-            userPayments.forEach((p, i) => {
-                reply += `${i + 1}. ${p.amount} (${p.status}) - ${new Date(p.createdAt).toDateString()}\n`;
-            });
-            await msg.reply(reply);
-        } else {
-            await msg.reply('No payment history found.');
-        }
-    },
     events: async (msg, args, client) => {
         const allEvents = await db.select().from(events);
 
@@ -214,10 +195,8 @@ module.exports = {
             1. !profile - My Profile
             2. !trips - My Trips
             3. !itinerary - My Itinerary
-            4. !payments - Payments
-            5. !events - Events
-            6. !review - Review Guide
-            7. !help - Support
+            4. !events - Events
+            5. !review - Review Guide
         `);
     }
 };

@@ -42,7 +42,7 @@ module.exports = {
             }
 
             // Only allow specific commands for now + help
-            const allowedCommands = ['profile', 'trips', 'itinerary', 'payments', 'events', 'review', 'menu', 'help'];
+            const allowedCommands = ['profile', 'trips', 'itinerary', 'events', 'review', 'menu'];
 
             if (allowedCommands.includes(commandName) && commands[commandName]) {
                 try {
