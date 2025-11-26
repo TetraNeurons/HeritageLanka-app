@@ -1,23 +1,21 @@
 const { drizzle } = require('drizzle-orm/node-postgres');
-const { Client } = require('pg');
+const { Pool } = require('pg');
 const schema = require('./schema');
 require('dotenv').config();
 
-const client = new Client({
+const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
+    ssl: process.env.DATABASE_URL && process.env.DATABASE_URL.includes('sslmode=require') ? { rejectUnauthorized: false } : false
 });
 
-const connectDB = async () => {
-    try {
-        await client.connect();
-        console.log('Connected to database');
-    } catch (err) {
-        console.error('Failed to connect to database', err);
-    }
-};
+// Test connection
+pool.connect().then(client => {
+    console.log('Connected to database via Pool');
+    client.release();
+}).catch(err => {
+    console.error('Failed to connect to database', err);
+});
 
-connectDB();
-
-const db = drizzle(client, { schema });
+const db = drizzle(pool, { schema });
 
 module.exports = { db };
