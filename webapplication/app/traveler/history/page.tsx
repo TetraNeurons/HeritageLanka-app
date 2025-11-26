@@ -142,16 +142,16 @@ export default function PaymentHistoryPage() {
           <main className="flex-1 overflow-y-auto p-4 lg:p-8">
             {/* Header */}
             <div className="mb-8">
-              <div className="lg:hidden mb-4">
+              <div className="hidden md:block mb-4">
                 <SidebarTrigger />
               </div>
               <div className="flex items-center gap-4">
                 <div className="bg-gradient-to-br from-amber-100 to-orange-100 p-4 rounded-xl shadow-lg">
-                  <Receipt className="h-7 w-7 text-amber-600" />
+                  <Receipt className="h-6 w-6 text-amber-600" />
                 </div>
                 <div>
-                  <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 font-poppins">Payment History</h1>
-                  <p className="text-gray-700 mt-2 font-medium">Track all your trip payments and event tickets</p>
+                  <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 font-poppins">Payment History</h1>
+                  <p className="text-sm lg:text-base text-gray-700 mt-2 font-medium">Track all your trip payments and event tickets</p>
                 </div>
               </div>
             </div>
@@ -161,8 +161,8 @@ export default function PaymentHistoryPage() {
               <Card className="border-dashed border-2 bg-white/95 backdrop-blur-md shadow-xl">
                 <CardContent className="flex flex-col items-center justify-center py-16">
                   <CreditCard className="h-20 w-20 text-amber-300 mb-6" />
-                  <h3 className="text-xl font-bold text-gray-900 mb-3 font-poppins">No payment history</h3>
-                  <p className="text-gray-600 text-center text-base">
+                  <h3 className="text-base lg:text-lg font-bold text-gray-900 mb-3 font-poppins">No payment history</h3>
+                  <p className="text-sm text-gray-600 text-center">
                     Your payment transactions will appear here
                   </p>
                 </CardContent>
@@ -172,7 +172,7 @@ export default function PaymentHistoryPage() {
                 {/* Desktop Table View */}
                 <Card className="hidden lg:block bg-white/95 backdrop-blur-md border-2 border-gray-200 shadow-xl">
                   <CardHeader className="pb-4">
-                    <CardTitle className="text-xl font-bold font-poppins">All Payments ({payments.length})</CardTitle>
+                    <CardTitle className="text-base lg:text-lg font-bold font-poppins">All Payments ({payments.length})</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <Table>
@@ -245,18 +245,18 @@ export default function PaymentHistoryPage() {
                               )}
                             </TableCell>
                             <TableCell>
-                              <span className="font-bold text-lg text-gray-900 font-poppins">
+                              <span className="font-bold text-base lg:text-lg text-gray-900 font-poppins">
                                 {formatCurrency(payment.amount)}
                               </span>
                             </TableCell>
                             <TableCell>{getStatusBadge(payment.status)}</TableCell>
                             <TableCell>
                               {payment.status === "PAID" && payment.paidAt ? (
-                                <span className="text-sm text-gray-700 font-medium font-poppins">
+                                <span className="text-xs lg:text-sm text-gray-700 font-medium font-poppins">
                                   {formatDate(payment.paidAt)}
                                 </span>
                               ) : (
-                                <span className="text-sm text-gray-500 italic font-medium">
+                                <span className="text-xs lg:text-sm text-gray-500 italic font-medium">
                                   Awaiting payment
                                 </span>
                               )}
@@ -283,7 +283,7 @@ export default function PaymentHistoryPage() {
                                   <Badge variant="outline" className="bg-gradient-to-br from-amber-50 to-orange-50 text-amber-700 border-2 border-amber-200 mb-1 font-semibold">
                                     Trip
                                   </Badge>
-                                  <div className="font-bold text-gray-900 font-poppins">
+                                  <div className="font-bold text-sm lg:text-base text-gray-900 font-poppins">
                                     {payment.trip.country}
                                   </div>
                                   <div className="text-xs text-gray-600 font-medium">
@@ -298,7 +298,7 @@ export default function PaymentHistoryPage() {
                                   <Badge variant="outline" className="bg-gradient-to-br from-purple-50 to-pink-50 text-purple-700 border-2 border-purple-200 mb-1 font-semibold">
                                     Event
                                   </Badge>
-                                  <div className="font-bold text-gray-900 font-poppins">
+                                  <div className="font-bold text-sm lg:text-base text-gray-900 font-poppins">
                                     {payment.event.title}
                                   </div>
                                   <div className="text-xs text-gray-600 font-medium">
@@ -375,20 +375,20 @@ export default function PaymentHistoryPage() {
                   <CardContent className="p-6">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div>
-                        <div className="text-sm text-gray-600 mb-1">Total Payments</div>
-                        <div className="text-2xl font-bold text-gray-900">
+                        <div className="text-xs lg:text-sm text-gray-600 mb-1">Total Payments</div>
+                        <div className="text-xl lg:text-2xl font-bold text-gray-900">
                           {payments.length}
                         </div>
                       </div>
                       <div>
-                        <div className="text-sm text-gray-600 mb-1">Completed</div>
-                        <div className="text-2xl font-bold text-green-600">
+                        <div className="text-xs lg:text-sm text-gray-600 mb-1">Completed</div>
+                        <div className="text-xl lg:text-2xl font-bold text-green-600">
                           {payments.filter((p) => p.status === "PAID").length}
                         </div>
                       </div>
                       <div>
-                        <div className="text-sm text-gray-600 mb-1">Total Spent</div>
-                        <div className="text-2xl font-bold text-gray-900">
+                        <div className="text-xs lg:text-sm text-gray-600 mb-1">Total Spent</div>
+                        <div className="text-xl lg:text-2xl font-bold text-gray-900">
                           {formatCurrency(
                             payments
                               .filter((p) => p.status === "PAID")

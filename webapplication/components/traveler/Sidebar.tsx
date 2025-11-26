@@ -31,6 +31,7 @@ import {
   Calendar,
   BookOpen,
   Menu,
+  X,
 } from "lucide-react";
 
 import axios from "axios";
@@ -40,6 +41,7 @@ import { usePathname } from "next/navigation";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger
@@ -58,6 +60,7 @@ const menuItems = [
 
 export function AppSidebar() {
   const [loading, setLoading] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const pathname = usePathname();
 
   async function handleSignOut() {
@@ -75,7 +78,7 @@ export function AppSidebar() {
   return (
     <>
       {/* Desktop Sidebar */}
-      <Sidebar className="w-64 hidden lg:flex">
+      <Sidebar className="w-64 hidden md:flex">
         <SidebarHeader className="p-6 border-b">
           <div className="flex flex-col gap-3">
             <div className="flex items-center gap-3">
@@ -127,6 +130,9 @@ export function AppSidebar() {
                 <DialogTitle className="text-xl font-semibold">
                   Emergency Services
                 </DialogTitle>
+                <DialogDescription className="sr-only">
+                  Emergency contact numbers for tourists in Sri Lanka
+                </DialogDescription>
               </DialogHeader>
 
               <div className="space-y-4 mt-4">
@@ -217,228 +223,228 @@ export function AppSidebar() {
       </Sidebar>
 
       {/* Mobile Bottom App Bar */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 lg:hidden bg-white/95 backdrop-blur-md border-t-2 border-gray-200 shadow-2xl">
-        <nav className="flex items-center justify-around px-4 py-3 max-w-screen-xl mx-auto">
+      <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-white/95 backdrop-blur-md border-t-2 border-gray-200 shadow-2xl">
+        <nav className="flex items-center justify-around px-2 py-3 max-w-screen-xl mx-auto">
           {/* Home */}
           <a
             href="/traveler/dashboard"
-            className={`flex flex-col items-center justify-center min-w-[64px] py-1 rounded-xl transition-all ${
+            className={`flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all ${
               isActive("/traveler/dashboard")
-                ? "text-amber-600"
-                : "text-gray-600"
+                ? "bg-amber-100 text-amber-700"
+                : "text-gray-600 hover:text-amber-600"
             }`}
           >
-            <LayoutDashboard className={`h-7 w-7 ${isActive("/traveler/dashboard") ? 'stroke-[2.5]' : 'stroke-[2]'}`} />
-            <span className={`text-xs mt-1 font-poppins ${isActive("/traveler/dashboard") ? 'font-semibold' : 'font-medium'}`}>
-              Home
-            </span>
+            <LayoutDashboard className="h-5 w-5" />
+            <span className="text-xs font-medium font-poppins">Home</span>
           </a>
 
           {/* Plan Trip */}
           <a
             href="/traveler/plan"
-            className={`flex flex-col items-center justify-center min-w-[64px] py-1 rounded-xl transition-all ${
+            className={`flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all ${
               isActive("/traveler/plan")
-                ? "text-amber-600"
-                : "text-gray-600"
+                ? "bg-amber-100 text-amber-700"
+                : "text-gray-600 hover:text-amber-600"
             }`}
           >
-            <BookOpen className={`h-7 w-7 ${isActive("/traveler/plan") ? 'stroke-[2.5]' : 'stroke-[2]'}`} />
-            <span className={`text-xs mt-1 font-poppins ${isActive("/traveler/plan") ? 'font-semibold' : 'font-medium'}`}>
-              Plan
-            </span>
+            <BookOpen className="h-5 w-5" />
+            <span className="text-xs font-medium font-poppins">Plan</span>
           </a>
 
-          {/* More Menu (Center Button) */}
-          <Dialog>
-            <DialogTrigger asChild>
-              <button className="flex flex-col items-center justify-center min-w-[64px] py-1 rounded-xl text-gray-600 transition-all">
-                <div className="h-12 w-12 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shadow-lg">
-                  <Menu className="h-6 w-6 text-white stroke-[2.5]" />
-                </div>
-              </button>
-            </DialogTrigger>
-
-            <DialogContent className="max-w-md p-4 rounded-2xl bg-white/95 backdrop-blur-md">
-              <DialogHeader>
-                <DialogTitle className="text-lg font-bold font-poppins bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
-                  Menu
-                </DialogTitle>
-              </DialogHeader>
-
-              <div className="grid grid-cols-2 gap-2.5 mt-4">
-                {/* Places */}
-                <a
-                  href="/traveler/places"
-                  className="flex flex-col items-center justify-center p-3 rounded-xl bg-white border-2 border-gray-200 hover:border-amber-300 hover:shadow-md transition-all"
-                >
-                  <div className="h-10 w-10 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center mb-1.5">
-                    <MapPin className="h-5 w-5 text-white" />
-                  </div>
-                  <span className="text-xs font-semibold font-poppins text-gray-800">Places</span>
-                </a>
-
-                {/* Reviews */}
-                <a
-                  href="/traveler/reviews"
-                  className="flex flex-col items-center justify-center p-3 rounded-xl bg-white border-2 border-gray-200 hover:border-amber-300 hover:shadow-md transition-all"
-                >
-                  <div className="h-10 w-10 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center mb-1.5">
-                    <Star className="h-5 w-5 text-white" />
-                  </div>
-                  <span className="text-xs font-semibold font-poppins text-gray-800">Reviews</span>
-                </a>
-
-                {/* History */}
-                <a
-                  href="/traveler/history"
-                  className="flex flex-col items-center justify-center p-3 rounded-xl bg-white border-2 border-gray-200 hover:border-amber-300 hover:shadow-md transition-all"
-                >
-                  <div className="h-10 w-10 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center mb-1.5">
-                    <History className="h-5 w-5 text-white" />
-                  </div>
-                  <span className="text-xs font-semibold font-poppins text-gray-800">History</span>
-                </a>
-
-                {/* Emergency */}
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <button className="flex flex-col items-center justify-center p-3 rounded-xl bg-red-50 border-2 border-red-200 hover:border-red-300 hover:shadow-md transition-all">
-                      <div className="h-10 w-10 rounded-full bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center mb-1.5">
-                        <PhoneCall className="h-5 w-5 text-white" />
-                      </div>
-                      <span className="text-xs font-semibold font-poppins text-red-700">Emergency</span>
-                    </button>
-                  </DialogTrigger>
-
-                  <DialogContent className="max-w-md p-4 rounded-xl">
-                    <DialogHeader>
-                      <DialogTitle className="text-lg font-semibold">
-                        Emergency Services
-                      </DialogTitle>
-                    </DialogHeader>
-
-                    <div className="space-y-3 mt-3">
-                      {/* Tourist Police */}
-                      <div className="flex items-center justify-between p-2.5 border rounded-lg">
-                        <div className="flex items-center gap-2">
-                          <Shield className="h-4 w-4 text-blue-600" />
-                          <span className="text-sm font-medium">Tourist Police</span>
-                        </div>
-                        <a href="tel:1912">
-                          <Button variant="outline" className="flex items-center gap-1.5 h-8 text-xs">
-                            <PhoneCall className="h-3 w-3" />
-                            1912
-                          </Button>
-                        </a>
-                      </div>
-
-                      {/* Ambulance */}
-                      <div className="flex items-center justify-between p-2.5 border rounded-lg">
-                        <div className="flex items-center gap-2">
-                          <Ambulance className="h-4 w-4 text-red-600" />
-                          <span className="text-sm font-medium">Ambulance</span>
-                        </div>
-                        <a href="tel:1990">
-                          <Button variant="outline" className="flex items-center gap-1.5 h-8 text-xs">
-                            <PhoneCall className="h-3 w-3" />
-                            1990
-                          </Button>
-                        </a>
-                      </div>
-
-                      {/* Police Emergency */}
-                      <div className="flex items-center justify-between p-2.5 border rounded-lg">
-                        <div className="flex items-center gap-2">
-                          <CarFront className="h-4 w-4 text-black" />
-                          <span className="text-sm font-medium">Police</span>
-                        </div>
-                        <a href="tel:118">
-                          <Button variant="outline" className="flex items-center gap-1.5 h-8 text-xs">
-                            <PhoneCall className="h-3 w-3" />
-                            118
-                          </Button>
-                        </a>
-                      </div>
-
-                      {/* Fire Rescue */}
-                      <div className="flex items-center justify-between p-2.5 border rounded-lg">
-                        <div className="flex items-center gap-2">
-                          <Flame className="h-4 w-4 text-orange-600" />
-                          <span className="text-sm font-medium">Fire Rescue</span>
-                        </div>
-                        <a href="tel:110">
-                          <Button variant="outline" className="flex items-center gap-1.5 h-8 text-xs">
-                            <PhoneCall className="h-3 w-3" />
-                            110
-                          </Button>
-                        </a>
-                      </div>
-
-                      {/* Coast Guard */}
-                      <div className="flex items-center justify-between p-2.5 border rounded-lg">
-                        <div className="flex items-center gap-2">
-                          <Ship className="h-4 w-4 text-blue-800" />
-                          <span className="text-sm font-medium">Coast Guard</span>
-                        </div>
-                        <a href="tel:117">
-                          <Button variant="outline" className="flex items-center gap-1.5 h-8 text-xs">
-                            <PhoneCall className="h-3 w-3" />
-                            117
-                          </Button>
-                        </a>
-                      </div>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-
-                {/* Sign Out */}
-                <button
-                  onClick={handleSignOut}
-                  disabled={loading}
-                  className="flex flex-col items-center justify-center p-3 rounded-xl bg-white border-2 border-gray-200 hover:border-gray-300 hover:shadow-md transition-all col-span-2"
-                >
-                  <div className="h-10 w-10 rounded-full bg-gradient-to-br from-gray-500 to-gray-600 flex items-center justify-center mb-1.5">
-                    <LogOut className="h-5 w-5 text-white" />
-                  </div>
-                  <span className="text-xs font-semibold font-poppins text-gray-800">
-                    {loading ? "Signing out..." : "Sign Out"}
-                  </span>
-                </button>
-              </div>
-            </DialogContent>
-          </Dialog>
+          {/* Center More Button - placed in middle */}
+          <div className="flex-0 px-2">
+            <button
+              onClick={() => setMenuOpen(!menuOpen)}
+              aria-label="More"
+              className="-mt-6 flex items-center justify-center h-14 w-14 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 text-white shadow-lg hover:shadow-xl transition-transform transform-gpu"
+            >
+              {menuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </button>
+            <div className="text-center mt-1">
+              <span className="text-xs font-medium font-poppins text-gray-700">More</span>
+            </div>
+          </div>
 
           {/* My Trips */}
           <a
             href="/traveler/plans"
-            className={`flex flex-col items-center justify-center min-w-[64px] py-1 rounded-xl transition-all ${
+            className={`flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all ${
               isActive("/traveler/plans")
-                ? "text-amber-600"
-                : "text-gray-600"
+                ? "bg-amber-100 text-amber-700"
+                : "text-gray-600 hover:text-amber-600"
             }`}
           >
-            <Calendar className={`h-7 w-7 ${isActive("/traveler/plans") ? 'stroke-[2.5]' : 'stroke-[2]'}`} />
-            <span className={`text-xs mt-1 font-poppins ${isActive("/traveler/plans") ? 'font-semibold' : 'font-medium'}`}>
-              My Trips
-            </span>
+            <Calendar className="h-5 w-5" />
+            <span className="text-xs font-medium font-poppins">My Trips</span>
           </a>
 
           {/* Events */}
           <a
             href="/traveler/events"
-            className={`flex flex-col items-center justify-center min-w-[64px] py-1 rounded-xl transition-all ${
+            className={`flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all ${
               isActive("/traveler/events")
-                ? "text-amber-600"
-                : "text-gray-600"
+                ? "bg-amber-100 text-amber-700"
+                : "text-gray-600 hover:text-amber-600"
             }`}
           >
-            <Calendar className={`h-7 w-7 ${isActive("/traveler/events") ? 'stroke-[2.5]' : 'stroke-[2]'}`} />
-            <span className={`text-xs mt-1 font-poppins ${isActive("/traveler/events") ? 'font-semibold' : 'font-medium'}`}>
-              Events
-            </span>
+            <Calendar className="h-5 w-5" />
+            <span className="text-xs font-medium font-poppins">Events</span>
           </a>
         </nav>
+
+        {/* Menu Popup */}
+        {menuOpen && (
+          <div className="absolute bottom-full left-0 right-0 mb-2 mx-4 bg-white/95 backdrop-blur-md border-2 border-white shadow-xl rounded-2xl overflow-hidden">
+            <div className="p-2">
+              {/* Places */}
+              <a
+                href="/traveler/places"
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                  isActive("/traveler/places")
+                    ? "bg-amber-100 text-amber-700"
+                    : "text-gray-700 hover:bg-gray-100"
+                }`}
+                onClick={() => setMenuOpen(false)}
+              >
+                <MapPin className="h-5 w-5" />
+                <span className="text-sm font-medium font-poppins">Explore Places</span>
+              </a>
+
+              {/* Reviews */}
+              <a
+                href="/traveler/reviews"
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                  isActive("/traveler/reviews")
+                    ? "bg-amber-100 text-amber-700"
+                    : "text-gray-700 hover:bg-gray-100"
+                }`}
+                onClick={() => setMenuOpen(false)}
+              >
+                <Star className="h-5 w-5" />
+                <span className="text-sm font-medium font-poppins">My Reviews</span>
+              </a>
+
+              {/* History */}
+              <a
+                href="/traveler/history"
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                  isActive("/traveler/history")
+                    ? "bg-amber-100 text-amber-700"
+                    : "text-gray-700 hover:bg-gray-100"
+                }`}
+                onClick={() => setMenuOpen(false)}
+              >
+                <History className="h-5 w-5" />
+                <span className="text-sm font-medium font-poppins">Payment History</span>
+              </a>
+
+              {/* Emergency */}
+              <Dialog>
+                <DialogTrigger asChild>
+                  <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-red-600 hover:bg-red-50">
+                    <PhoneCall className="h-5 w-5" />
+                    <span className="text-sm font-medium font-poppins">Emergency Help</span>
+                  </button>
+                </DialogTrigger>
+
+                <DialogContent className="max-w-md p-4 rounded-xl">
+                  <DialogHeader>
+                    <DialogTitle className="text-lg font-semibold">
+                      Emergency Services
+                    </DialogTitle>
+                    <DialogDescription className="sr-only">
+                      Emergency contact numbers for tourists in Sri Lanka
+                    </DialogDescription>
+                  </DialogHeader>
+
+                  <div className="space-y-3 mt-3">
+                    {/* Tourist Police */}
+                    <div className="flex items-center justify-between p-2.5 border rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <Shield className="h-4 w-4 text-blue-600" />
+                        <span className="text-sm font-medium">Tourist Police</span>
+                      </div>
+                      <a href="tel:1912">
+                        <Button variant="outline" className="flex items-center gap-1.5 h-8 text-xs">
+                          <PhoneCall className="h-3 w-3" />
+                          1912
+                        </Button>
+                      </a>
+                    </div>
+
+                    {/* Ambulance */}
+                    <div className="flex items-center justify-between p-2.5 border rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <Ambulance className="h-4 w-4 text-red-600" />
+                        <span className="text-sm font-medium">Ambulance</span>
+                      </div>
+                      <a href="tel:1990">
+                        <Button variant="outline" className="flex items-center gap-1.5 h-8 text-xs">
+                          <PhoneCall className="h-3 w-3" />
+                          1990
+                        </Button>
+                      </a>
+                    </div>
+
+                    {/* Police Emergency */}
+                    <div className="flex items-center justify-between p-2.5 border rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <CarFront className="h-4 w-4 text-black" />
+                        <span className="text-sm font-medium">Police</span>
+                      </div>
+                      <a href="tel:118">
+                        <Button variant="outline" className="flex items-center gap-1.5 h-8 text-xs">
+                          <PhoneCall className="h-3 w-3" />
+                          118
+                        </Button>
+                      </a>
+                    </div>
+
+                    {/* Fire Rescue */}
+                    <div className="flex items-center justify-between p-2.5 border rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <Flame className="h-4 w-4 text-orange-600" />
+                        <span className="text-sm font-medium">Fire Rescue</span>
+                      </div>
+                      <a href="tel:110">
+                        <Button variant="outline" className="flex items-center gap-1.5 h-8 text-xs">
+                          <PhoneCall className="h-3 w-3" />
+                          110
+                        </Button>
+                      </a>
+                    </div>
+
+                    {/* Coast Guard */}
+                    <div className="flex items-center justify-between p-2.5 border rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <Ship className="h-4 w-4 text-blue-800" />
+                        <span className="text-sm font-medium">Coast Guard</span>
+                      </div>
+                      <a href="tel:117">
+                        <Button variant="outline" className="flex items-center gap-1.5 h-8 text-xs">
+                          <PhoneCall className="h-3 w-3" />
+                          117
+                        </Button>
+                      </a>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
+
+              {/* Sign Out Button */}
+              <button
+                onClick={handleSignOut}
+                disabled={loading}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-red-600 hover:bg-red-50 mt-2 border-t pt-4"
+              >
+                <LogOut className="h-5 w-5" />
+                <span className="text-sm font-medium font-poppins">
+                  {loading ? "Signing out..." : "Sign Out"}
+                </span>
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );

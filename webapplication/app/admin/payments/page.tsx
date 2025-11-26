@@ -143,10 +143,10 @@ export default function AdminPaymentsPage() {
   if (loading) {
     return (
       <SidebarProvider>
-        <div className="flex h-screen w-full bg-gray-50">
+        <div className="flex h-screen w-full bg-gradient-to-br from-gray-50 to-gray-100">
           <AppSidebar />
           <div className="flex-1 flex items-center justify-center">
-            <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+            <Loader2 className="h-12 w-12 animate-spin text-amber-600" />
           </div>
         </div>
       </SidebarProvider>
@@ -155,58 +155,53 @@ export default function AdminPaymentsPage() {
 
   return (
     <SidebarProvider>
-      <div className="flex h-screen w-full bg-gray-50">
+      <div className="flex h-screen w-full bg-gradient-to-br from-gray-50 to-gray-100">
         <AppSidebar />
 
         <div className="flex-1 flex flex-col overflow-hidden">
-          <main className="flex-1 overflow-y-auto p-4 lg:p-6">
+          <main className="flex-1 overflow-y-auto p-4 lg:p-8">
             {/* Header */}
-            <div className="mb-6">
-              <div className="lg:hidden mb-4">
+            <div className="mb-8">
+              <div className="hidden md:block mb-4">
                 <SidebarTrigger />
               </div>
-              <div className="flex items-center gap-3 mb-4">
-                <div className="bg-green-100 p-3 rounded-lg">
-                  <Receipt className="h-6 w-6 text-green-600" />
-                </div>
-                <div>
-                  <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Payment History</h1>
-                  <p className="text-gray-600 mt-1">Monitor all payment transactions</p>
-                </div>
+              <div className="mb-6">
+                <h1 className="text-3xl lg:text-4xl font-bold font-poppins bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">Payment History</h1>
+                <p className="text-gray-600 mt-2 font-poppins">Monitor all payment transactions</p>
               </div>
 
               {/* Stats Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                <Card>
-                  <CardContent className="p-4">
-                    <div className="text-sm text-gray-600 mb-1">Total Payments</div>
-                    <div className="text-2xl font-bold text-gray-900">{payments.length}</div>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="p-4">
-                    <div className="text-sm text-gray-600 mb-1">Completed</div>
-                    <div className="text-2xl font-bold text-green-600">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div className="bg-white/95 backdrop-blur-md border-2 border-white shadow-xl rounded-2xl overflow-hidden">
+                  <div className="p-6">
+                    <div className="text-sm font-poppins font-medium text-gray-600 mb-2">Total Payments</div>
+                    <div className="text-3xl font-bold font-poppins text-gray-900">{payments.length}</div>
+                  </div>
+                </div>
+                <div className="bg-white/95 backdrop-blur-md border-2 border-white shadow-xl rounded-2xl overflow-hidden">
+                  <div className="p-6">
+                    <div className="text-sm font-poppins font-medium text-gray-600 mb-2">Completed</div>
+                    <div className="text-3xl font-bold font-poppins text-green-600">
                       {payments.filter((p) => p.status === "PAID").length}
                     </div>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="p-4">
-                    <div className="text-sm text-gray-600 mb-1">Total Revenue</div>
-                    <div className="text-xl font-bold text-green-600">
+                  </div>
+                </div>
+                <div className="bg-white/95 backdrop-blur-md border-2 border-white shadow-xl rounded-2xl overflow-hidden">
+                  <div className="p-6">
+                    <div className="text-sm font-poppins font-medium text-gray-600 mb-2">Total Revenue</div>
+                    <div className="text-3xl font-bold font-poppins text-green-600">
                       {formatCurrency(getTotalRevenue())}
                     </div>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="p-4">
-                    <div className="text-sm text-gray-600 mb-1">Pending Amount</div>
-                    <div className="text-xl font-bold text-orange-600">
+                  </div>
+                </div>
+                <div className="bg-white/95 backdrop-blur-md border-2 border-white shadow-xl rounded-2xl overflow-hidden">
+                  <div className="p-6">
+                    <div className="text-sm font-poppins font-medium text-gray-600 mb-2">Pending Amount</div>
+                    <div className="text-3xl font-bold font-poppins text-orange-600">
                       {formatCurrency(getPendingAmount())}
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
               </div>
 
               {/* Filters */}

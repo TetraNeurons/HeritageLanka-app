@@ -115,11 +115,11 @@ export default function TravelerReviewsPage() {
             <div className="max-w-7xl mx-auto">
               {/* Header */}
               <div className="mb-8">
-                <div className="lg:hidden mb-4">
+                <div className="hidden md:block mb-4">
                   <SidebarTrigger />
                 </div>
-                <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-3 font-poppins">My Reviews</h1>
-                <p className="text-gray-700 font-medium">
+                <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-3 font-poppins">My Reviews</h1>
+                <p className="text-sm lg:text-base text-gray-700 font-medium">
                   View reviews you've given and received from guides
                 </p>
               </div>
@@ -129,11 +129,11 @@ export default function TravelerReviewsPage() {
                 {/* Reviews Given */}
                 <div>
                   <div className="flex items-center gap-3 mb-5 bg-white/95 backdrop-blur-md p-4 rounded-xl shadow-lg border-2 border-gray-200">
-                    <MessageSquare className="h-6 w-6 text-amber-600" />
-                    <h2 className="text-xl font-bold text-gray-900 font-poppins">
+                    <MessageSquare className="h-5 w-5 text-amber-600" />
+                    <h2 className="text-base lg:text-lg font-bold text-gray-900 font-poppins">
                       Reviews Given
                     </h2>
-                    <span className="bg-gradient-to-r from-amber-100 to-orange-100 text-amber-700 px-3 py-1 rounded-full text-sm font-bold border-2 border-amber-200">
+                    <span className="bg-gradient-to-r from-amber-100 to-orange-100 text-amber-700 px-3 py-1 rounded-full text-xs lg:text-sm font-bold border-2 border-amber-200">
                       {reviewsGiven.length}
                     </span>
                   </div>
@@ -167,10 +167,10 @@ export default function TravelerReviewsPage() {
                   ) : (
                     <div className="bg-white/95 backdrop-blur-md border-2 border-gray-200 rounded-xl p-16 text-center shadow-xl">
                       <Star className="h-16 w-16 text-amber-300 mx-auto mb-6" />
-                      <h3 className="text-lg font-bold text-gray-900 mb-3 font-poppins">
+                      <h3 className="text-base lg:text-lg font-bold text-gray-900 mb-3 font-poppins">
                         No reviews given yet
                       </h3>
-                      <p className="text-gray-600 font-medium">
+                      <p className="text-sm text-gray-600 font-medium">
                         Complete a trip with a guide to leave your first review
                       </p>
                     </div>
@@ -180,11 +180,11 @@ export default function TravelerReviewsPage() {
                 {/* Reviews Received */}
                 <div>
                   <div className="flex items-center gap-3 mb-5 bg-white/95 backdrop-blur-md p-4 rounded-xl shadow-lg border-2 border-gray-200">
-                    <Star className="h-6 w-6 text-yellow-500" />
-                    <h2 className="text-xl font-bold text-gray-900 font-poppins">
+                    <Star className="h-5 w-5 text-yellow-500" />
+                    <h2 className="text-base lg:text-lg font-bold text-gray-900 font-poppins">
                       Reviews Received
                     </h2>
-                    <span className="bg-gradient-to-r from-yellow-100 to-amber-100 text-yellow-700 px-3 py-1 rounded-full text-sm font-bold border-2 border-yellow-200">
+                    <span className="bg-gradient-to-r from-yellow-100 to-amber-100 text-yellow-700 px-3 py-1 rounded-full text-xs lg:text-sm font-bold border-2 border-yellow-200">
                       {reviewsReceived.length}
                     </span>
                   </div>
@@ -216,10 +216,10 @@ export default function TravelerReviewsPage() {
                   ) : (
                     <div className="bg-white/95 backdrop-blur-md border-2 border-gray-200 rounded-xl p-16 text-center shadow-xl">
                       <Star className="h-16 w-16 text-amber-300 mx-auto mb-6" />
-                      <h3 className="text-lg font-bold text-gray-900 mb-3 font-poppins">
+                      <h3 className="text-base lg:text-lg font-bold text-gray-900 mb-3 font-poppins">
                         No reviews received yet
                       </h3>
-                      <p className="text-gray-600 font-medium">
+                      <p className="text-sm text-gray-600 font-medium">
                         Guides will be able to review you after completing trips
                       </p>
                     </div>
@@ -235,8 +235,8 @@ export default function TravelerReviewsPage() {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent className="bg-white/95 backdrop-blur-md border-2 border-gray-200 shadow-2xl">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-xl font-bold font-poppins">Delete Review</AlertDialogTitle>
-            <AlertDialogDescription className="text-base">
+            <AlertDialogTitle className="text-base lg:text-lg font-bold font-poppins">Delete Review</AlertDialogTitle>
+            <AlertDialogDescription className="text-sm">
               Are you sure you want to delete this review? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>

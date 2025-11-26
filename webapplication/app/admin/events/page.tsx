@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { format } from "date-fns";
 import { AppSidebar } from "@/components/admin/Sidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
@@ -78,50 +79,115 @@ export default function AdminEventsPage() {
 
   return (
     <SidebarProvider>
-      <div className="flex h-screen w-full bg-white">
+      <div className="flex h-screen w-full bg-gradient-to-br from-gray-50 to-gray-100">
         <AppSidebar />
 
         <div className="flex-1 overflow-y-auto p-8">
-          <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl font-bold text-black">Manage Events</h1>
-            <Button 
-              onClick={() => router.push('/admin/events/create')}
-              className="bg-black hover:bg-gray-800 text-white"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Create Event
-            </Button>
+          <div className="mb-8">
+            <div className="flex justify-between items-center">
+              <div>
+                <h1 className="text-4xl font-bold font-poppins bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">Manage Events</h1>
+                <p className="text-gray-600 mt-2 font-poppins">Create and manage events & promotional offers</p>
+              </div>
+              <Button 
+                onClick={() => router.push('/admin/events/create')}
+                className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-poppins shadow-lg"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Create Event
+              </Button>
+            </div>
+          </div>
+
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div className="bg-white/95 backdrop-blur-md border-2 border-white shadow-xl rounded-2xl overflow-hidden">
+              <div className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-poppins font-medium text-gray-600 mb-2">Total Events</p>
+                    <p className="text-3xl font-bold font-poppins text-gray-900">{events.length}</p>
+                  </div>
+                  <div className="p-4 bg-gradient-to-br from-blue-400 to-blue-600 rounded-2xl shadow-lg">
+                    <Calendar className="h-7 w-7 text-white" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white/95 backdrop-blur-md border-2 border-white shadow-xl rounded-2xl overflow-hidden">
+              <div className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-poppins font-medium text-gray-600 mb-2">Active Events</p>
+                    <p className="text-3xl font-bold font-poppins text-green-600">
+                      {events.filter(e => e.date && new Date(e.date) >= new Date()).length}
+                    </p>
+                  </div>
+                  <div className="p-4 bg-gradient-to-br from-green-400 to-green-600 rounded-2xl shadow-lg">
+                    <Ticket className="h-7 w-7 text-white" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white/95 backdrop-blur-md border-2 border-white shadow-xl rounded-2xl overflow-hidden">
+              <div className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-poppins font-medium text-gray-600 mb-2">Upcoming</p>
+                    <p className="text-3xl font-bold font-poppins text-purple-600">
+                      {events.filter(e => e.date && new Date(e.date) > new Date()).length}
+                    </p>
+                  </div>
+                  <div className="p-4 bg-gradient-to-br from-purple-400 to-purple-600 rounded-2xl shadow-lg">
+                    <Calendar className="h-7 w-7 text-white" />
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
           {events.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-gray-500">No events found. Create your first event!</p>
+            <div className="bg-white/95 backdrop-blur-md border-2 border-white shadow-xl rounded-2xl p-12">
+              <div className="text-center">
+                <Calendar className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                <p className="text-gray-500 font-poppins">No events found. Create your first event!</p>
+              </div>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-6">
               {events.map((event) => (
                 <div
                   key={event.id}
-                  className="border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-all"
+                  className="bg-white/95 backdrop-blur-md border-2 border-white shadow-xl rounded-2xl overflow-hidden hover:shadow-2xl transition-all"
                 >
-                  <div className="flex gap-6">
+                  <div className="p-6 flex gap-6">
                     <img
                       src={event.images[0]}
                       alt={event.title}
-                      className="w-48 h-32 object-cover rounded"
+                      className="w-48 h-32 object-cover rounded-xl"
                     />
                     
                     <div className="flex-1">
-                      <h2 className="text-2xl font-bold text-black mb-3">{event.title}</h2>
+                      <h2 className="text-2xl font-bold font-poppins text-gray-900 mb-3">{event.title}</h2>
                       
-                      <div className="grid grid-cols-2 gap-3 text-sm text-gray-600 mb-4">
+                      <div className="grid grid-cols-2 gap-3 text-sm text-gray-600 mb-4 font-poppins">
                         <p className="flex items-center gap-2">
-                          <Calendar className="w-4 h-4" /> {event.date}
+                          <Calendar className="w-4 h-4" /> 
+                          {event.date ? (() => {
+                            try {
+                              const date = new Date(event.date);
+                              return format(date, "PPP 'at' p");
+                            } catch {
+                              return event.date;
+                            }
+                          })() : 'No date'}
                         </p>
                         <p className="flex items-center gap-2">
                           <MapPin className="w-4 h-4" /> {event.place}
                         </p>
-                        <p className="flex items-center gap-2 font-semibold text-black">
+                        <p className="flex items-center gap-2 font-semibold text-amber-600">
                           Price: {event.price}
                         </p>
                         <p className="flex items-center gap-2">

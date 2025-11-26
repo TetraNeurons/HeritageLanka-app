@@ -3,11 +3,8 @@
 import { useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
 import Header from "@/components/Header"
 import Footer from "@/components/Footer"
 import StructuredData from "@/components/StructuredData"
@@ -21,8 +18,6 @@ import {
   MapPin, 
   Star,
   Megaphone,
-  Copy,
-  Check,
   Smartphone,
   Clock,
   Award,
@@ -31,54 +26,6 @@ import {
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<"traveler" | "guide">("traveler")
-  
-  // Advertisement form state
-  const [adForm, setAdForm] = useState({
-    imageUrl: "",
-    description: "",
-    redirectUrl: "",
-  })
-  const [adSubmitting, setAdSubmitting] = useState(false)
-  const [adSuccess, setAdSuccess] = useState(false)
-  const [paymentRef, setPaymentRef] = useState("")
-  const [adError, setAdError] = useState("")
-  const [copied, setCopied] = useState(false)
-
-  const handleAdSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setAdSubmitting(true)
-    setAdError("")
-
-    try {
-      const response = await fetch("/api/public/advertisements", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(adForm),
-      })
-
-      const data = await response.json()
-
-      if (data.success) {
-        setAdSuccess(true)
-        setPaymentRef(data.paymentReference)
-        setAdForm({ imageUrl: "", description: "", redirectUrl: "" })
-      } else {
-        setAdError(data.message || "Failed to submit advertisement")
-      }
-    } catch (error) {
-      setAdError("An error occurred. Please try again.")
-    } finally {
-      setAdSubmitting(false)
-    }
-  }
-
-  const copyToClipboard = () => {
-    if (typeof window !== 'undefined' && navigator.clipboard) {
-      navigator.clipboard.writeText(paymentRef)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    }
-  }
 
   return (
     <div className="flex min-h-screen flex-col overflow-x-hidden">
@@ -125,7 +72,101 @@ export default function Home() {
             Connect with verified local guides and discover hidden places across Sri Lanka
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center pt-6 px-4 sm:px-0 animate-fade-in-up animation-delay-400">
+          {/* Search Section */}
+          <div className="max-w-4xl mx-auto animate-fade-in-up animation-delay-300">
+            <div className="bg-white/10 backdrop-blur-md rounded-2xl shadow-2xl p-4 md:p-5 border-2 border-white/20">
+              {/* Category Tabs */}
+              <div className="flex flex-wrap justify-center gap-2 md:gap-3 mb-4">
+                <Button
+                  variant="ghost"
+                  className="flex items-center gap-2 text-sm md:text-base font-semibold text-white hover:text-white hover:bg-white/20 rounded-lg px-3 py-1.5"
+                  asChild
+                >
+                  <Link href="/auth/signin">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                    Search All
+                  </Link>
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="flex items-center gap-2 text-sm md:text-base font-semibold text-white hover:text-white hover:bg-white/20 rounded-lg px-3 py-1.5"
+                  asChild
+                >
+                  <Link href="/auth/signin">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 20l-5.447-2.724A1 1 0 0 1 3 16.382V5.618a1 1 0 0 1 1.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0 0 21 18.382V7.618a1 1 0 0 0-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
+                    Plan Trip
+                  </Link>
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="flex items-center gap-2 text-sm md:text-base font-semibold text-white hover:text-white hover:bg-white/20 rounded-lg px-3 py-1.5"
+                  asChild
+                >
+                  <Link href="/auth/signin">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                    Explore Places
+                  </Link>
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="flex items-center gap-2 text-sm md:text-base font-semibold text-white hover:text-white hover:bg-white/20 rounded-lg px-3 py-1.5"
+                  asChild
+                >
+                  <Link href="/auth/signin">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></svg>
+                    New Events
+                  </Link>
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="flex items-center gap-2 text-sm md:text-base font-semibold text-white hover:text-white hover:bg-white/20 rounded-lg px-3 py-1.5"
+                  asChild
+                >
+                  <Link href="/auth/signin">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                    Exclusive Offers
+                  </Link>
+                </Button>
+              </div>
+
+              {/* Search Bar */}
+              <div className="flex flex-col sm:flex-row gap-2">
+                <div className="flex-1 relative">
+                  <svg 
+                    xmlns="http://www.w3.org/2000/svg" 
+                    width="18" 
+                    height="18" 
+                    viewBox="0 0 24 24" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    strokeWidth="2" 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round"
+                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60"
+                  >
+                    <circle cx="11" cy="11" r="8"/>
+                    <path d="m21 21-4.3-4.3"/>
+                  </svg>
+                  <input
+                    type="text"
+                    placeholder="Places to go, things to do, hotels..."
+                    className="w-full h-12 pl-11 pr-4 rounded-xl border-2 border-white/30 bg-white/20 focus:border-white/50 focus:bg-white/30 focus:outline-none text-sm text-white placeholder-white/60 font-medium"
+                  />
+                </div>
+                <Button 
+                  size="lg" 
+                  className="h-12 px-6 bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 text-white font-bold rounded-xl shadow-lg text-sm"
+                  asChild
+                >
+                  <Link href="/auth/signin">
+                    Search
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-4 justify-center px-4 sm:px-0 animate-fade-in-up animation-delay-400 mt-4">
             <Button size="lg" className="w-full sm:w-auto h-12 text-base px-6 bg-white text-black hover:bg-gray-100 font-semibold shadow-2xl transition-all transform hover:scale-105" asChild>
               <Link href="/auth/signup">
                 Join as Traveler
@@ -526,7 +567,7 @@ export default function Home() {
         />
         
         {/* Content */}
-        <div className="container mx-auto max-w-2xl relative z-10">
+        <div className="container mx-auto max-w-4xl relative z-10">
           <div className="text-center mb-12">
             <div className="flex justify-center mb-6">
               <div className="h-16 w-16 rounded-xl bg-amber-100 flex items-center justify-center">
@@ -536,162 +577,58 @@ export default function Home() {
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-4">
               Advertise <span className="text-amber-500">With Us</span>
             </h2>
-            <p className="text-lg text-gray-600">
+            <p className="text-lg text-gray-600 mb-8">
               Reach thousands of travelers exploring Sri Lanka. Only 50 LKR per day!
             </p>
+
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+              <Button size="lg" className="w-full sm:w-auto h-12 text-base px-8 bg-amber-500 hover:bg-amber-600 text-white font-semibold shadow-xl" asChild>
+                <Link href="/public/check-ad">
+                  Submit Advertisement
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+              <Button size="lg" variant="outline" className="w-full sm:w-auto h-12 text-base px-8 border-2 border-amber-500 text-amber-600 hover:bg-amber-50 font-semibold shadow-xl" asChild>
+                <Link href="/public/check-ad">
+                  Check Ad Status
+                </Link>
+              </Button>
+            </div>
           </div>
 
-          {!adSuccess ? (
-            <Card className="bg-white/95 backdrop-blur-md border-2 border-gray-100 shadow-2xl">
-              <CardHeader className="pb-6 pt-6 px-12 text-center">
-                <CardTitle className="text-2xl font-bold tracking-tight">Submit Your Advertisement</CardTitle>
-              </CardHeader>
-              <CardContent className="px-12 pb-8">
-                <form onSubmit={handleAdSubmit} className="space-y-5">
-                  <div>
-                    <Label htmlFor="imageUrl" className="text-base font-semibold">Image URL *</Label>
-                    <Input
-                      id="imageUrl"
-                      type="url"
-                      placeholder="https://example.com/image.jpg"
-                      value={adForm.imageUrl}
-                      onChange={(e) => setAdForm({ ...adForm, imageUrl: e.target.value })}
-                      required
-                      className="mt-2 h-12"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="description" className="text-base font-semibold">Description * (Max 500 characters)</Label>
-                    <Textarea
-                      id="description"
-                      placeholder="Describe your advertisement..."
-                      value={adForm.description}
-                      onChange={(e) => setAdForm({ ...adForm, description: e.target.value })}
-                      maxLength={500}
-                      rows={4}
-                      required
-                      className="mt-2"
-                    />
-                    <p className="text-xs text-gray-500 mt-2">
-                      {adForm.description.length}/500 characters
-                    </p>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="redirectUrl" className="text-base font-semibold">Redirect URL *</Label>
-                    <Input
-                      id="redirectUrl"
-                      type="url"
-                      placeholder="https://your-website.com"
-                      value={adForm.redirectUrl}
-                      onChange={(e) => setAdForm({ ...adForm, redirectUrl: e.target.value })}
-                      required
-                      className="mt-2 h-12"
-                    />
-                  </div>
-
-                  {adError && (
-                    <div className="p-4 bg-red-50 border-2 border-red-200 rounded-lg text-red-600 text-sm font-medium">
-                      {adError}
-                    </div>
-                  )}
-
-                  <div className="bg-amber-50 border-2 border-amber-200 rounded-lg p-5">
-                    <h4 className="font-bold text-base mb-3 text-gray-900">Payment Instructions</h4>
-                    <ul className="text-sm text-gray-700 space-y-2">
-                      <li className="flex items-start">
-                        <span className="mr-2">•</span>
-                        <span>Price: 50 LKR per day</span>
-                      </li>
-                      <li className="flex items-start">
-                        <span className="mr-2">•</span>
-                        <span>Payment via bank transfer</span>
-                      </li>
-                      <li className="flex items-start">
-                        <span className="mr-2">•</span>
-                        <span>Include the payment reference ID in your transfer description</span>
-                      </li>
-                      <li className="flex items-start">
-                        <span className="mr-2">•</span>
-                        <span>Your ad will be reviewed and activated after payment verification</span>
-                      </li>
-                    </ul>
-                  </div>
-
-                  <Button type="submit" className="w-full h-12 text-base font-bold" disabled={adSubmitting}>
-                    {adSubmitting ? "Submitting..." : "Submit Advertisement"}
-                  </Button>
-
-                  <div className="text-center pt-2">
-                    <p className="text-sm text-gray-600">
-                      Already submitted an ad?{" "}
-                      <Link href="/public/check-ad" className="text-amber-600 hover:text-amber-700 hover:underline font-semibold">
-                        Check your ad status
-                      </Link>
-                    </p>
-                  </div>
-                </form>
-              </CardContent>
-            </Card>
-          ) : (
-            <Card className="border-green-200 bg-green-50">
-              <CardContent className="pt-6">
-                <div className="text-center space-y-4">
-                  <div className="flex justify-center">
-                    <div className="h-16 w-16 rounded-full bg-green-100 flex items-center justify-center">
-                      <Check className="h-8 w-8 text-green-600" />
-                    </div>
-                  </div>
-                  <h3 className="text-2xl font-bold text-green-900">Advertisement Submitted!</h3>
-                  <p className="text-green-700">
-                    Your advertisement has been submitted successfully. Please complete the payment to activate it.
-                  </p>
-
-                  <div className="bg-white border border-green-200 rounded-lg p-4">
-                    <p className="text-sm font-medium text-gray-700 mb-2">Your Payment Reference ID:</p>
-                    <div className="flex items-center gap-2 justify-center">
-                      <code className="text-lg font-mono font-bold text-green-600 bg-green-100 px-4 py-2 rounded">
-                        {paymentRef}
-                      </code>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={copyToClipboard}
-                        className="flex items-center gap-2"
-                      >
-                        {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                        {copied ? "Copied!" : "Copy"}
-                      </Button>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-3">
-                      Include this reference ID in your bank transfer description
-                    </p>
-                  </div>
-
-                  <div className="text-left bg-white border border-green-200 rounded-lg p-4">
-                    <h4 className="font-semibold text-sm mb-2">Next Steps:</h4>
-                    <ol className="text-sm text-muted-foreground space-y-1 list-decimal list-inside">
-                      <li>Make a bank transfer of 50 LKR per day</li>
-                      <li>Include the reference ID <strong>{paymentRef}</strong> in the description</li>
-                      <li>Your ad will be reviewed and activated within 24 hours</li>
-                      <li>Check your ad status at <Link href="/check-ad" className="text-primary underline">/check-ad</Link></li>
-                    </ol>
-                  </div>
-
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setAdSuccess(false)
-                      setPaymentRef("")
-                    }}
-                  >
-                    Submit Another Advertisement
-                  </Button>
+          {/* Why Advertise With Us */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Card className="bg-white/95 backdrop-blur-md border-2 border-gray-100 shadow-lg hover:shadow-xl transition-all">
+              <CardContent className="pt-6 pb-6 text-center">
+                <div className="h-12 w-12 rounded-xl bg-amber-100 flex items-center justify-center mx-auto mb-4">
+                  <Users className="h-6 w-6 text-amber-600" />
                 </div>
+                <h3 className="font-bold text-lg mb-2">Targeted Audience</h3>
+                <p className="text-sm text-gray-600">Reach travelers actively planning trips to Sri Lanka</p>
               </CardContent>
             </Card>
-          )}
+
+            <Card className="bg-white/95 backdrop-blur-md border-2 border-gray-100 shadow-lg hover:shadow-xl transition-all">
+              <CardContent className="pt-6 pb-6 text-center">
+                <div className="h-12 w-12 rounded-xl bg-amber-100 flex items-center justify-center mx-auto mb-4">
+                  <Zap className="h-6 w-6 text-amber-600" />
+                </div>
+                <h3 className="font-bold text-lg mb-2">Affordable Pricing</h3>
+                <p className="text-sm text-gray-600">Just 50 LKR per day with flexible payment options</p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white/95 backdrop-blur-md border-2 border-gray-100 shadow-lg hover:shadow-xl transition-all">
+              <CardContent className="pt-6 pb-6 text-center">
+                <div className="h-12 w-12 rounded-xl bg-amber-100 flex items-center justify-center mx-auto mb-4">
+                  <Globe className="h-6 w-6 text-amber-600" />
+                </div>
+                <h3 className="font-bold text-lg mb-2">Wide Reach</h3>
+                <p className="text-sm text-gray-600">Display your ads to thousands of active users</p>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </section>
 

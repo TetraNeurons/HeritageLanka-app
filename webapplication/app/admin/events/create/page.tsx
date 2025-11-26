@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
 import { AppSidebar } from "@/components/admin/Sidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
@@ -9,9 +10,18 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Upload, X } from "lucide-react";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { storage } from "@/lib/firebase";
 import { toast } from "sonner";
+import DateTimePicker from "@/components/DateTimePicker";
+
+// Dynamically import LocationPicker to avoid SSR issues with Leaflet
+const LocationPicker = dynamic(() => import("@/components/LocationPicker"), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-[400px] bg-gray-100 rounded-lg flex items-center justify-center">
+      <p className="text-gray-500">Loading map...</p>
+    </div>
+  ),
+});
 
 export default function CreateEventPage() {
   const router = useRouter();
@@ -19,9 +29,10 @@ export default function CreateEventPage() {
   const [images, setImages] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
   
+  const [eventDate, setEventDate] = useState<Date | undefined>(undefined);
+  
   const [formData, setFormData] = useState({
     title: "",
-    date: "",
     price: "",
     place: "",
     lat: "",
@@ -50,19 +61,6 @@ export default function CreateEventPage() {
     setPreviews(previews.filter((_, i) => i !== index));
   };
 
-  const uploadImages = async () => {
-    const urls: string[] = [];
-    
-    for (const image of images) {
-      const storageRef = ref(storage, `events/${Date.now()}_${image.name}`);
-      await uploadBytes(storageRef, image);
-      const url = await getDownloadURL(storageRef);
-      urls.push(url);
-    }
-    
-    return urls;
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -73,26 +71,41 @@ export default function CreateEventPage() {
 
     setLoading(true);
 
-    try {
-      const imageUrls = await uploadImages();
+    if (!eventDate) {
+      toast.error("Please select event date and time");
+      return;
+    }
 
-      const res = await fetch('/api/events', {
+    try {
+      // Create FormData and append all fields
+      const formDataToSend = new FormData();
+      formDataToSend.append('title', formData.title);
+      formDataToSend.append('date', eventDate.toISOString());
+      formDataToSend.append('price', formData.price);
+      formDataToSend.append('place', formData.place);
+      formDataToSend.append('lat', formData.lat);
+      formDataToSend.append('lng', formData.lng);
+      formDataToSend.append('phone', formData.phone);
+      formDataToSend.append('organizer', formData.organizer);
+      formDataToSend.append('description', formData.description);
+      formDataToSend.append('ticketCount', formData.ticketCount);
+      
+      // Append image files
+      images.forEach((image, index) => {
+        formDataToSend.append(`image${index}`, image);
+      });
+
+      const res = await fetch('/api/admin/events', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...formData,
-          images: imageUrls,
-          lat: parseFloat(formData.lat),
-          lng: parseFloat(formData.lng),
-          ticketCount: parseInt(formData.ticketCount) || 0,
-        }),
+        body: formDataToSend,
       });
 
       if (res.ok) {
         toast.success('Event created successfully');
         router.push('/admin/events');
       } else {
-        toast.error('Failed to create event');
+        const error = await res.json();
+        toast.error(error.error || 'Failed to create event');
       }
     } catch (error) {
       console.error('Error creating event:', error);
@@ -161,13 +174,11 @@ export default function CreateEventPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="date">Date</Label>
-                  <Input
-                    id="date"
-                    placeholder="e.g., Aug 14–24, 2025"
-                    value={formData.date}
-                    onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                    required
+                  <DateTimePicker
+                    value={eventDate}
+                    onChange={setEventDate}
+                    label="Event Date & Time"
+                    placeholder="Select event date and time"
                   />
                 </div>
                 <div>
@@ -183,12 +194,29 @@ export default function CreateEventPage() {
               </div>
 
               <div>
-                <Label htmlFor="place">Location</Label>
+                <Label htmlFor="place">Location Name</Label>
                 <Input
                   id="place"
                   value={formData.place}
                   onChange={(e) => setFormData({ ...formData, place: e.target.value })}
+                  placeholder="Enter location name or select on map"
                   required
+                />
+              </div>
+
+              <div>
+                <Label>Select Location on Map</Label>
+                <LocationPicker
+                  lat={parseFloat(formData.lat) || 7.8731}
+                  lng={parseFloat(formData.lng) || 80.7718}
+                  onLocationChange={(lat, lng, placeName) => {
+                    setFormData({
+                      ...formData,
+                      lat: lat.toString(),
+                      lng: lng.toString(),
+                      place: placeName || formData.place,
+                    });
+                  }}
                 />
               </div>
 
@@ -202,6 +230,7 @@ export default function CreateEventPage() {
                     value={formData.lat}
                     onChange={(e) => setFormData({ ...formData, lat: e.target.value })}
                     required
+                    readOnly
                   />
                 </div>
                 <div>
@@ -213,6 +242,7 @@ export default function CreateEventPage() {
                     value={formData.lng}
                     onChange={(e) => setFormData({ ...formData, lng: e.target.value })}
                     required
+                    readOnly
                   />
                 </div>
               </div>

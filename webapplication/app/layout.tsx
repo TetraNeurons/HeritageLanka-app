@@ -3,6 +3,7 @@ import { Inter, Poppins, Dancing_Script } from "next/font/google";
 import "./globals.css";
 import { AccessibilityWidget } from "@/components/accessibility/AccessibilityWidget";
 import { Toaster } from "sonner";
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 const inter = Inter({ 
   subsets: ["latin"],

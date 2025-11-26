@@ -158,7 +158,7 @@ export default function GuiderDashboardPage() {
             {/* Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-4 sm:mb-6 gap-3">
               <div className="w-full sm:w-auto">
-                <div className="lg:hidden mb-2"><SidebarTrigger /></div>
+                <div className="hidden md:block mb-2"><SidebarTrigger /></div>
                 <h1 className="text-xl sm:text-2xl font-bold font-poppins tracking-tight text-gray-900">Guide Dashboard</h1>
                 <p className="text-gray-500 text-xs sm:text-sm font-poppins">{currentDate}</p>
               </div>

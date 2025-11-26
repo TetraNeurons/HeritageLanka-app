@@ -210,3 +210,54 @@ export interface APILog {
   success: boolean;
   errorMessage?: string;
 }
+
+/**
+ * TypeScript type definitions for file storage operations
+ */
+
+/**
+ * Request interface for file upload operations
+ */
+export interface FileUploadRequest {
+  files: File[];
+}
+
+/**
+ * Response interface for successful file upload operations
+ */
+export interface FileUploadResponse {
+  urls: string[];
+}
+
+/**
+ * Metadata for files stored in Firebase Storage
+ */
+export interface StorageFileMetadata {
+  name: string;
+  bucket: string;
+  contentType: string;
+  size: number;
+  timeCreated?: string;
+  updated?: string;
+}
+
+/**
+ * Error interface for file validation failures
+ */
+export interface FileValidationError {
+  isValid: false;
+  error: string;
+  field?: string;
+}
+
+/**
+ * Success interface for file validation
+ */
+export interface FileValidationSuccess {
+  isValid: true;
+}
+
+/**
+ * Union type for file validation results
+ */
+export type FileValidationResult = FileValidationSuccess | FileValidationError;

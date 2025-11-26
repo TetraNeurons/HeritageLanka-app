@@ -2,7 +2,7 @@
 
 import { AppSidebar } from "@/components/traveler/Sidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -17,6 +17,9 @@ import "leaflet-routing-machine/dist/leaflet-routing-machine.css";
 import L from "leaflet";
 import { toast } from "sonner";
 import Fuse from "fuse.js";
+import { isValidCoordinate } from "@/lib/coordinate-validation";
+import LoadingScreen from "@/components/traveler/LoadingScreen";
+import ResultsView from "@/components/traveler/ResultsView";
 
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -58,7 +61,18 @@ const preferenceOptions = [
   { value: "ADVENTURE", label: "Adventure" },
 ];
 
+enum PlanPhase {
+  FORM = 'FORM',
+  GENERATING = 'GENERATING',
+  RESULTS = 'RESULTS'
+}
+
 export default function PlanMakerContent() {
+  // Phase management
+  const [phase, setPhase] = useState<PlanPhase>(PlanPhase.FORM);
+  const [error, setError] = useState<string | null>(null);
+  
+  // Form state
   const [useAI, setUseAI] = useState(false);
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
@@ -69,13 +83,16 @@ export default function PlanMakerContent() {
   const [locations, setLocations] = useState<Location[]>([]);
   const [search, setSearch] = useState("");
   const [flyToLoc, setFlyToLoc] = useState<Location | null>(null);
+  
+  // Data state
   const [attractionsData, setAttractionsData] = useState<AttractionData[]>([]);
   const [touristData, setTouristData] = useState<any[]>([]);
   const [locationImages, setLocationImages] = useState<{ [key: string]: string }>({});
   const [routes, setRoutes] = useState<[number, number][][]>([]);
+  
+  // Generation state
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedPlan, setGeneratedPlan] = useState<any>(null);
-  const [showPlanPreview, setShowPlanPreview] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isSearching = useRef(false);
 
@@ -282,7 +299,10 @@ export default function PlanMakerContent() {
       return;
     }
 
+    setPhase(PlanPhase.GENERATING);
+    setError(null);
     setIsGenerating(true);
+    
     try {
       const response = await fetch('/api/traveler/generate-ai-plan', {
         method: 'POST',
@@ -302,20 +322,16 @@ export default function PlanMakerContent() {
       
       if (data.success && data.plan) {
         setGeneratedPlan(data.plan);
-        setShowPlanPreview(true);
         
-        // FIXED: Properly validate and map AI locations
+        // Validate and map AI locations
         const aiLocations: Location[] = [];
         
         if (data.plan.selectedAttractions && Array.isArray(data.plan.selectedAttractions)) {
           data.plan.selectedAttractions.forEach((attr: any, idx: number) => {
-            // Validate that we have valid coordinates
             const lat = attr.latitude || attr.lat;
             const lng = attr.longitude || attr.lng;
             
-            if (typeof lat === 'number' && typeof lng === 'number' && 
-                !isNaN(lat) && !isNaN(lng) &&
-                lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+            if (isValidCoordinate(lat, lng)) {
               aiLocations.push({
                 lat,
                 lng,
@@ -339,12 +355,21 @@ export default function PlanMakerContent() {
         if (aiLocations.length > 0) {
           setFlyToLoc(aiLocations[0]);
         }
+        
+        // Transition to results phase
+        setPhase(PlanPhase.RESULTS);
       } else {
-        toast.error('Failed to generate plan: ' + (data.error || 'Unknown error'));
+        const errorMsg = data.error || 'Unknown error';
+        setError(errorMsg);
+        toast.error('Failed to generate plan: ' + errorMsg);
+        setPhase(PlanPhase.FORM);
       }
     } catch (error) {
       console.error('AI generation failed:', error);
-      toast.error('Failed to generate AI plan. Please try again.');
+      const errorMsg = error instanceof Error ? error.message : 'Failed to generate AI plan';
+      setError(errorMsg);
+      toast.error(errorMsg + '. Please try again.');
+      setPhase(PlanPhase.FORM);
     } finally {
       setIsGenerating(false);
     }
@@ -367,7 +392,7 @@ export default function PlanMakerContent() {
           description,
           planningMode: 'AI_GENERATED',
           aiPlan: generatedPlan,
-          locations, // Include the validated locations
+          locations,
           userId: "",
         }),
       });
@@ -376,8 +401,10 @@ export default function PlanMakerContent() {
       
       if (data.success) {
         toast.success('Travel plan accepted and saved successfully!');
-        setShowPlanPreview(false);
         resetForm();
+        setPhase(PlanPhase.FORM);
+        // Optionally redirect to plans page
+        // window.location.href = '/traveler/plans';
       } else {
         toast.error('Failed to save plan: ' + data.error);
       }
@@ -391,8 +418,8 @@ export default function PlanMakerContent() {
 
   const handleRejectPlan = () => {
     setGeneratedPlan(null);
-    setShowPlanPreview(false);
-    setLocations([]);
+    setPhase(PlanPhase.FORM);
+    // Form inputs are preserved automatically
   };
 
   async function handleManualSubmit(e: React.FormEvent) {
@@ -403,7 +430,10 @@ export default function PlanMakerContent() {
       return;
     }
 
+    setPhase(PlanPhase.GENERATING);
+    setError(null);
     setIsSubmitting(true);
+    
     try {
       const response = await fetch('/api/traveler/create-manual-plan', {
         method: 'POST',
@@ -425,12 +455,19 @@ export default function PlanMakerContent() {
       if (data.success) {
         toast.success('Travel plan created successfully!');
         resetForm();
+        setPhase(PlanPhase.FORM);
       } else {
-        toast.error('Failed to create plan: ' + data.error);
+        const errorMsg = data.error || 'Unknown error';
+        setError(errorMsg);
+        toast.error('Failed to create plan: ' + errorMsg);
+        setPhase(PlanPhase.FORM);
       }
     } catch (error) {
       console.error('Manual plan creation failed:', error);
-      toast.error('Failed to create plan. Please try again.');
+      const errorMsg = error instanceof Error ? error.message : 'Failed to create plan';
+      setError(errorMsg);
+      toast.error(errorMsg + '. Please try again.');
+      setPhase(PlanPhase.FORM);
     } finally {
       setIsSubmitting(false);
     }
@@ -457,23 +494,47 @@ export default function PlanMakerContent() {
 
   const totalDays = calculateDays();
 
-  // Helper function to validate locations before rendering markers
-  const validLocations = locations.filter(loc => 
-    loc.lat && loc.lng && 
-    typeof loc.lat === 'number' && typeof loc.lng === 'number' &&
-    !isNaN(loc.lat) && !isNaN(loc.lng) &&
-    loc.lat >= -90 && loc.lat <= 90 && loc.lng >= -180 && loc.lng <= 180
-  );
+  // Validate locations using memoized computation
+  const validLocations = useMemo(() => {
+    return locations.filter(loc => {
+      const isValid = isValidCoordinate(loc.lat, loc.lng);
+      if (!isValid) {
+        console.warn(`Invalid location coordinates for ${loc.name}:`, { lat: loc.lat, lng: loc.lng });
+      }
+      return isValid;
+    });
+  }, [locations]);
 
   return (
     <SidebarProvider>
       <div className="flex h-screen w-full bg-gradient-to-br from-gray-50 to-gray-100">
         <AppSidebar />
 
-        <div className="flex flex-col lg:flex-row flex-1 overflow-hidden">
-          {/* Form Panel */}
-          <div className={`${useAI ? 'w-full lg:w-[600px]' : 'w-full lg:w-[480px]'} bg-white shadow-xl overflow-y-auto p-5 lg:p-8 border-b lg:border-r lg:border-b-0 border-gray-200 transition-all`}>
-            <h1 className="text-2xl lg:text-3xl font-bold mb-6 lg:mb-8 text-gray-900 font-poppins">Create Travel Plan</h1>
+        {/* Phase: GENERATING - Show Loading Screen */}
+        {phase === PlanPhase.GENERATING && (
+          <LoadingScreen mode={useAI ? 'AI' : 'MANUAL'} />
+        )}
+
+        {/* Phase: RESULTS - Show Results View */}
+        {phase === PlanPhase.RESULTS && generatedPlan && (
+          <div className="flex-1 overflow-hidden">
+            <ResultsView
+              plan={generatedPlan}
+              locations={locations}
+              locationImages={locationImages}
+              onAccept={handleAcceptPlan}
+              onReject={handleRejectPlan}
+              isSubmitting={isSubmitting}
+            />
+          </div>
+        )}
+
+        {/* Phase: FORM - Show Form and Map */}
+        {phase === PlanPhase.FORM && (
+          <div className="flex flex-col lg:flex-row flex-1 overflow-hidden">
+            {/* Form Panel */}
+            <div className={`${useAI ? 'w-full lg:w-[600px]' : 'w-full lg:w-[480px]'} bg-white shadow-xl overflow-y-auto p-5 lg:p-8 border-b lg:border-r lg:border-b-0 border-gray-200 transition-all`}>
+              <h1 className="text-2xl lg:text-3xl font-bold mb-6 lg:mb-8 text-gray-900 font-poppins">Create Travel Plan</h1>
             
             <form onSubmit={handleManualSubmit} className="space-y-5 lg:space-y-6">
               {/* AI Toggle */}
@@ -731,163 +792,6 @@ export default function PlanMakerContent() {
               </MapContainer>
             </div>
           )}
-        </div>
-
-        {/* AI Plan Preview Modal with Map */}
-        {showPlanPreview && generatedPlan && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4" style={{ zIndex: 9999 }}>
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col border-2 border-gray-200" style={{ zIndex: 10000 }}>
-              <div className="p-5 lg:p-6 border-b-2 border-gray-200 flex justify-between items-center bg-gradient-to-r from-amber-50 to-orange-50">
-                <h2 className="text-xl lg:text-2xl font-bold text-gray-900 font-poppins">Your AI-Generated Travel Plan</h2>
-                <Button variant="ghost" size="sm" onClick={handleRejectPlan} className="hover:bg-white/50 rounded-full p-2">
-                  <X className="h-5 w-5" />
-                </Button>
-              </div>
-
-              <div className="flex-1 overflow-hidden flex flex-col lg:flex-row">
-                {/* Plan Details */}
-                <div className="w-full lg:w-1/2 p-4 lg:p-6 overflow-y-auto bg-gray-50">
-                  <div className="space-y-4">
-                    <div className="bg-white p-5 rounded-xl border-2 border-amber-200 shadow-md">
-                      <h3 className="font-bold text-lg mb-3 font-poppins text-gray-900">Trip Summary</h3>
-                      <p className="text-sm text-gray-700 leading-relaxed">{generatedPlan.summary}</p>
-                    </div>
-
-                    <div>
-                      <h3 className="font-bold text-lg mb-3 font-poppins text-gray-900">Daily Itinerary</h3>
-                      <div className="space-y-3">
-                        {generatedPlan.dailyItinerary?.map((day: any, idx: number) => (
-                          <div key={idx} className="border-2 border-gray-200 rounded-xl p-4 bg-white shadow-sm hover:shadow-md transition-all">
-                            <div className="font-bold text-amber-600 mb-3 font-poppins text-base">
-                              Day {day.day} - {day.date}
-                            </div>
-                            <ul className="space-y-2 text-sm">
-                              {day.places?.map((place: string, pIdx: number) => (
-                                <li key={pIdx} className="flex items-start gap-2">
-                                  <span className="text-amber-500 font-bold">•</span>
-                                  <span className="text-gray-700">{place}</span>
-                                </li>
-                              ))}
-                            </ul>
-                            {day.estimatedDistance && (
-                              <p className="text-xs text-gray-500 mt-3 font-medium bg-gray-50 px-3 py-1.5 rounded-lg inline-block">📍 {day.estimatedDistance}</p>
-                            )}
-                            {day.notes && (
-                              <p className="text-xs text-gray-500 mt-2 italic bg-amber-50 px-3 py-1.5 rounded-lg">{day.notes}</p>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="bg-white p-5 rounded-xl border-2 border-gray-200 shadow-md">
-                      <h3 className="font-bold text-lg mb-3 font-poppins text-gray-900">Travel Tips & Recommendations</h3>
-                      <ul className="text-sm text-gray-700 space-y-2">
-                        {generatedPlan.recommendations?.map((rec: string, idx: number) => (
-                          <li key={idx} className="flex items-start gap-2">
-                            <span className="text-amber-500 font-bold">•</span>
-                            <span>{rec}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    {generatedPlan.feasibilityScore && (
-                      <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-4 rounded-xl border-2 border-green-200 shadow-md">
-                        <div className="flex items-center gap-3 mb-2">
-                          <span className="font-bold text-sm font-poppins text-gray-900">Feasibility Score:</span>
-                          <span className="text-green-700 font-bold text-lg">{generatedPlan.feasibilityScore}/100</span>
-                        </div>
-                        {generatedPlan.feasibilityNotes && (
-                          <p className="text-xs text-gray-600 leading-relaxed">{generatedPlan.feasibilityNotes}</p>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Map */}
-                <div className="w-full lg:w-1/2 h-[400px] lg:h-full relative" style={{ zIndex: 1 }}>
-                  {validLocations.length > 0 ? (
-                    <MapContainer
-                      key={`dialog-map-${showPlanPreview}`}
-                      center={[validLocations[0].lat, validLocations[0].lng]}
-                      zoom={7}
-                      className="h-full w-full"
-                      style={{ zIndex: 1 }}
-                    >
-                      <TileLayer
-                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                        attribution='&copy; OpenStreetMap'
-                      />
-                      <MapResizer />
-                      <FlyToLocation location={flyToLoc} />
-
-                      {validLocations.map((loc, idx) => (
-                        <Marker key={loc.id} position={[loc.lat, loc.lng]} icon={customIcon}>
-                          <Popup>
-                            <div className="min-w-[250px] max-w-[300px]">
-                              {locationImages[loc.id] && (
-                                <img 
-                                  src={locationImages[loc.id]} 
-                                  alt={loc.name}
-                                  className="w-full h-32 object-cover rounded-lg mb-2 border-2 border-gray-200"
-                                />
-                              )}
-                              <div className="flex items-center gap-2 mb-2">
-                                <Badge variant="default" className="bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold shadow-md">
-                                  Stop {idx + 1}
-                                </Badge>
-                              </div>
-                              <p className="font-bold text-sm font-poppins text-gray-900">{loc.name}</p>
-                              {loc.district && <p className="text-xs text-gray-600 mt-1">{loc.district}</p>}
-                              {loc.rating && (
-                                <div className="text-xs text-amber-600 mt-1 font-semibold">★ {loc.rating}</div>
-                              )}
-                            </div>
-                          </Popup>
-                        </Marker>
-                      ))}
-
-                      {validLocations.length > 1 && (
-                        <RoutingMachine waypoints={validLocations.map(loc => [loc.lat, loc.lng])} />
-                      )}
-                    </MapContainer>
-                  ) : (
-                    <div className="h-full w-full flex items-center justify-center bg-gray-100">
-                      <p className="text-gray-500">No valid locations to display</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="p-5 lg:p-6 border-t-2 border-gray-200 flex gap-3 bg-gradient-to-r from-gray-50 to-gray-100">
-                <Button 
-                  onClick={handleAcceptPlan} 
-                  className="flex-1 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold font-poppins shadow-xl h-12" 
-                  size="lg"
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-                      Saving Plan...
-                    </>
-                  ) : (
-                    'Accept & Save Plan'
-                  )}
-                </Button>
-                <Button 
-                  onClick={handleRejectPlan} 
-                  variant="outline" 
-                  className="flex-1 hover:bg-white border-2 border-gray-300 font-semibold font-poppins h-12" 
-                  size="lg"
-                  disabled={isSubmitting}
-                >
-                  Reject & Regenerate
-                </Button>
-              </div>
-            </div>
           </div>
         )}
       </div>

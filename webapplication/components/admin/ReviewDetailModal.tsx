@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { ReviewCard } from "@/components/reviews/ReviewCard";
@@ -79,6 +79,9 @@ export function ReviewDetailModal({
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle>Reviews for {userName}</DialogTitle>
+          <DialogDescription className="sr-only">
+            View and filter all reviews for this user
+          </DialogDescription>
         </DialogHeader>
 
         {/* Filters */}

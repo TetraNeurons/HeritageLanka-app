@@ -12,7 +12,6 @@ import {
   CheckCircle,
   XCircle,
   Clock,
-  Zap,
   AlertCircle,
   ChevronDown,
   ChevronUp,
@@ -22,8 +21,6 @@ import {
   Line,
   BarChart,
   Bar,
-  AreaChart,
-  Area,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -38,15 +35,12 @@ interface AIStats {
   failedRequests: number;
   successRate: number;
   avgResponseTime: number;
-  totalTokens: number;
-  avgTokensPerRequest: number;
 }
 
 interface WorkflowStat {
   workflowType: string;
   count: number;
   successRate: number;
-  avgTokens: number;
 }
 
 interface TopUser {
@@ -54,7 +48,6 @@ interface TopUser {
   userName: string;
   userEmail: string;
   requestCount: number;
-  tokensUsed: number;
   successRate: number;
 }
 
@@ -72,7 +65,6 @@ interface TimeSeriesPoint {
   requests: number;
   successes: number;
   failures: number;
-  tokens: number;
 }
 
 export default function AIAnalyticsPage() {
@@ -116,9 +108,9 @@ export default function AIAnalyticsPage() {
       return { status: "unknown", color: "gray", label: "No Data" };
     }
     
-    if (stats.successRate >= 95) {
+    if (stats.successRate >= 90) {
       return { status: "healthy", color: "green", label: "Healthy" };
-    } else if (stats.successRate >= 85) {
+    } else if (stats.successRate >= 75) {
       return { status: "warning", color: "yellow", label: "Warning" };
     } else {
       return { status: "critical", color: "red", label: "Critical" };
@@ -210,7 +202,7 @@ export default function AIAnalyticsPage() {
 
             {/* Key Metrics */}
             {stats && stats.totalRequests > 0 && (
-              <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                 <Card>
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between mb-2">
@@ -250,83 +242,71 @@ export default function AIAnalyticsPage() {
                     <div className="text-2xl font-bold text-orange-900">{stats.avgResponseTime}ms</div>
                   </CardContent>
                 </Card>
-
-                <Card>
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <Zap className="h-5 w-5 text-purple-600" />
-                    </div>
-                    <div className="text-sm text-gray-600 mb-1">Total Tokens</div>
-                    <div className="text-2xl font-bold text-purple-900">{stats.totalTokens}</div>
-                  </CardContent>
-                </Card>
               </div>
             )}
 
-            {/* Request Volume Chart */}
-            {timeSeriesData.length > 0 && (
-              <Card className="mb-6">
-                <CardHeader>
-                  <CardTitle>Request Volume Over Time</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <LineChart data={timeSeriesData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="date" />
-                      <YAxis />
-                      <Tooltip />
-                      <Legend />
-                      <Line type="monotone" dataKey="requests" stroke="#3b82f6" name="Total Requests" strokeWidth={2} />
-                      <Line type="monotone" dataKey="successes" stroke="#10b981" name="Successful" strokeWidth={2} />
-                      <Line type="monotone" dataKey="failures" stroke="#ef4444" name="Failed" strokeWidth={2} />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
-            )}
+            {/* Charts Grid */}
+            {(timeSeriesData.length > 0 || workflowBreakdown.length > 0) && (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                {/* Request Volume Chart */}
+                {timeSeriesData.length > 0 && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Request Volume Over Time</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ResponsiveContainer width="100%" height={300}>
+                        <LineChart data={timeSeriesData}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="date" />
+                          <YAxis />
+                          <Tooltip />
+                          <Legend />
+                          <Line type="monotone" dataKey="requests" stroke="#3b82f6" name="Total Requests" strokeWidth={2} />
+                          <Line type="monotone" dataKey="successes" stroke="#10b981" name="Successful" strokeWidth={2} />
+                          <Line type="monotone" dataKey="failures" stroke="#ef4444" name="Failed" strokeWidth={2} />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </CardContent>
+                  </Card>
+                )}
 
-            {/* Workflow Breakdown Chart */}
-            {workflowBreakdown.length > 0 && (
-              <Card className="mb-6">
-                <CardHeader>
-                  <CardTitle>Workflow Breakdown</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={workflowBreakdown}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="workflowType" />
-                      <YAxis />
-                      <Tooltip />
-                      <Legend />
-                      <Bar dataKey="count" fill="#3b82f6" name="Total Requests" />
-                      <Bar dataKey="successRate" fill="#10b981" name="Success Rate (%)" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Token Usage Chart */}
-            {timeSeriesData.length > 0 && (
-              <Card className="mb-6">
-                <CardHeader>
-                  <CardTitle>Token Usage Over Time</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <AreaChart data={timeSeriesData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="date" />
-                      <YAxis />
-                      <Tooltip />
-                      <Legend />
-                      <Area type="monotone" dataKey="tokens" stroke="#a855f7" fill="#a855f7" fillOpacity={0.6} name="Tokens Used" />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
+                {/* Workflow Breakdown */}
+                {workflowBreakdown.length > 0 && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Workflow Breakdown</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        {workflowBreakdown.map((workflow) => (
+                          <div key={workflow.workflowType} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <div className="flex-1">
+                              <div className="font-medium text-gray-900 mb-1">{workflow.workflowType}</div>
+                              <div className="flex items-center gap-2">
+                                <div className="text-sm text-gray-600">{workflow.count} requests</div>
+                                <div className="text-gray-300">•</div>
+                                <div className={`text-sm font-medium ${
+                                  workflow.successRate >= 90 ? 'text-green-600' : 
+                                  workflow.successRate >= 75 ? 'text-yellow-600' : 
+                                  'text-red-600'
+                                }`}>
+                                  {workflow.successRate.toFixed(1)}% success
+                                </div>
+                              </div>
+                            </div>
+                            <div className="ml-4">
+                              <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center">
+                                <div className="text-xl font-bold text-blue-700">{workflow.count}</div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
             )}
 
             {/* Top Users Table */}
@@ -351,7 +331,7 @@ export default function AIAnalyticsPage() {
                         <div className="text-right">
                           <div className="font-semibold text-gray-900">{user.requestCount} requests</div>
                           <div className="text-sm text-gray-500">
-                            {user.tokensUsed} tokens • {user.successRate.toFixed(1)}% success
+                            {user.successRate.toFixed(1)}% success
                           </div>
                         </div>
                       </div>

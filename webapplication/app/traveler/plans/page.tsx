@@ -427,7 +427,7 @@ export default function TravelerPlansPage() {
           <main className="flex-1 overflow-y-auto p-4 lg:p-8">
             {/* Header */}
             <div className="mb-8">
-              <div className="lg:hidden mb-4">
+              <div className="hidden md:block mb-4">
                 <SidebarTrigger />
               </div>
               <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 font-poppins">Your Travel Plans</h1>

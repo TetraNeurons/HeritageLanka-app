@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db/drizzle';
-import { events, payments, travelers } from '@/db/schema';
+import { events, payments, travelers, eventTickets } from '@/db/schema';
 import { eq } from 'drizzle-orm';
-import { verifyToken } from '@/lib/jwt';
+import { getSession } from '@/lib/jwt';
 import Stripe from 'stripe';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -14,20 +14,12 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // Verify authentication
-    const token = request.headers.get('authorization')?.split(' ')[1];
-    if (!token) {
+    // Verify authentication using session
+    const userSession = await getSession();
+    if (!userSession?.userId) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
         { status: 401 }
-      );
-    }
-
-    const decoded = await verifyToken(token);
-    if (!decoded || decoded.role !== 'TRAVELER') {
-      return NextResponse.json(
-        { success: false, error: 'Forbidden' },
-        { status: 403 }
       );
     }
 
@@ -46,7 +38,7 @@ export async function POST(
     const [traveler] = await db
       .select()
       .from(travelers)
-      .where(eq(travelers.userId, decoded.userId))
+      .where(eq(travelers.userId, userSession.userId))
       .limit(1);
 
     if (!traveler) {
@@ -56,51 +48,94 @@ export async function POST(
       );
     }
 
-    // Use transaction for atomic operations
-    const result = await db.transaction(async (tx) => {
-      // Lock the event row for update
-      const event = await tx
-        .select()
-        .from(events)
-        .where(eq(events.id, eventId))
-        .for('update');
+    // Get event data
+    const [eventData] = await db
+      .select()
+      .from(events)
+      .where(eq(events.id, eventId))
+      .limit(1);
 
-      if (!event || event.length === 0) {
-        throw new Error('Event not found');
-      }
+    if (!eventData) {
+      return NextResponse.json(
+        { success: false, error: 'Event not found' },
+        { status: 404 }
+      );
+    }
 
-      const eventData = event[0];
+    // Verify sufficient tickets
+    if (eventData.ticketCount < quantity) {
+      return NextResponse.json(
+        { success: false, error: 'Insufficient tickets available' },
+        { status: 409 }
+      );
+    }
 
-      // Verify sufficient tickets
-      if (eventData.ticketCount < quantity) {
-        throw new Error('Insufficient tickets available');
-      }
+    // Calculate amount
+    const amount = calculateTicketAmount(eventData.price, quantity);
 
-      // Calculate amount
-      const amount = calculateTicketAmount(eventData.price, quantity);
+    // Check if this is a free event
+    const isFreeEvent = amount === 0;
 
-      // Create payment record with PENDING status
-      const payment = await tx
-        .insert(payments)
-        .values({
-          eventId,
-          travelerId: traveler.id,
-          ticketQuantity: quantity,
-          amount,
-          status: 'PENDING',
-        })
-        .returning();
+    // For paid events, check Stripe minimum amount (50 cents USD)
+    if (!isFreeEvent && amount < 0.50) {
+      return NextResponse.json(
+        { 
+          success: false, 
+          error: 'Event price is too low for online payment. Minimum amount is $0.50 per ticket.' 
+        },
+        { status: 400 }
+      );
+    }
 
-      return { payment: payment[0], event: eventData, amount };
-    });
+    // Create payment record
+    const [payment] = await db
+      .insert(payments)
+      .values({
+        eventId,
+        travelerId: traveler.id,
+        ticketQuantity: quantity,
+        amount,
+        status: isFreeEvent ? 'PAID' : 'PENDING',
+      })
+      .returning();
 
-    // Create Stripe Checkout Session
-    const session = await stripe.checkout.sessions.create({
+    // For free events, decrement ticket count immediately and create ticket record
+    if (isFreeEvent) {
+      await db
+        .update(events)
+        .set({ ticketCount: eventData.ticketCount - quantity })
+        .where(eq(events.id, eventId));
+
+      // Create event ticket record
+      await db.insert(eventTickets).values({
+        eventId,
+        travelerId: traveler.id,
+        paymentId: payment.id,
+        quantity,
+      });
+    }
+
+    const result = { payment, event: eventData, amount, isFreeEvent };
+
+    // Handle free events - return success immediately
+    if (result.isFreeEvent) {
+      return NextResponse.json({
+        success: true,
+        payment: {
+          id: result.payment.id,
+          amount: result.payment.amount,
+          status: result.payment.status,
+        },
+      });
+    }
+
+    // For paid events, create Stripe Checkout Session
+    const stripeSession = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [
         {
           price_data: {
-            currency: 'lkr',
+            currency: 'usd',
             product_data: {
               name: result.event.title,
               description: `${quantity} ticket(s) for ${result.event.title}`,
@@ -112,26 +147,27 @@ export async function POST(
         },
       ],
       mode: 'payment',
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/traveler/events?payment=success`,
+      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/api/traveler/events/payment-success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/traveler/events?payment=cancelled`,
       metadata: {
         paymentId: result.payment.id,
         eventId,
+        travelerId: traveler.id,
         quantity: quantity.toString(),
-        userId: decoded.userId, // Store userId for filtering payments later
+        userId: userSession.userId,
       },
     });
 
     // Update payment with Stripe session ID
     await db
       .update(payments)
-      .set({ stripeSessionId: session.id })
+      .set({ stripeSessionId: stripeSession.id })
       .where(eq(payments.id, result.payment.id));
 
     return NextResponse.json({
       success: true,
-      sessionUrl: session.url,
-      sessionId: session.id,
+      sessionUrl: stripeSession.url,
+      sessionId: stripeSession.id,
     });
   } catch (error: any) {
     console.error('Event ticket purchase error:', error);
@@ -163,7 +199,7 @@ function calculateTicketAmount(price: string, quantity: number): number {
     return 0;
   }
 
-  // Extract numeric value from price string (e.g., "500 LKR" -> 500)
+  // Extract numeric value from price string (e.g., "$10" or "10 USD" -> 10)
   const numericPrice = parseFloat(price.replace(/[^0-9.]/g, ''));
   
   if (isNaN(numericPrice)) {

@@ -44,7 +44,7 @@ const response = await axiosInstance.get('/api/auth/validate')
       case 'ADMIN':
         return '/admin/dashboard'
       case 'GUIDE':
-        return '/guide/dashboard'
+        return '/guider/dashboard'
       case 'TRAVELER':
       default:
         return '/traveler/dashboard'
@@ -88,7 +88,7 @@ const response = await axiosInstance.get('/api/auth/validate')
               </>
             ) : (
               <>
-                <Button variant="ghost" size="sm" className="text-white hover:bg-white/20 font-poppins font-semibold shadow-lg" asChild>
+                <Button variant="outline" size="sm" className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white border-0 font-poppins font-bold shadow-xl" asChild>
                   <Link href="/auth/signin">Sign In</Link>
                 </Button>
                 <Button size="sm" className="bg-white text-black hover:bg-gray-100 font-poppins font-bold shadow-xl" asChild>
@@ -135,7 +135,7 @@ const response = await axiosInstance.get('/api/auth/validate')
                 </>
               ) : (
                 <>
-                  <Button variant="ghost" className="justify-start text-white hover:bg-white/20 font-poppins font-semibold shadow-lg" asChild>
+                  <Button variant="outline" className="justify-start bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white border-0 font-poppins font-bold shadow-xl" asChild>
                     <Link href="/auth/signin">Sign In</Link>
                   </Button>
                   <Button className="justify-start bg-white text-black hover:bg-gray-100 font-poppins font-bold shadow-xl" asChild>

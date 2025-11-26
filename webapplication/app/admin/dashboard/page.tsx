@@ -107,7 +107,7 @@ export default function AdminDashboardPage() {
   const [apiLoading, setApiLoading] = useState(true);
   const [adAnalytics, setAdAnalytics] = useState<AdAnalytics | null>(null);
   const [adLoading, setAdLoading] = useState(true);
-  const [aiStats, setAiStats] = useState<{ totalRequests: number; successRate: number; totalTokens: number } | null>(null);
+  const [aiStats, setAiStats] = useState<{ totalRequests: number; successRate: number } | null>(null);
   const [aiLoading, setAiLoading] = useState(true);
 
   useEffect(() => {
@@ -194,7 +194,6 @@ export default function AdminDashboardPage() {
         setAiStats({
           totalRequests: data.stats.totalRequests,
           successRate: data.stats.successRate,
-          totalTokens: data.stats.totalTokens,
         });
       } else {
         console.error("Failed to fetch AI stats:", data.error);
@@ -251,25 +250,25 @@ export default function AdminDashboardPage() {
 
   return (
     <SidebarProvider>
-      <div className="flex h-screen w-full bg-gray-50">
+      <div className="flex h-screen w-full bg-gradient-to-br from-gray-50 to-gray-100">
         <AppSidebar />
 
         <div className="flex-1 flex flex-col overflow-hidden">
-          <main className="flex-1 overflow-y-auto p-4 lg:p-6">
+          <main className="flex-1 overflow-y-auto p-4 lg:p-8">
             {/* Header */}
-            <div className="mb-6">
-              <div className="lg:hidden mb-4">
+            <div className="mb-8">
+              <div className="hidden md:block mb-4">
                 <SidebarTrigger />
               </div>
-              <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-              <p className="text-gray-600 mt-1">Monitor guide assignments and trip statuses</p>
+              <h1 className="text-3xl lg:text-4xl font-bold font-poppins bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">Admin Dashboard</h1>
+              <p className="text-gray-600 mt-2 font-poppins">Monitor guide assignments and trip statuses</p>
             </div>
 
             {/* API Health Overview with Accordions */}
-            <Card className="mb-6">
-              <CardHeader>
+            <div className="bg-white/95 backdrop-blur-md border-2 border-white shadow-xl rounded-2xl mb-6">
+              <div className="p-6 border-b">
                 <div className="flex items-center justify-between">
-                  <CardTitle>API Health Overview</CardTitle>
+                  <h2 className="text-xl font-bold font-poppins text-gray-900">API Health Overview</h2>
                   <Select value={timeRange} onValueChange={setTimeRange}>
                     <SelectTrigger className="w-[140px]">
                       <SelectValue />
@@ -282,8 +281,8 @@ export default function AdminDashboardPage() {
                     </SelectContent>
                   </Select>
                 </div>
-              </CardHeader>
-              <CardContent>
+              </div>
+              <div className="p-6">
                 <Accordion type="single" collapsible className="w-full">
                   {/* Serper API Accordion */}
                   <AccordionItem value="serper">
@@ -440,7 +439,7 @@ export default function AdminDashboardPage() {
                         </div>
                       ) : aiStats ? (
                         <div className="space-y-4">
-                          <div className="grid grid-cols-3 gap-4">
+                          <div className="grid grid-cols-2 gap-4">
                             <div className="bg-purple-50 p-4 rounded-lg">
                               <div className="text-sm text-purple-600 mb-1">Total Requests</div>
                               <div className="text-2xl font-bold text-purple-900">{aiStats.totalRequests}</div>
@@ -448,10 +447,6 @@ export default function AdminDashboardPage() {
                             <div className="bg-green-50 p-4 rounded-lg">
                               <div className="text-sm text-green-600 mb-1">Success Rate</div>
                               <div className="text-2xl font-bold text-green-900">{aiStats.successRate.toFixed(1)}%</div>
-                            </div>
-                            <div className="bg-blue-50 p-4 rounded-lg">
-                              <div className="text-sm text-blue-600 mb-1">Total Tokens</div>
-                              <div className="text-2xl font-bold text-blue-900">{aiStats.totalTokens}</div>
                             </div>
                           </div>
                           <div className="pt-2">
@@ -471,18 +466,18 @@ export default function AdminDashboardPage() {
                     </AccordionContent>
                   </AccordionItem>
                 </Accordion>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
             {/* Advertisement Analytics Card */}
-            <Card className="mb-6">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+            <div className="bg-white/95 backdrop-blur-md border-2 border-white shadow-xl rounded-2xl mb-6">
+              <div className="p-6 border-b">
+                <h2 className="text-xl font-bold font-poppins text-gray-900 flex items-center gap-2">
                   <Megaphone className="h-5 w-5 text-purple-600" />
                   Advertisement Analytics
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
+                </h2>
+              </div>
+              <div className="p-6">
                 {adLoading ? (
                   <div className="flex items-center justify-center py-8">
                     <Loader2 className="h-6 w-6 animate-spin text-purple-600" />
@@ -518,78 +513,78 @@ export default function AdminDashboardPage() {
                     No advertisement data available
                   </div>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-              <Card>
-                <CardContent className="p-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              <div className="bg-white/95 backdrop-blur-md border-2 border-white shadow-xl rounded-2xl overflow-hidden">
+                <div className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="text-sm text-gray-600 mb-1">Total Trips</div>
-                      <div className="text-2xl font-bold text-gray-900">{trips.length}</div>
+                      <div className="text-sm font-poppins font-medium text-gray-600 mb-2">Total Trips</div>
+                      <div className="text-3xl font-bold font-poppins text-gray-900">{trips.length}</div>
                     </div>
-                    <div className="bg-blue-100 p-3 rounded-lg">
-                      <MapPin className="h-5 w-5 text-blue-600" />
+                    <div className="bg-gradient-to-br from-blue-400 to-blue-600 p-4 rounded-2xl shadow-lg">
+                      <MapPin className="h-7 w-7 text-white" />
                     </div>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
 
-              <Card>
-                <CardContent className="p-4">
+              <div className="bg-white/95 backdrop-blur-md border-2 border-white shadow-xl rounded-2xl overflow-hidden">
+                <div className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="text-sm text-gray-600 mb-1">Needs Guide</div>
-                      <div className="text-2xl font-bold text-orange-600">{tripsNeedingGuide.length}</div>
+                      <div className="text-sm font-poppins font-medium text-gray-600 mb-2">Needs Guide</div>
+                      <div className="text-3xl font-bold font-poppins text-orange-600">{tripsNeedingGuide.length}</div>
                     </div>
-                    <div className="bg-orange-100 p-3 rounded-lg">
-                      <AlertCircle className="h-5 w-5 text-orange-600" />
+                    <div className="bg-gradient-to-br from-orange-400 to-orange-600 p-4 rounded-2xl shadow-lg">
+                      <AlertCircle className="h-7 w-7 text-white" />
                     </div>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
 
-              <Card>
-                <CardContent className="p-4">
+              <div className="bg-white/95 backdrop-blur-md border-2 border-white shadow-xl rounded-2xl overflow-hidden">
+                <div className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="text-sm text-gray-600 mb-1">With Guide</div>
-                      <div className="text-2xl font-bold text-green-600">{tripsWithGuide.length}</div>
+                      <div className="text-sm font-poppins font-medium text-gray-600 mb-2">With Guide</div>
+                      <div className="text-3xl font-bold font-poppins text-green-600">{tripsWithGuide.length}</div>
                     </div>
-                    <div className="bg-green-100 p-3 rounded-lg">
-                      <CheckCircle className="h-5 w-5 text-green-600" />
+                    <div className="bg-gradient-to-br from-green-400 to-green-600 p-4 rounded-2xl shadow-lg">
+                      <CheckCircle className="h-7 w-7 text-white" />
                     </div>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
 
-              <Card>
-                <CardContent className="p-4">
+              <div className="bg-white/95 backdrop-blur-md border-2 border-white shadow-xl rounded-2xl overflow-hidden">
+                <div className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="text-sm text-gray-600 mb-1">Without Guide</div>
-                      <div className="text-2xl font-bold text-gray-600">{tripsWithoutGuide.length}</div>
+                      <div className="text-sm font-poppins font-medium text-gray-600 mb-2">Without Guide</div>
+                      <div className="text-3xl font-bold font-poppins text-gray-600">{tripsWithoutGuide.length}</div>
                     </div>
-                    <div className="bg-gray-100 p-3 rounded-lg">
-                      <Users className="h-5 w-5 text-gray-600" />
+                    <div className="bg-gradient-to-br from-gray-400 to-gray-600 p-4 rounded-2xl shadow-lg">
+                      <Users className="h-7 w-7 text-white" />
                     </div>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </div>
 
             {/* Trips Needing Guide - Prominent Display */}
             {tripsNeedingGuide.length > 0 && (
-              <Card className="mb-6 border-orange-200 bg-orange-50">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-orange-900">
-                    <AlertCircle className="h-5 w-5" />
+              <div className="bg-orange-50/80 backdrop-blur-md border-2 border-orange-200 shadow-xl rounded-2xl mb-8">
+                <div className="p-6 border-b border-orange-200">
+                  <h2 className="text-xl font-bold font-poppins text-orange-900 flex items-center gap-2">
+                    <AlertCircle className="h-6 w-6" />
                     Trips Needing Guide Assignment ({tripsNeedingGuide.length})
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
+                  </h2>
+                </div>
+                <div className="p-6">
                   <div className="space-y-3">
                     {tripsNeedingGuide.slice(0, 5).map((trip) => (
                       <div key={trip.id} className="bg-white p-4 rounded-lg border border-orange-200">
@@ -623,15 +618,15 @@ export default function AdminDashboardPage() {
                       </p>
                     )}
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             )}
 
             {/* All Trips Table */}
-            <Card>
-              <CardHeader>
+            <div className="bg-white/95 backdrop-blur-md border-2 border-white shadow-xl rounded-2xl">
+              <div className="p-6 border-b">
                 <div className="flex items-center justify-between">
-                  <CardTitle>All Trips & Guide Assignments</CardTitle>
+                  <h2 className="text-xl font-bold font-poppins text-gray-900">All Trips & Guide Assignments</h2>
                   <div className="flex items-center gap-2">
                     <Filter className="h-4 w-4 text-gray-400" />
                     <Select value={filter} onValueChange={setFilter}>
@@ -647,8 +642,8 @@ export default function AdminDashboardPage() {
                     </Select>
                   </div>
                 </div>
-              </CardHeader>
-              <CardContent>
+              </div>
+              <div className="p-6">
                 {trips.length === 0 ? (
                   <div className="text-center py-12">
                     <MapPin className="h-12 w-12 text-gray-300 mx-auto mb-3" />
@@ -773,8 +768,8 @@ export default function AdminDashboardPage() {
                     </div>
                   </>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </main>
         </div>
       </div>

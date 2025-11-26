@@ -7,6 +7,7 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -352,11 +353,11 @@ export default function PlacesPage() {
                 </div>
 
                 <div className="p-5 space-y-3">
-                  <h2 className="text-lg font-bold text-gray-900 line-clamp-2 font-poppins">
+                  <h2 className="text-base lg:text-lg font-bold text-gray-900 line-clamp-2 font-poppins">
                     {place.title}
                   </h2>
 
-                  <div className="space-y-2 text-sm text-gray-700">
+                  <div className="space-y-2 text-xs lg:text-sm text-gray-700">
                     <p className="flex items-center gap-2 font-medium">
                       <Map className="w-4 h-4 text-amber-600" /> 
                       <span className="font-poppins">{place.district}</span>
@@ -367,7 +368,7 @@ export default function PlacesPage() {
                     </p>
                     <p className="flex items-center gap-2 font-bold text-gray-900">
                       <Star className="w-5 h-5 fill-amber-400 text-amber-400" />
-                      <span className="text-base font-poppins">{place.rating}</span>
+                      <span className="text-sm lg:text-base font-poppins">{place.rating}</span>
                     </p>
                   </div>
 
@@ -380,9 +381,12 @@ export default function PlacesPage() {
 
                     <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto p-6 bg-white/95 backdrop-blur-md border-2 border-gray-200 shadow-2xl">
                       <DialogHeader>
-                        <DialogTitle className="text-2xl font-bold pr-8 font-poppins text-gray-900">
+                        <DialogTitle className="text-xl lg:text-2xl font-bold pr-8 font-poppins text-gray-900">
                           {place.title}
                         </DialogTitle>
+                        <DialogDescription className="sr-only">
+                          Place details including images, description, location, and contact information
+                        </DialogDescription>
                       </DialogHeader>
 
                       {/* Image Carousel */}
@@ -412,12 +416,12 @@ export default function PlacesPage() {
                         <div className="flex items-center gap-3 mb-4">
                           <div className="flex items-center gap-1">
                             <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-                            <span className="font-bold text-lg">{place.rating}</span>
+                            <span className="font-bold text-base lg:text-lg">{place.rating}</span>
                           </div>
-                          <span className="text-gray-600">
+                          <span className="text-sm text-gray-600">
                             ({place.ratingCount} reviews)
                           </span>
-                          <span className="px-3 py-1 bg-gray-100 rounded text-sm">
+                          <span className="px-3 py-1 bg-gray-100 rounded text-xs lg:text-sm">
                             {place.category}
                           </span>
                         </div>
@@ -429,8 +433,8 @@ export default function PlacesPage() {
                           <div className="flex items-start gap-3">
                             <MapPin className="w-5 h-5 text-gray-500 mt-0.5" />
                             <div>
-                              <p className="font-medium">Address</p>
-                              <p className="text-sm text-gray-600">
+                              <p className="font-medium text-sm lg:text-base">Address</p>
+                              <p className="text-xs lg:text-sm text-gray-600">
                                 {place.address}
                               </p>
                             </div>
@@ -439,8 +443,8 @@ export default function PlacesPage() {
                           <div className="flex items-start gap-3">
                             <Map className="w-5 h-5 text-gray-500 mt-0.5" />
                             <div>
-                              <p className="font-medium">District</p>
-                              <p className="text-sm text-gray-600">
+                              <p className="font-medium text-sm lg:text-base">District</p>
+                              <p className="text-xs lg:text-sm text-gray-600">
                                 {place.district}
                               </p>
                             </div>
@@ -450,8 +454,8 @@ export default function PlacesPage() {
                             <div className="flex items-start gap-3">
                               <Phone className="w-5 h-5 text-gray-500 mt-0.5" />
                               <div>
-                                <p className="font-medium">Contact</p>
-                                <p className="text-sm text-black font-medium">
+                                <p className="font-medium text-sm lg:text-base">Contact</p>
+                                <p className="text-xs lg:text-sm text-black font-medium">
                                   {place.phoneNumber}
                                 </p>
                               </div>
@@ -462,12 +466,12 @@ export default function PlacesPage() {
                             <div className="flex items-start gap-3">
                               <Globe className="w-5 h-5 text-gray-500 mt-0.5" />
                               <div>
-                                <p className="font-medium">Website</p>
+                                <p className="font-medium text-sm lg:text-base">Website</p>
                                 <a
                                   href={place.website}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="text-sm text-blue-600 hover:underline break-all"
+                                  className="text-xs lg:text-sm text-blue-600 hover:underline break-all"
                                 >
                                   Visit website
                                 </a>
