@@ -249,6 +249,27 @@ export const eventTickets = pgTable('event_tickets', {
   purchasedAt: timestamp('purchased_at').defaultNow().notNull(),
 });
 
+// System Feedback table - Public feedback from users (signed in or not)
+export const systemFeedback = pgTable('system_feedback', {
+  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+  name: text('name'),
+  email: text('email'),
+  phone: text('phone'),
+  ageGroup: text('age_group'), // '18-24', '25-34', '35-44', '45+'
+  userType: text('user_type'), // 'STUDENT', 'EMPLOYEE', 'BUSINESS_OWNER', 'OTHER'
+  satisfactionLevel: text('satisfaction_level').notNull(), // 'VERY_SATISFIED', 'SATISFIED', 'NEUTRAL', 'UNSATISFIED', 'VERY_UNSATISFIED'
+  feeling: text('feeling'), // 'COMFORTABLE', 'CONFIDENT', 'HAPPY', 'FRUSTRATED', 'CONFUSED', 'OTHER'
+  likedMost: text('liked_most'),
+  improvements: text('improvements'),
+  hasMajorProblems: boolean('has_major_problems').default(false).notNull(),
+  problemDescription: text('problem_description'),
+  wouldRecommend: text('would_recommend'), // 'YES', 'MAYBE', 'NO'
+  isApproved: boolean('is_approved').default(false).notNull(), // Only approved feedback shows on testimonials
+  isPublic: boolean('is_public').default(false).notNull(), // Whether to show on public testimonials
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ one }) => ({
   traveler: one(travelers, {
@@ -390,3 +411,5 @@ export const eventTicketsRelations = relations(eventTickets, ({ one }) => ({
     references: [payments.id],
   }),
 }));
+
+// No relations needed for systemFeedback as it's standalone

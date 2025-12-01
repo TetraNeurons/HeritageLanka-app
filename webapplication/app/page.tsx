@@ -8,6 +8,8 @@ import { Badge } from "@/components/ui/badge"
 import Header from "@/components/Header"
 import Footer from "@/components/Footer"
 import StructuredData from "@/components/StructuredData"
+import TestimonialsSection from "@/components/TestimonialsSection"
+import FeedbackForm from "@/components/FeedbackForm"
 import { 
   ArrowRight, 
   Zap, 
@@ -26,6 +28,7 @@ import {
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<"traveler" | "guide">("traveler")
+  const [showFeedbackForm, setShowFeedbackForm] = useState(false)
 
   return (
     <div className="flex min-h-screen flex-col overflow-x-hidden">
@@ -552,8 +555,41 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Testimonials Section */}
+      <TestimonialsSection />
+
+      {/* Feedback Section */}
+      <section className="py-20 px-6 md:px-8 lg:px-12 bg-white">
+        <div className="container mx-auto max-w-4xl">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-3">
+              Help Us <span className="text-amber-500">Improve</span>
+            </h2>
+            <p className="text-lg text-gray-600 mb-6">
+              Your feedback shapes the future of Heritage Lanka
+            </p>
+            
+            {!showFeedbackForm && (
+              <Button
+                size="lg"
+                onClick={() => setShowFeedbackForm(true)}
+                className="h-12 px-8 bg-amber-500 hover:bg-amber-600 text-white font-semibold shadow-xl"
+              >
+                Share Your Feedback
+              </Button>
+            )}
+          </div>
+
+          {showFeedbackForm && (
+            <div className="animate-fade-in-up">
+              <FeedbackForm />
+            </div>
+          )}
+        </div>
+      </section>
+
       {/* Advertise With Us Section */}
-      <section className="py-16 px-6 md:px-8 lg:px-12 bg-white relative overflow-hidden">
+      <section className="py-16 px-6 md:px-8 lg:px-12 bg-gradient-to-b from-gray-50 to-white relative overflow-hidden">
         {/* Background SVG */}
         <div 
           className="absolute inset-0 opacity-60"

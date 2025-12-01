@@ -22,7 +22,8 @@ import {
   Megaphone,
   Brain,
   Menu,
-  X
+  X,
+  MessageSquare
 } from "lucide-react";
 
 import axios from "axios";
@@ -36,6 +37,7 @@ const menuItems = [
   { icon: Plane, label: "Trip Management", href: "/admin/trips" },
   { icon: TicketPercent, label: "Events & Offers", href: "/admin/events" },
   { icon: Megaphone, label: "Advertisements", href: "/admin/advertisements" },
+  { icon: MessageSquare, label: "Feedback", href: "/admin/feedback" },
   { icon: Receipt, label: "Payments", href: "/admin/payments" },
   { icon: Brain, label: "AI Analytics", href: "/admin/ai-analytics" },
 ];
@@ -68,6 +70,7 @@ export function AppSidebar() {
   // Additional menu items for center button popup
   const moreMenuItems = [
     { icon: Megaphone, label: "Advertisements", href: "/admin/advertisements" },
+    { icon: MessageSquare, label: "Feedback", href: "/admin/feedback" },
     { icon: Receipt, label: "Payments", href: "/admin/payments" },
     { icon: Brain, label: "AI Analytics", href: "/admin/ai-analytics" },
   ];
