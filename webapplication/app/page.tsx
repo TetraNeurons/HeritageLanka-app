@@ -25,6 +25,7 @@ import {
   Award,
   Heart
 } from "lucide-react"
+import DisasterAlert from "@/components/DisasterAlert"
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<"traveler" | "guide">("traveler")
@@ -34,6 +35,7 @@ export default function Home() {
     <div className="flex min-h-screen flex-col overflow-x-hidden">
       <StructuredData />
       <Header />
+      <DisasterAlert />
 
       {/* Hero Section */}
       <section className="relative pt-32 pb-16 px-6 md:px-8 lg:px-12 min-h-screen flex items-center overflow-hidden">
