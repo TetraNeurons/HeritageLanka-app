@@ -3,6 +3,7 @@ import { db } from '@/db/drizzle';
 import { trips, guides } from '@/db/schema';
 import { eq, and, isNull } from 'drizzle-orm';
 import { getSession } from '@/lib/jwt';
+import { canGuideAcceptTrips, getGuideVerificationStatus } from '@/lib/verification-service';
 
 export async function POST(
   request: NextRequest,
@@ -39,6 +40,33 @@ export async function POST(
         { success: false, error: 'Guide profile not found' },
         { status: 404 }
       );
+    }
+
+    // Check guide verification status
+    const canAccept = await canGuideAcceptTrips(guide.id);
+    if (!canAccept) {
+      const verificationStatus = await getGuideVerificationStatus(guide.id);
+      
+      if (verificationStatus.status === 'PENDING') {
+        return NextResponse.json(
+          { 
+            success: false, 
+            error: 'Your account is pending verification. You will be able to accept trips once verified.',
+            verificationStatus: 'PENDING'
+          },
+          { status: 403 }
+        );
+      } else if (verificationStatus.status === 'REJECTED') {
+        return NextResponse.json(
+          { 
+            success: false, 
+            error: 'Your account verification was rejected. Please contact support for more information.',
+            verificationStatus: 'REJECTED',
+            rejectionReason: verificationStatus.rejectionReason
+          },
+          { status: 403 }
+        );
+      }
     }
 
     // Verify guide doesn't have tripInProgress = true

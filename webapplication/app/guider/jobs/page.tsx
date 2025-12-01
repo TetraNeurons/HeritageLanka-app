@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { AppSidebar } from "@/components/guider/Sidebar";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -46,6 +47,7 @@ interface TripLocation {
 interface InProgressJob {
   id: string;
   traveler: {
+    userId: string;
     name: string;
     phone: string;
   };
@@ -87,6 +89,7 @@ interface JobsData {
 }
 
 export default function JobsPage() {
+  const router = useRouter();
   const [currentTime, setCurrentTime] = useState("");
   const [currentDate, setCurrentDate] = useState("");
   const [jobsData, setJobsData] = useState<JobsData | null>(null);
@@ -440,7 +443,12 @@ export default function JobsPage() {
                           {/* Job Header */}
                           <div className="flex items-start justify-between">
                             <div>
-                              <h3 className="font-semibold font-poppins text-gray-900 text-base">{job.traveler.name}</h3>
+                              <button
+                                onClick={() => router.push(`/profile/${job.traveler.userId}`)}
+                                className="font-semibold font-poppins text-gray-900 text-base hover:text-amber-600 hover:underline text-left"
+                              >
+                                {job.traveler.name}
+                              </button>
                               <p className="text-sm font-poppins text-gray-500 mt-1">{job.country}</p>
                             </div>
                             <Badge className={job.status === 'IN_PROGRESS' ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-poppins' : 'bg-gradient-to-r from-green-500 to-emerald-500 text-white font-poppins'}>
@@ -629,7 +637,12 @@ export default function JobsPage() {
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-2">
-                              <h3 className="font-semibold font-poppins text-gray-900">{job.traveler.name}</h3>
+                              <button
+                                onClick={() => router.push(`/profile/${job.traveler.userId}`)}
+                                className="font-semibold font-poppins text-gray-900 hover:text-amber-600 hover:underline"
+                              >
+                                {job.traveler.name}
+                              </button>
                               <Badge 
                                 variant={job.status === 'COMPLETED' ? 'default' : 'destructive'}
                                 className={job.status === 'COMPLETED' ? 'bg-gradient-to-r from-green-500 to-emerald-500 font-poppins' : 'bg-gradient-to-r from-red-500 to-rose-500 font-poppins'}

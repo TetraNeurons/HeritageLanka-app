@@ -15,7 +15,6 @@ import {
   Plane,
   Map,
   History,
-  Globe,
   LogOut,
   PhoneCall,
   Shield,
@@ -35,7 +34,7 @@ import {
 } from "lucide-react";
 
 import axios from "axios";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 
 import {
@@ -47,6 +46,9 @@ import {
   DialogTrigger
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Avatar } from "@/components/Avatar";
+
+const PROFILE_CACHE_KEY = "user_profile_cache";
 
 const menuItems = [
   { icon: Home, label: "Dashboard", href: "/dashboard" },
@@ -62,11 +64,53 @@ export function AppSidebar() {
   const [loading, setLoading] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const pathname = usePathname();
+  const [userProfile, setUserProfile] = useState<{
+    id: string;
+    name: string;
+    profileImageUrl: string | null;
+  } | null>(null);
+
+  // Fetch user profile with localStorage caching
+  useEffect(() => {
+    async function fetchProfile() {
+      // Try to get cached profile from localStorage
+      try {
+        const cachedData = localStorage.getItem(PROFILE_CACHE_KEY);
+        if (cachedData) {
+          const cachedProfile = JSON.parse(cachedData);
+          setUserProfile(cachedProfile);
+          return;
+        }
+      } catch (error) {
+        console.error("Failed to parse cached profile:", error);
+      }
+
+      // Fetch from API if no cache
+      try {
+        const response = await axios.get("/api/profile/me");
+        if (response.data.success) {
+          const profile = {
+            id: response.data.profile.id,
+            name: response.data.profile.name,
+            profileImageUrl: response.data.profile.profileImageUrl,
+          };
+          // Cache the profile in localStorage
+          localStorage.setItem(PROFILE_CACHE_KEY, JSON.stringify(profile));
+          setUserProfile(profile);
+        }
+      } catch (error) {
+        console.error("Failed to fetch profile:", error);
+      }
+    }
+    fetchProfile();
+  }, []);
 
   async function handleSignOut() {
     try {
       setLoading(true);
       await axios.post("/api/auth/signout");
+      // Clear cached profile from localStorage on sign out
+      localStorage.removeItem(PROFILE_CACHE_KEY);
       window.location.href = "/auth/signin";
     } finally {
       setLoading(false);
@@ -78,35 +122,51 @@ export function AppSidebar() {
   return (
     <>
       {/* Desktop Sidebar */}
-      <Sidebar className="w-64 hidden md:flex">
-        <SidebarHeader className="p-6 border-b">
-          <div className="flex flex-col gap-3">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg overflow-hidden" style={{ filter: 'drop-shadow(0 0 8px rgba(245, 158, 11, 0.6))' }}>
-                <img src="/images/logo.png" alt="Heritage Lanka Logo" className="h-full w-full object-contain" />
-              </div>
-              <span className="text-xl font-bold tracking-tight text-gray-900 font-dancing-script">
-                Heritage <span className="ml-1">Lanka</span>
-              </span>
+      <Sidebar className="w-64 hidden md:flex border-r">
+        <SidebarHeader className="p-5 border-b">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-amber-500 to-orange-500 shadow-md">
+              <img src="/images/logo.png" alt="Heritage Lanka Logo" className="h-7 w-7 object-contain brightness-0 invert" />
             </div>
-            <p className="text-sm text-muted-foreground font-poppins font-medium pl-1">Traveler Dashboard</p>
+            <div className="flex-1">
+              <h2 className="text-lg font-bold text-gray-900 font-dancing-script leading-tight">Heritage Lanka</h2>
+              <p className="text-xs text-gray-500 font-poppins">Traveler</p>
+            </div>
           </div>
+          
+          {/* User Avatar */}
+          {userProfile && (
+            <a href="/traveler/profile" className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors border border-gray-200">
+              <Avatar
+                imageUrl={userProfile.profileImageUrl}
+                name={userProfile.name}
+                size="md"
+                clickable={false}
+              />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold font-poppins text-gray-900 truncate">
+                  {userProfile.name}
+                </p>
+                <p className="text-xs text-gray-500 font-poppins">View Profile</p>
+              </div>
+            </a>
+          )}
         </SidebarHeader>
 
-        <SidebarContent>
-          <SidebarMenu className="space-y-2 pt-4">
+        <SidebarContent className="px-3 py-4">
+          <SidebarMenu className="space-y-1">
             {menuItems.map((item) => (
               <SidebarMenuItem key={item.label}>
                 <SidebarMenuButton asChild>
                   <a
                     href={item.href}
-                    className={`flex items-center gap-4 p-4 h-8 text-lg font-medium rounded-lg transition-colors font-poppins ${
+                    className={`flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all font-poppins ${
                       isActive(item.href)
-                        ? "bg-amber-100 text-amber-700 font-semibold"
-                        : "hover:bg-muted"
+                        ? "bg-amber-500 text-white shadow-md"
+                        : "text-gray-700 hover:bg-gray-100"
                     }`}
                   >
-                    <item.icon className="h-6 w-6" />
+                    <item.icon className="h-5 w-5 flex-shrink-0" />
                     <span>{item.label}</span>
                   </a>
                 </SidebarMenuButton>
@@ -116,10 +176,10 @@ export function AppSidebar() {
         </SidebarContent>
 
         {/* Emergency Button */}
-        <div className="px-6 mb-4">
+        <div className="px-3 mb-3">
           <Dialog>
             <DialogTrigger asChild>
-              <button className="flex items-center gap-2 p-2 text-sm font-medium text-red-700 bg-red-100 hover:bg-red-200 rounded-md w-full">
+              <button className="flex items-center justify-center gap-2 px-3 py-2.5 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg w-full transition-colors font-poppins">
                 <PhoneCall className="h-4 w-4" />
                 Emergency Help
               </button>
@@ -210,15 +270,15 @@ export function AppSidebar() {
           </Dialog>
         </div>
 
-        <SidebarFooter className="p-6 border-t">
-          <SidebarMenuButton
+        <SidebarFooter className="p-3 border-t">
+          <button
             onClick={handleSignOut}
             disabled={loading}
-            className="w-full justify-start text-black/70 flex items-center gap-3 h-5 text-lg font-medium"
+            className="w-full flex items-center justify-center gap-2 px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors font-poppins"
           >
-            <LogOut className="h-6 w-6" />
+            <LogOut className="h-4 w-4" />
             {loading ? "Signing out..." : "Sign Out"}
-          </SidebarMenuButton>
+          </button>
         </SidebarFooter>
       </Sidebar>
 

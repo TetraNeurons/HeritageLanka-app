@@ -1,6 +1,6 @@
 // lib/auth_service.ts
 import { db } from '@/db/drizzle';
-import { users, travelers, guides } from '@/db/schema';
+import { users, travelers, guides, guideVerifications } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import bcrypt from 'bcryptjs';
 
@@ -41,10 +41,16 @@ export async function createUser(data: {
   }
 
   if (data.role === 'GUIDE' && data.nic && data.country) {
-    await db.insert(guides).values({
+    const [guide] = await db.insert(guides).values({
       userId: user.id,
       nic: data.nic,
       // country not stored here? add column if needed
+    }).returning();
+
+    // Create verification record with PENDING status for new guides
+    await db.insert(guideVerifications).values({
+      guideId: guide.id,
+      verificationStatus: 'PENDING',
     });
   }
 

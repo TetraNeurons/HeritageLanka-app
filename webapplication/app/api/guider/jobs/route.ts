@@ -103,6 +103,7 @@ export async function GET(request: NextRequest) {
         return {
           id: trip.id,
           traveler: {
+            userId: travelerUser.id,
             name: travelerUser.name,
             phone: travelerUser.phone,
           },
@@ -131,6 +132,7 @@ export async function GET(request: NextRequest) {
     const jobHistory = jobHistoryData.map(({ trip, travelerUser }) => ({
       id: trip.id,
       traveler: {
+        userId: travelerUser.id,
         name: travelerUser.name,
       },
       fromDate: trip.fromDate.toISOString(),

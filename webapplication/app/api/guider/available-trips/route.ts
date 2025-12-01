@@ -120,6 +120,7 @@ export async function GET(request: NextRequest) {
         return {
           id: trip.id,
           traveler: {
+            userId: travelerUser.id,
             name: travelerUser.name,
             languages: travelerLanguages,
           },

@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { AppSidebar } from "@/components/guider/Sidebar";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, MapPin, Calendar, Users, Star, CheckCircle, XCircle, Phone, Globe } from "lucide-react";
+import { Loader2, MapPin, Calendar, Users, Star, CheckCircle, XCircle, Phone, Globe, Clock } from "lucide-react";
 import { toast } from "sonner";
 
 interface TripLocation {
@@ -20,6 +21,7 @@ interface TripLocation {
 interface AvailableTrip {
   id: string;
   traveler: {
+    userId: string;
     name: string;
     languages: string[];
   };
@@ -35,6 +37,7 @@ interface AvailableTrip {
 interface MyTrip {
   id: string;
   traveler: {
+    userId: string;
     name: string;
     phone?: string;
   };
@@ -57,6 +60,7 @@ interface DashboardStats {
 }
 
 export default function GuiderDashboardPage() {
+  const router = useRouter();
   const [currentTime, setCurrentTime] = useState("");
   const [currentDate, setCurrentDate] = useState("");
   
@@ -64,6 +68,13 @@ export default function GuiderDashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [verificationStatus, setVerificationStatus] = useState<{
+    status: string;
+    message: string;
+    rejectionReason?: string;
+    isLegacy?: boolean;
+  } | null>(null);
+  const [showVerificationBanner, setShowVerificationBanner] = useState(true);
 
   // Update time
   useEffect(() => {
@@ -78,7 +89,25 @@ export default function GuiderDashboardPage() {
   // Fetch dashboard data
   useEffect(() => {
     fetchDashboardData();
+    fetchVerificationStatus();
   }, []);
+
+  const fetchVerificationStatus = async () => {
+    try {
+      const response = await fetch("/api/guider/verification-status");
+      const data = await response.json();
+      if (data.success && data.verification) {
+        setVerificationStatus({
+          status: data.verification.status,
+          message: data.verification.message,
+          rejectionReason: data.verification.rejectionReason,
+          isLegacy: data.verification.isLegacy,
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching verification status:", error);
+    }
+  };
 
   const fetchDashboardData = async () => {
     try {
@@ -167,6 +196,45 @@ export default function GuiderDashboardPage() {
               </div>
             </div>
 
+            {/* Verification Status Banner - Only show for PENDING or REJECTED, not for VERIFIED (including legacy) */}
+            {verificationStatus && (verificationStatus.status === 'PENDING' || verificationStatus.status === 'REJECTED') && showVerificationBanner && (
+              <div className={`mb-4 sm:mb-6 p-4 rounded-lg border-2 flex items-start justify-between ${
+                verificationStatus.status === 'PENDING' 
+                  ? 'bg-yellow-50 border-yellow-300 text-yellow-800'
+                  : 'bg-red-50 border-red-300 text-red-800'
+              }`}>
+                <div className="flex items-start gap-3 flex-1">
+                  {verificationStatus.status === 'PENDING' ? (
+                    <Clock className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                  ) : (
+                    <XCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                  )}
+                  <div>
+                    <h3 className="font-semibold font-poppins mb-1">
+                      {verificationStatus.status === 'PENDING' 
+                        ? 'Verification Pending' 
+                        : 'Verification Rejected'}
+                    </h3>
+                    <p className="text-sm font-poppins">
+                      {verificationStatus.message}
+                    </p>
+                    {verificationStatus.rejectionReason && (
+                      <p className="text-sm font-poppins mt-2 italic">
+                        Reason: {verificationStatus.rejectionReason}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowVerificationBanner(false)}
+                  className="text-current hover:opacity-70 transition-opacity"
+                  aria-label="Dismiss banner"
+                >
+                  <XCircle className="h-5 w-5" />
+                </button>
+              </div>
+            )}
+
             {/* Stats Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
               <Card className="bg-white/95 backdrop-blur-md border-2 border-white shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 animate-fadeIn" style={{ animationDelay: '0.1s', animationFillMode: 'both' }}>
@@ -244,7 +312,12 @@ export default function GuiderDashboardPage() {
                     <div className="space-y-3">
                       <div>
                         <p className="text-xs text-gray-500 font-poppins uppercase tracking-wider">Traveler</p>
-                        <p className="text-base font-poppins font-semibold text-gray-900">{stats.currentTrip.traveler.name}</p>
+                        <button
+                          onClick={() => stats.currentTrip && router.push(`/profile/${stats.currentTrip.traveler.userId}`)}
+                          className="text-base font-poppins font-semibold text-gray-900 hover:text-amber-600 hover:underline"
+                        >
+                          {stats.currentTrip.traveler.name}
+                        </button>
                       </div>
                       <div>
                         <p className="text-xs text-gray-500 font-poppins uppercase tracking-wider">Contact</p>
@@ -312,7 +385,12 @@ export default function GuiderDashboardPage() {
                           <div className="md:col-span-2 space-y-3">
                             <div className="flex items-start justify-between">
                               <div>
-                                <h3 className="font-semibold font-poppins text-gray-900 text-base">{trip.traveler.name}</h3>
+                                <button
+                                  onClick={() => router.push(`/profile/${trip.traveler.userId}`)}
+                                  className="font-semibold font-poppins text-gray-900 text-base hover:text-amber-600 hover:underline text-left"
+                                >
+                                  {trip.traveler.name}
+                                </button>
                                 <p className="text-sm font-poppins text-gray-500 mt-1">{trip.country}</p>
                               </div>
                               <Badge variant="outline" className="text-xs font-poppins border-2">

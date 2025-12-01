@@ -502,7 +502,13 @@ export default function TravelerPlansPage() {
                         <div className="pt-3 border-t-2 border-gray-200 space-y-2 bg-gradient-to-br from-amber-50 to-orange-50 p-4 rounded-xl">
                           <div className="flex items-center gap-2 text-sm">
                             <Users className="h-4 w-4 text-amber-600" />
-                            <span className="font-bold font-poppins">Guide: {trip.guide.name}</span>
+                            <span className="font-bold font-poppins">Guide: </span>
+                            <button
+                              onClick={() => router.push(`/profile/${trip.guide?.userId}`)}
+                              className="font-bold font-poppins text-amber-600 hover:text-amber-700 hover:underline"
+                            >
+                              {trip.guide.name}
+                            </button>
                           </div>
                           <div className="flex items-center gap-1 flex-wrap ml-6">
                             <Globe className="h-3 w-3 text-gray-500" />
@@ -798,7 +804,12 @@ export default function TravelerPlansPage() {
                     <div className="space-y-2">
                       <div>
                         <span className="text-xs text-gray-500">Name:</span>
-                        <p className="font-medium">{selectedTrip.guide.name}</p>
+                        <button
+                          onClick={() => router.push(`/profile/${selectedTrip.guide?.userId}`)}
+                          className="font-medium text-blue-600 hover:text-blue-700 hover:underline block mt-1"
+                        >
+                          {selectedTrip.guide.name}
+                        </button>
                       </div>
                       <div>
                         <span className="text-xs text-gray-500">Languages:</span>

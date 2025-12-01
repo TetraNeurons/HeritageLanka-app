@@ -14,6 +14,7 @@ export const tripStatusEnum = pgEnum('trip_status', ['PLANNING', 'CONFIRMED', 'I
 export const adStatusEnum = pgEnum('ad_status', ['PENDING', 'ACTIVE', 'INACTIVE', 'REJECTED']);
 export const workflowTypeEnum = pgEnum('workflow_type', ['GENERATE_AI_PLAN', 'CREATE_MANUAL_PLAN']);
 export const reviewerTypeEnum = pgEnum('reviewer_type', ['TRAVELER', 'GUIDE']);
+export const verificationStatusEnum = pgEnum('verification_status', ['PENDING', 'VERIFIED', 'REJECTED']);
 
 // Users table
 export const users = pgTable('users', {
@@ -249,6 +250,28 @@ export const eventTickets = pgTable('event_tickets', {
   purchasedAt: timestamp('purchased_at').defaultNow().notNull(),
 });
 
+// User Profiles table - NEW TABLE for profile images and bios (doesn't modify users table)
+export const userProfiles = pgTable('user_profiles', {
+  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }).unique(),
+  profileImageUrl: text('profile_image_url'),
+  bio: text('bio'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+// Guide Verifications table - NEW TABLE for guide verification (doesn't modify guides table)
+export const guideVerifications = pgTable('guide_verifications', {
+  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+  guideId: text('guide_id').notNull().references(() => guides.id, { onDelete: 'cascade' }).unique(),
+  verificationStatus: verificationStatusEnum('verification_status').notNull(),
+  verifiedAt: timestamp('verified_at'),
+  verifiedBy: text('verified_by').references(() => users.id, { onDelete: 'set null' }),
+  rejectionReason: text('rejection_reason'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
 // System Feedback table - Public feedback from users (signed in or not)
 export const systemFeedback = pgTable('system_feedback', {
   id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
@@ -280,6 +303,10 @@ export const usersRelations = relations(users, ({ one }) => ({
     fields: [users.id],
     references: [guides.userId],
   }),
+  profile: one(userProfiles, {
+    fields: [users.id],
+    references: [userProfiles.userId],
+  }),
 }));
 
 export const travelersRelations = relations(travelers, ({ one, many }) => ({
@@ -299,6 +326,10 @@ export const guidesRelations = relations(guides, ({ one, many }) => ({
   }),
   trips: many(trips),
   reviews: many(reviews),
+  verification: one(guideVerifications, {
+    fields: [guides.id],
+    references: [guideVerifications.guideId],
+  }),
 }));
 
 export const tripsRelations = relations(trips, ({ one, many }) => ({
@@ -413,3 +444,21 @@ export const eventTicketsRelations = relations(eventTickets, ({ one }) => ({
 }));
 
 // No relations needed for systemFeedback as it's standalone
+
+export const userProfilesRelations = relations(userProfiles, ({ one }) => ({
+  user: one(users, {
+    fields: [userProfiles.userId],
+    references: [users.id],
+  }),
+}));
+
+export const guideVerificationsRelations = relations(guideVerifications, ({ one }) => ({
+  guide: one(guides, {
+    fields: [guideVerifications.guideId],
+    references: [guides.id],
+  }),
+  verifier: one(users, {
+    fields: [guideVerifications.verifiedBy],
+    references: [users.id],
+  }),
+}));

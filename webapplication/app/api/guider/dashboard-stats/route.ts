@@ -81,6 +81,7 @@ export async function GET(request: NextRequest) {
       currentTrip = {
         id: trip.id,
         traveler: {
+          userId: travelerUser.id,
           name: travelerUser.name,
           phone: travelerUser.phone,
         },

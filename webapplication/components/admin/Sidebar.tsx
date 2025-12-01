@@ -34,6 +34,7 @@ import { usePathname } from "next/navigation";
 const menuItems = [
   { icon: Home, label: "Dashboard", href: "/admin/dashboard" },
   { icon: Users, label: "User Management", href: "/admin/users" },
+  { icon: Globe, label: "Guide Verification", href: "/admin/guides" },
   { icon: Plane, label: "Trip Management", href: "/admin/trips" },
   { icon: TicketPercent, label: "Events & Offers", href: "/admin/events" },
   { icon: Megaphone, label: "Advertisements", href: "/admin/advertisements" },
