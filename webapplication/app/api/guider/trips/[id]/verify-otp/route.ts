@@ -98,15 +98,15 @@ export async function POST(
       );
     }
 
-    // Generate guide geohash with precision 5
-    const guideGeohash = geohash.encode(latitude, longitude, 5);
+    // Generate guide geohash with precision 3 (approximately 156km x 156km, covers Sri Lanka)
+    const guideGeohash = geohash.encode(latitude, longitude, 3);
 
-    // Check if geohashes match (same 5-character prefix means within ~5km)
+    // Check if geohashes match (same 3-character prefix means within Sri Lanka)
     if (verification.travelerGeohash !== guideGeohash) {
       return NextResponse.json(
         { 
           success: false, 
-          error: 'Location verification failed. You must be near the traveler to start the trip.',
+          error: 'Location verification failed. You must be in Sri Lanka to start the trip.',
           travelerGeohash: verification.travelerGeohash,
           guideGeohash: guideGeohash,
         },

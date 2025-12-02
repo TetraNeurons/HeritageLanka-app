@@ -124,8 +124,8 @@ export async function POST(
     // Generate 4-digit OTP
     const otp = Math.floor(1000 + Math.random() * 9000).toString();
     
-    // Generate geohash with precision 5 (approximately 5km x 5km)
-    const travelerGeohash = geohash.encode(latitude, longitude, 5);
+    // Generate geohash with precision 3 (approximately 156km x 156km, covers Sri Lanka)
+    const travelerGeohash = geohash.encode(latitude, longitude, 3);
     
     // Set OTP expiration to 30 minutes from now
     const expiresAt = new Date(Date.now() + 30 * 60 * 1000);
