@@ -403,8 +403,8 @@ export default function PlanMakerContent() {
         toast.success('Travel plan accepted and saved successfully!');
         resetForm();
         setPhase(PlanPhase.FORM);
-        // Optionally redirect to plans page
-        // window.location.href = '/traveler/plans';
+        // Redirect to plans page
+        window.location.href = '/traveler/plans';
       } else {
         toast.error('Failed to save plan: ' + data.error);
       }
@@ -456,6 +456,8 @@ export default function PlanMakerContent() {
         toast.success('Travel plan created successfully!');
         resetForm();
         setPhase(PlanPhase.FORM);
+        // Redirect to plans page
+        window.location.href = '/traveler/plans';
       } else {
         const errorMsg = data.error || 'Unknown error';
         setError(errorMsg);
