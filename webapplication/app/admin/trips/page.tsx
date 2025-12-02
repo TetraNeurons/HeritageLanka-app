@@ -42,6 +42,7 @@ import {
   Star,
   Phone,
   Globe,
+  Trash2,
 } from "lucide-react";
 import Fuse from "fuse.js";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -77,7 +78,9 @@ export default function AdminTripsPage() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
+  const [deletingTripId, setDeletingTripId] = useState<string | null>(null);
   const [touristData, setTouristData] = useState<any[]>([]);
   const [fuseInstance, setFuseInstance] = useState<Fuse<any> | null>(null);
 
@@ -198,6 +201,39 @@ export default function AdminTripsPage() {
   const handleViewDetails = (trip: Trip) => {
     setSelectedTrip(trip);
     setDetailsDialogOpen(true);
+  };
+
+  const handleDeleteClick = (trip: Trip) => {
+    setSelectedTrip(trip);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!selectedTrip) return;
+
+    try {
+      setDeletingTripId(selectedTrip.id);
+      const response = await fetch(`/api/admin/trips/${selectedTrip.id}`, {
+        method: "DELETE",
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        // Show success message
+        alert("Trip deleted successfully!");
+        // Refresh trip list
+        await fetchTrips();
+      } else {
+        alert(`Failed to delete trip: ${data.error}`);
+      }
+    } catch (error) {
+      console.error("Error deleting trip:", error);
+      alert("Failed to delete trip. Please try again.");
+    } finally {
+      setDeletingTripId(null);
+      setDeleteDialogOpen(false);
+      setSelectedTrip(null);
+    }
   };
 
   if (loading) {
@@ -403,14 +439,29 @@ export default function AdminTripsPage() {
                               )}
                             </TableCell>
                             <TableCell>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleViewDetails(trip)}
-                              >
-                                <Eye className="h-4 w-4 mr-1" />
-                                View
-                              </Button>
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleViewDetails(trip)}
+                                >
+                                  <Eye className="h-4 w-4 mr-1" />
+                                  View
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleDeleteClick(trip)}
+                                  disabled={deletingTripId === trip.id}
+                                  className="text-red-600 hover:bg-red-50 hover:border-red-300"
+                                >
+                                  {deletingTripId === trip.id ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                  ) : (
+                                    <Trash2 className="h-4 w-4" />
+                                  )}
+                                </Button>
+                              </div>
                             </TableCell>
                           </TableRow>
                         ))}
@@ -465,14 +516,29 @@ export default function AdminTripsPage() {
                           <div className="text-xs text-gray-500">
                             {trip.locations.length} locations • {trip.totalDistance ? `${Math.round(trip.totalDistance)} km` : "Distance TBD"}
                           </div>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleViewDetails(trip)}
-                          >
-                            <Eye className="h-4 w-4 mr-1" />
-                            View
-                          </Button>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleViewDetails(trip)}
+                            >
+                              <Eye className="h-4 w-4 mr-1" />
+                              View
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleDeleteClick(trip)}
+                              disabled={deletingTripId === trip.id}
+                              className="text-red-600 hover:bg-red-50 hover:border-red-300"
+                            >
+                              {deletingTripId === trip.id ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <Trash2 className="h-4 w-4" />
+                              )}
+                            </Button>
+                          </div>
                         </div>
                       </CardContent>
                     </Card>
@@ -668,6 +734,45 @@ export default function AdminTripsPage() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setDetailsDialogOpen(false)}>
               Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Trip</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this trip to {selectedTrip?.country} for {selectedTrip?.traveler.name}? 
+              This action cannot be undone and will remove all associated data including locations and payments.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setDeleteDialogOpen(false)}
+              disabled={deletingTripId !== null}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteConfirm}
+              disabled={deletingTripId !== null}
+            >
+              {deletingTripId ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete Trip
+                </>
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>

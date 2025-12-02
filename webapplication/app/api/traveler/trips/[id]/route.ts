@@ -59,6 +59,23 @@ export async function DELETE(
       );
     }
 
+    // Check if payment has been made
+    const [payment] = await db
+      .select()
+      .from(payments)
+      .where(eq(payments.tripId, tripId))
+      .limit(1);
+
+    if (payment) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Cannot delete trip after payment has been made. Please contact support for assistance.',
+        },
+        { status: 400 }
+      );
+    }
+
     // Delete trip with cascade to tripLocations and payments
     // The database schema has onDelete: 'cascade' configured, so related records will be automatically deleted
     await db.delete(trips).where(eq(trips.id, tripId));

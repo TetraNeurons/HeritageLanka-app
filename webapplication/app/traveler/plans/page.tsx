@@ -284,7 +284,8 @@ export default function TravelerPlansPage() {
   };
 
   const canDelete = (trip: Trip) => {
-    return trip.status === "PLANNING" || trip.status === "CONFIRMED";
+    // Can only delete if status is PLANNING or CONFIRMED AND no payment has been made
+    return (trip.status === "PLANNING" || trip.status === "CONFIRMED") && !trip.payment;
   };
 
   const canPay = (trip: Trip) => {
