@@ -62,17 +62,37 @@ export async function GET(request: NextRequest) {
     // Format payments with trip or event details
     const formattedPayments = await Promise.all(
       allPaymentsData.map(async (payment) => {
-        // Get traveler info
-        const [travelerData] = await db
-          .select({
-            travelerId: travelers.id,
-            travelerName: users.name,
-            travelerEmail: users.email,
-          })
-          .from(travelers)
-          .innerJoin(users, eq(travelers.userId, users.id))
-          .where(eq(travelers.id, payment.travelerId!))
-          .limit(1);
+        let travelerData = null;
+
+        // If travelerId is directly available (event payments)
+        if (payment.travelerId) {
+          const [data] = await db
+            .select({
+              travelerId: travelers.id,
+              travelerName: users.name,
+              travelerEmail: users.email,
+            })
+            .from(travelers)
+            .innerJoin(users, eq(travelers.userId, users.id))
+            .where(eq(travelers.id, payment.travelerId))
+            .limit(1);
+          travelerData = data;
+        }
+        // If travelerId is null but tripId exists, get traveler from trip
+        else if (payment.tripId) {
+          const [data] = await db
+            .select({
+              travelerId: travelers.id,
+              travelerName: users.name,
+              travelerEmail: users.email,
+            })
+            .from(trips)
+            .innerJoin(travelers, eq(trips.travelerId, travelers.id))
+            .innerJoin(users, eq(travelers.userId, users.id))
+            .where(eq(trips.id, payment.tripId))
+            .limit(1);
+          travelerData = data;
+        }
 
         const basePayment = {
           id: payment.id,

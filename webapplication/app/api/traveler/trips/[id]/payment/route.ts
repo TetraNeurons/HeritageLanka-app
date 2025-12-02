@@ -113,6 +113,7 @@ export async function POST(
     } else {
       // Create payment record with PENDING status
       await db.insert(payments).values({
+        travelerId: traveler.id,
         tripId: tripId,
         amount: amount,
         status: 'PENDING',
