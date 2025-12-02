@@ -7,8 +7,16 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, MapPin, Calendar, Users, Star, CheckCircle, XCircle, Phone, Globe, Clock } from "lucide-react";
+import { Loader2, MapPin, Calendar, Users, Star, CheckCircle, XCircle, Phone, Globe, Clock, ChevronDown, ChevronUp, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface TripLocation {
   id: string;
@@ -75,6 +83,9 @@ export default function GuiderDashboardPage() {
     isLegacy?: boolean;
   } | null>(null);
   const [showVerificationBanner, setShowVerificationBanner] = useState(true);
+  const [expandedTrips, setExpandedTrips] = useState<Set<string>>(new Set());
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+  const [selectedTripToAccept, setSelectedTripToAccept] = useState<AvailableTrip | null>(null);
 
   // Update time
   useEffect(() => {
@@ -133,8 +144,18 @@ export default function GuiderDashboardPage() {
     }
   };
 
-  const handleAcceptTrip = async (tripId: string) => {
+  const handleAcceptTripClick = (trip: AvailableTrip) => {
+    setSelectedTripToAccept(trip);
+    setConfirmDialogOpen(true);
+  };
+
+  const handleConfirmAccept = async () => {
+    if (!selectedTripToAccept) return;
+
+    const tripId = selectedTripToAccept.id;
     setActionLoading(tripId);
+    setConfirmDialogOpen(false);
+    
     try {
       const res = await fetch(`/api/guider/trips/${tripId}/accept`, {
         method: "POST",
@@ -153,7 +174,20 @@ export default function GuiderDashboardPage() {
       toast.error("Failed to accept trip");
     } finally {
       setActionLoading(null);
+      setSelectedTripToAccept(null);
     }
+  };
+
+  const toggleTripExpanded = (tripId: string) => {
+    setExpandedTrips(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(tripId)) {
+        newSet.delete(tripId);
+      } else {
+        newSet.add(tripId);
+      }
+      return newSet;
+    });
   };
 
   const formatDate = (dateStr: string) => {
@@ -380,58 +414,96 @@ export default function GuiderDashboardPage() {
                         key={trip.id}
                         className="border-2 border-gray-200 rounded-lg p-4 hover:shadow-lg hover:border-amber-200 transition-all bg-white"
                       >
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                          {/* Trip Info */}
-                          <div className="md:col-span-2 space-y-3">
-                            <div className="flex items-start justify-between">
-                              <div>
-                                <button
-                                  onClick={() => router.push(`/profile/${trip.traveler.userId}`)}
-                                  className="font-semibold font-poppins text-gray-900 text-base hover:text-amber-600 hover:underline text-left"
-                                >
-                                  {trip.traveler.name}
-                                </button>
-                                <p className="text-sm font-poppins text-gray-500 mt-1">{trip.country}</p>
-                              </div>
-                              <Badge variant="outline" className="text-xs font-poppins border-2">
-                                {trip.numberOfPeople} {trip.numberOfPeople === 1 ? "person" : "people"}
-                              </Badge>
+                        <div className="space-y-3">
+                          {/* Trip Header */}
+                          <div className="flex items-start justify-between">
+                            <div>
+                              <button
+                                onClick={() => router.push(`/profile/${trip.traveler.userId}`)}
+                                className="font-semibold font-poppins text-gray-900 text-base hover:text-amber-600 hover:underline text-left"
+                              >
+                                {trip.traveler.name}
+                              </button>
+                              <p className="text-sm font-poppins text-gray-500 mt-1">{trip.country}</p>
                             </div>
+                            <Badge variant="outline" className="text-xs font-poppins border-2">
+                              {trip.numberOfPeople} {trip.numberOfPeople === 1 ? "person" : "people"}
+                            </Badge>
+                          </div>
 
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                          {/* Trip Details */}
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                            <div className="flex items-center gap-2 text-gray-600">
+                              <Calendar className="h-4 w-4" />
+                              <span className="font-poppins">{formatDate(trip.fromDate)} - {formatDate(trip.toDate)}</span>
+                            </div>
+                            {trip.totalDistance && (
                               <div className="flex items-center gap-2 text-gray-600">
-                                <Calendar className="h-4 w-4" />
-                                <span className="font-poppins">{formatDate(trip.fromDate)} - {formatDate(trip.toDate)}</span>
-                              </div>
-                              {trip.totalDistance && (
-                                <div className="flex items-center gap-2 text-gray-600">
-                                  <MapPin className="h-4 w-4" />
-                                  <span className="font-poppins">{trip.totalDistance.toFixed(1)} km</span>
-                                </div>
-                              )}
-                            </div>
-
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <Globe className="h-4 w-4 text-gray-400" />
-                              <span className="text-xs font-poppins text-gray-500">Shared languages:</span>
-                              {trip.sharedLanguages.map((lang) => (
-                                <Badge key={lang} variant="secondary" className="text-xs font-poppins border-2">
-                                  {lang}
-                                </Badge>
-                              ))}
-                            </div>
-
-                            {trip.locations.length > 0 && (
-                              <div className="text-xs font-poppins text-gray-500">
-                                {trip.locations.length} location{trip.locations.length !== 1 ? "s" : ""} planned
+                                <MapPin className="h-4 w-4" />
+                                <span className="font-poppins">{trip.totalDistance.toFixed(1)} km</span>
                               </div>
                             )}
                           </div>
 
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <Globe className="h-4 w-4 text-gray-400" />
+                            <span className="text-xs font-poppins text-gray-500">Shared languages:</span>
+                            {trip.sharedLanguages.map((lang) => (
+                              <Badge key={lang} variant="secondary" className="text-xs font-poppins border-2">
+                                {lang}
+                              </Badge>
+                            ))}
+                          </div>
+
+                          {/* Expandable Locations */}
+                          {trip.locations.length > 0 && (
+                            <div className="pt-2 border-t">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => toggleTripExpanded(trip.id)}
+                                className="w-full justify-between hover:bg-amber-50 transition-colors duration-200 font-poppins"
+                              >
+                                <span className="text-sm font-medium">
+                                  {trip.locations.length} location{trip.locations.length !== 1 ? "s" : ""} planned
+                                </span>
+                                {expandedTrips.has(trip.id) ? (
+                                  <ChevronUp className="h-4 w-4" />
+                                ) : (
+                                  <ChevronDown className="h-4 w-4" />
+                                )}
+                              </Button>
+
+                              {expandedTrips.has(trip.id) && (
+                                <div className="mt-3 space-y-2 animate-fadeIn">
+                                  {trip.locations.map((location, idx) => (
+                                    <div
+                                      key={location.id}
+                                      className="p-3 bg-amber-50 border border-amber-100 rounded-lg text-sm"
+                                    >
+                                      <div className="flex items-start gap-2">
+                                        <MapPin className="h-4 w-4 text-amber-500 mt-0.5 flex-shrink-0" />
+                                        <div className="flex-1">
+                                          <p className="font-poppins font-medium text-gray-900">{location.title}</p>
+                                          <p className="font-poppins text-gray-600 text-xs mt-1">{location.address}</p>
+                                          <div className="flex items-center gap-3 mt-2 text-xs font-poppins text-gray-500">
+                                            <span>Day {location.dayNumber}</span>
+                                            <span>•</span>
+                                            <span>Stop {location.visitOrder}</span>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          )}
+
                           {/* Actions */}
-                          <div className="flex md:flex-col gap-2 md:justify-center">
+                          <div className="flex gap-2 pt-2 border-t">
                             <Button
-                              onClick={() => handleAcceptTrip(trip.id)}
+                              onClick={() => handleAcceptTripClick(trip)}
                               disabled={actionLoading === trip.id}
                               className="flex-1 h-12 font-poppins font-bold bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 hover:scale-105 active:scale-98 text-white shadow-xl transition-all duration-200"
                             >
@@ -455,6 +527,84 @@ export default function GuiderDashboardPage() {
           </main>
         </div>
       </div>
+
+      {/* Confirmation Dialog */}
+      <Dialog open={confirmDialogOpen} onOpenChange={setConfirmDialogOpen}>
+        <DialogContent className="max-w-md bg-white/95 backdrop-blur-md border-2 border-white shadow-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 font-poppins text-xl">
+              <AlertTriangle className="h-5 w-5 text-amber-600" />
+              Accept Trip Request
+            </DialogTitle>
+            <DialogDescription className="font-poppins">
+              Are you sure you want to accept this trip?
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            {selectedTripToAccept && (
+              <div className="bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-200 p-4 rounded-lg">
+                <div className="space-y-2 text-sm">
+                  <div>
+                    <span className="font-semibold font-poppins text-gray-700">Traveler:</span>
+                    <span className="ml-2 font-poppins text-gray-900">{selectedTripToAccept.traveler.name}</span>
+                  </div>
+                  <div>
+                    <span className="font-semibold font-poppins text-gray-700">Duration:</span>
+                    <span className="ml-2 font-poppins text-gray-900">
+                      {formatDate(selectedTripToAccept.fromDate)} - {formatDate(selectedTripToAccept.toDate)}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="font-semibold font-poppins text-gray-700">Group Size:</span>
+                    <span className="ml-2 font-poppins text-gray-900">
+                      {selectedTripToAccept.numberOfPeople} {selectedTripToAccept.numberOfPeople === 1 ? "person" : "people"}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="font-semibold font-poppins text-gray-700">Locations:</span>
+                    <span className="ml-2 font-poppins text-gray-900">
+                      {selectedTripToAccept.locations.length} stop{selectedTripToAccept.locations.length !== 1 ? "s" : ""}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            <div className="bg-gradient-to-br from-red-50 to-rose-50 border-2 border-red-200 p-4 rounded-lg">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
+                <div className="text-sm text-red-800">
+                  <p className="font-semibold font-poppins mb-2">Important Notice:</p>
+                  <p className="font-poppins">
+                    You can only work on <strong>one trip at a time</strong>. Accepting this trip means you won't be able to accept other trip requests until you complete this one.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setConfirmDialogOpen(false);
+                setSelectedTripToAccept(null);
+              }}
+              className="font-poppins font-semibold border-2"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleConfirmAccept}
+              className="font-poppins font-bold bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 shadow-lg"
+            >
+              <CheckCircle className="h-4 w-4 mr-2" />
+              Yes, Accept Trip
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </SidebarProvider>
   );
 }
