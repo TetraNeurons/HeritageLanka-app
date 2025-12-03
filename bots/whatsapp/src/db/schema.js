@@ -18,7 +18,7 @@ const users = pgTable('users', {
     email: text('email').notNull().unique(),
     password: text('password').notNull(),
     role: userRoleEnum('role').notNull(),
-    phone: text('phone').notNull(),
+    phone: text('phone').notNull().unique(),
     name: text('name').notNull(),
     birthYear: integer('birth_year').notNull(),
     gender: genderEnum('gender').notNull(),
