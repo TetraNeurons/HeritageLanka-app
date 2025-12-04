@@ -155,7 +155,7 @@ export default function SignUpPage() {
         playsInline
         className="absolute inset-0 w-full h-full object-cover"
       >
-        <source src="/videos/Hero-Video-Trim.mp4" type="video/mp4" />
+        <source src="/videos/Hero-Video-Trim.webm" type="video/webm" />
       </video>
 
       {/* Gradient Overlay */}
