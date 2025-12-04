@@ -19,7 +19,7 @@ export function AccessibilityWidget() {
   const [position, setPosition] = useState({ x: 20, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [hasDragged, setHasDragged] = useState(false);
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [fontSize, setFontSize] = useState(100);
   const [colorBlindMode, setColorBlindMode] = useState<ColorBlindMode>('normal');
   const [screenReaderEnabled, setScreenReaderEnabled] = useState(false);
@@ -125,47 +125,85 @@ export function AccessibilityWidget() {
     }
   }, [screenReaderEnabled]);
 
-  const handleMouseDown = (e: React.MouseEvent) => {
+  const handleDragStart = (clientX: number, clientY: number) => {
     setIsDragging(true);
     setHasDragged(false);
-    setDragOffset({
-      x: e.clientX - position.x,
-      y: e.clientY - position.y,
+    setDragStart({
+      x: clientX - position.x,
+      y: clientY - position.y,
     });
   };
 
-  const handleClick = () => {
-    // Only open if we didn't drag
-    if (!hasDragged) {
+  const handleDragMove = (clientX: number, clientY: number) => {
+    if (isDragging) {
+      const moveThreshold = 5; // Minimum pixels to consider it a drag
+      const deltaX = Math.abs(clientX - (dragStart.x + position.x));
+      const deltaY = Math.abs(clientY - (dragStart.y + position.y));
+      
+      if (deltaX > moveThreshold || deltaY > moveThreshold) {
+        setHasDragged(true);
+      }
+      
+      setPosition({
+        x: Math.max(0, Math.min(window.innerWidth - (isOpen ? 320 : 60), clientX - dragStart.x)),
+        y: Math.max(0, Math.min(window.innerHeight - 100, clientY - dragStart.y)),
+      });
+    }
+  };
+
+  const handleDragEnd = () => {
+    if (isDragging && !hasDragged) {
       setIsOpen(true);
     }
+    setIsDragging(false);
+  };
+
+  // Mouse events
+  const handleMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    handleDragStart(e.clientX, e.clientY);
+  };
+
+  // Touch events for mobile
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    handleDragStart(touch.clientX, touch.clientY);
   };
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      if (isDragging) {
-        setHasDragged(true);
-        setPosition({
-          x: Math.max(0, Math.min(window.innerWidth - 300, e.clientX - dragOffset.x)),
-          y: Math.max(0, Math.min(window.innerHeight - 100, e.clientY - dragOffset.y)),
-        });
+      handleDragMove(e.clientX, e.clientY);
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (e.touches.length > 0) {
+        const touch = e.touches[0];
+        handleDragMove(touch.clientX, touch.clientY);
       }
     };
 
     const handleMouseUp = () => {
-      setIsDragging(false);
+      handleDragEnd();
+    };
+
+    const handleTouchEnd = () => {
+      handleDragEnd();
     };
 
     if (isDragging) {
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
+      document.addEventListener('touchmove', handleTouchMove, { passive: false });
+      document.addEventListener('touchend', handleTouchEnd);
     }
 
     return () => {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
+      document.removeEventListener('touchmove', handleTouchMove);
+      document.removeEventListener('touchend', handleTouchEnd);
     };
-  }, [isDragging, dragOffset]);
+  }, [isDragging, dragStart, position, isOpen]);
 
   const resetSettings = () => {
     setFontSize(100);
@@ -201,24 +239,31 @@ export function AccessibilityWidget() {
 
       {/* Floating Widget */}
       <div
-        className="fixed z-50"
+        className="fixed z-50 touch-none"
         style={{ left: `${position.x}px`, top: `${position.y}px` }}
       >
         {!isOpen ? (
           <Button
-            onClick={handleClick}
             onMouseDown={handleMouseDown}
-            className="rounded-full w-12 h-12 shadow-lg cursor-move relative bg-blue-400 hover:bg-blue-500 text-white"
+            onTouchStart={handleTouchStart}
+            className="rounded-full w-14 h-14 shadow-lg cursor-move relative bg-blue-500 hover:bg-blue-600 text-white active:scale-95 transition-transform"
             aria-label="Open accessibility options"
             title="Accessibility Options (Drag to move)"
           >
-            <GripVertical className="w-3 h-3 absolute top-1 left-1 opacity-40" />
-            <Accessibility className="w-5 h-5" />
+            <GripVertical className="w-4 h-4 absolute top-1 left-1 opacity-50" />
+            <Accessibility className="w-6 h-6" />
           </Button>
         ) : (
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl p-4 w-80 border border-gray-200 dark:border-gray-700">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-lg">Accessibility</h3>
+            <div 
+              className="flex items-center justify-between mb-4 cursor-move touch-none"
+              onMouseDown={handleMouseDown}
+              onTouchStart={handleTouchStart}
+            >
+              <div className="flex items-center gap-2">
+                <GripVertical className="w-4 h-4 text-gray-400" />
+                <h3 className="font-semibold text-lg">Accessibility</h3>
+              </div>
               <Button
                 variant="ghost"
                 size="sm"

@@ -23,7 +23,8 @@ import {
   Brain,
   Menu,
   X,
-  MessageSquare
+  MessageSquare,
+  ExternalLink
 } from "lucide-react";
 
 import axios from "axios";
@@ -82,14 +83,14 @@ export function AppSidebar() {
       <Sidebar className="hidden md:flex w-64">
       <SidebarHeader className="p-6 border-b">
         <div className="flex flex-col gap-3">
-          <div className="flex items-center gap-3">
+          <a href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg overflow-hidden" style={{ filter: 'drop-shadow(0 0 8px rgba(245, 158, 11, 0.6))' }}>
               <img src="/images/logo.png" alt="Heritage Lanka Logo" className="h-full w-full object-contain" />
             </div>
             <span className="text-xl font-bold tracking-tight text-gray-900 font-dancing-script">
               Heritage <span className="ml-1">Lanka</span>
             </span>
-          </div>
+          </a>
           <p className="text-sm text-muted-foreground font-poppins font-medium pl-1">Admin Dashboard</p>
         </div>
       </SidebarHeader>
@@ -117,14 +118,26 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="p-6 border-t">
-        <SidebarMenuButton
-          onClick={handleSignOut}
-          disabled={loading}
-          className="w-full justify-start text-black/70 flex items-center gap-3 h-5 text-lg font-medium font-poppins"
-        >
-          <LogOut className="h-6 w-6" />
-          {loading ? "Signing out..." : "Sign Out"}
-        </SidebarMenuButton>
+        <div className="space-y-3">
+          {/* Home Page Link */}
+          <a
+            href="/"
+            className="w-full flex items-center gap-3 px-4 py-3 text-base font-medium font-poppins text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors border border-blue-200"
+          >
+            <ExternalLink className="h-5 w-5" />
+            <span>Visit Home Page</span>
+          </a>
+
+          {/* Sign Out Button */}
+          <button
+            onClick={handleSignOut}
+            disabled={loading}
+            className="w-full flex items-center gap-3 px-4 py-3 text-base font-medium font-poppins text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors border border-red-200"
+          >
+            <LogOut className="h-5 w-5" />
+            {loading ? "Signing out..." : "Sign Out"}
+          </button>
+        </div>
       </SidebarFooter>
     </Sidebar>
 
@@ -197,12 +210,22 @@ export function AppSidebar() {
                   <span className="text-sm font-medium font-poppins">{item.label}</span>
                 </a>
               ))}
+
+              {/* Home Page */}
+              <a
+                href="/"
+                className="flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-blue-600 bg-blue-50 hover:bg-blue-100 mt-2 border-t pt-4 border-blue-200"
+                onClick={() => setMenuOpen(false)}
+              >
+                <ExternalLink className="h-5 w-5" />
+                <span className="text-sm font-medium font-poppins">Visit Home Page</span>
+              </a>
               
               {/* Sign Out Button */}
               <button
                 onClick={handleSignOut}
                 disabled={loading}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-red-600 hover:bg-red-50 mt-2 border-t pt-4"
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-red-600 bg-red-50 hover:bg-red-100 border border-red-200"
               >
                 <LogOut className="h-5 w-5" />
                 <span className="text-sm font-medium font-poppins">

@@ -31,6 +31,7 @@ import {
   BookOpen,
   Menu,
   X,
+  Globe,
 } from "lucide-react";
 
 import axios from "axios";
@@ -124,7 +125,7 @@ export function AppSidebar() {
       {/* Desktop Sidebar */}
       <Sidebar className="w-64 hidden md:flex border-r">
         <SidebarHeader className="p-5 border-b">
-          <div className="flex items-center gap-3 mb-4">
+          <a href="/" className="flex items-center gap-3 mb-4 hover:opacity-80 transition-opacity">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-amber-500 to-orange-500 shadow-md">
               <img src="/images/logo.png" alt="Heritage Lanka Logo" className="h-7 w-7 object-contain brightness-0 invert" />
             </div>
@@ -132,7 +133,7 @@ export function AppSidebar() {
               <h2 className="text-lg font-bold text-gray-900 font-dancing-script leading-tight">Heritage Lanka</h2>
               <p className="text-xs text-gray-500 font-poppins">Traveler</p>
             </div>
-          </div>
+          </a>
           
           {/* User Avatar */}
           {userProfile && (
@@ -271,14 +272,26 @@ export function AppSidebar() {
         </div>
 
         <SidebarFooter className="p-3 border-t">
-          <button
-            onClick={handleSignOut}
-            disabled={loading}
-            className="w-full flex items-center justify-center gap-2 px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors font-poppins"
-          >
-            <LogOut className="h-4 w-4" />
-            {loading ? "Signing out..." : "Sign Out"}
-          </button>
+          <div className="space-y-2">
+            {/* Home Page Link */}
+            <a
+              href="/"
+              className="w-full flex items-center justify-center gap-2 px-3 py-2.5 text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors font-poppins border border-blue-200"
+            >
+              <Globe className="h-4 w-4" />
+              Visit Home Page
+            </a>
+
+            {/* Sign Out Button */}
+            <button
+              onClick={handleSignOut}
+              disabled={loading}
+              className="w-full flex items-center justify-center gap-2 px-3 py-2.5 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors font-poppins border border-red-200"
+            >
+              <LogOut className="h-4 w-4" />
+              {loading ? "Signing out..." : "Sign Out"}
+            </button>
+          </div>
         </SidebarFooter>
       </Sidebar>
 
@@ -491,11 +504,21 @@ export function AppSidebar() {
                 </DialogContent>
               </Dialog>
 
+              {/* Home Page */}
+              <a
+                href="/"
+                className="flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-blue-600 bg-blue-50 hover:bg-blue-100 mt-2 border-t pt-4 border-blue-200"
+                onClick={() => setMenuOpen(false)}
+              >
+                <Globe className="h-5 w-5" />
+                <span className="text-sm font-medium font-poppins">Visit Home Page</span>
+              </a>
+
               {/* Sign Out Button */}
               <button
                 onClick={handleSignOut}
                 disabled={loading}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-red-600 hover:bg-red-50 mt-2 border-t pt-4"
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-red-600 bg-red-50 hover:bg-red-100 border border-red-200"
               >
                 <LogOut className="h-5 w-5" />
                 <span className="text-sm font-medium font-poppins">
