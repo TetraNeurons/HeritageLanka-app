@@ -48,7 +48,7 @@ export default function Home() {
             playsInline
             className="w-full h-full object-cover"
           >
-            <source src="/videos/hero-video.mp4" type="video/mp4" />
+            <source src="/videos/hero-video.webm" type="video/webm" />
             Your browser does not support the video tag.
           </video>
           {/* Dark overlay for better text readability */}
