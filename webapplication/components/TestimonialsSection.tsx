@@ -14,6 +14,15 @@ interface Testimonial {
   createdAt: string
 }
 
+interface CachedTestimonials {
+  data: Testimonial[]
+  timestamp: number
+}
+
+const CACHE_KEY = "testimonials_cache"
+const CACHE_DURATION = 24 * 60 * 60 * 1000 // 24 hours in milliseconds
+const MAX_TESTIMONIALS = 3
+
 export default function TestimonialsSection() {
   const [testimonials, setTestimonials] = useState<Testimonial[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -24,11 +33,46 @@ export default function TestimonialsSection() {
 
   const fetchTestimonials = async () => {
     try {
+      // Check if we have cached data
+      const cachedData = localStorage.getItem(CACHE_KEY)
+      
+      if (cachedData) {
+        const parsed: CachedTestimonials = JSON.parse(cachedData)
+        const now = Date.now()
+        
+        // Check if cache is still valid (less than 24 hours old)
+        if (now - parsed.timestamp < CACHE_DURATION) {
+          setTestimonials(parsed.data)
+          setIsLoading(false)
+          return
+        }
+      }
+
+      // Cache is invalid or doesn't exist, fetch from API
       const response = await fetch("/api/public/feedback")
       const data = await response.json()
-      setTestimonials(data.testimonials || [])
+      const allTestimonials = data.testimonials || []
+      
+      // Get only the latest 3 testimonials
+      const latestThree = allTestimonials.slice(0, MAX_TESTIMONIALS)
+      
+      // Cache the data with timestamp
+      const cacheData: CachedTestimonials = {
+        data: latestThree,
+        timestamp: Date.now()
+      }
+      localStorage.setItem(CACHE_KEY, JSON.stringify(cacheData))
+      
+      setTestimonials(latestThree)
     } catch (error) {
       console.error("Error fetching testimonials:", error)
+      
+      // Try to use cached data even if expired, as fallback
+      const cachedData = localStorage.getItem(CACHE_KEY)
+      if (cachedData) {
+        const parsed: CachedTestimonials = JSON.parse(cachedData)
+        setTestimonials(parsed.data)
+      }
     } finally {
       setIsLoading(false)
     }
