@@ -19,9 +19,14 @@ export default function Footer() {
         {/* Bottom */}
         <div className="border-t border-border/40 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-            <p className="text-sm text-muted-foreground">
-              © {currentYear} Heritage Lanka. All rights reserved.
-            </p>
+            <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-4">
+              <p className="text-sm text-muted-foreground">
+                © {currentYear} Heritage Lanka. All rights reserved.
+              </p>
+              <Link href="/privacy" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                Privacy Policy
+              </Link>
+            </div>
             <div className="flex items-center space-x-6">
               <Link href="#twitter" className="text-muted-foreground hover:text-foreground transition-colors">
                 <span className="sr-only">Twitter</span>

@@ -10,13 +10,19 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Avatar } from "@/components/Avatar";
 import { toast } from "sonner";
-import { Loader2, Upload, X } from "lucide-react";
+import { Loader2, Upload, X, Trash2, Shield } from "lucide-react";
 import axios from "axios";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function TravelerProfilePage() {
+  const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [profile, setProfile] = useState<any>(null);
   const [formData, setFormData] = useState({
     name: "",
@@ -133,6 +139,32 @@ export default function TravelerProfilePage() {
       toast.error(error.response?.data?.error || "Failed to delete image");
     } finally {
       setUploading(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    try {
+      setDeleting(true);
+      const response = await axios.delete("/api/profile/delete");
+      
+      if (response.data.success) {
+        toast.success("Account deleted successfully!");
+        
+        // Logout and redirect to home page
+        try {
+          await axios.post("/api/auth/logout");
+        } catch (logoutError) {
+          console.error("Logout error:", logoutError);
+        }
+        
+        // Redirect to home page
+        router.push("/");
+      }
+    } catch (error: any) {
+      console.error("Failed to delete account:", error);
+      toast.error(error.response?.data?.error || "Failed to delete account");
+      setDeleting(false);
+      setShowDeleteDialog(false);
     }
   };
 
@@ -304,6 +336,44 @@ export default function TravelerProfilePage() {
                       Cancel
                     </Button>
                   </div>
+
+                  {/* Privacy and Account Management */}
+                  <div className="pt-6 border-t space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-lg font-semibold text-gray-900">
+                        Privacy & Account
+                      </h3>
+                    </div>
+                    
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <Link href="/privacy" className="flex-1">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="w-full"
+                        >
+                          <Shield className="h-4 w-4 mr-2" />
+                          Privacy Policy
+                        </Button>
+                      </Link>
+                      
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setShowDeleteDialog(true)}
+                        className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+                        disabled={saving || uploading}
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete Account
+                      </Button>
+                    </div>
+                    
+                    <p className="text-xs text-gray-500">
+                      Deleting your account will permanently remove all your data including trips, 
+                      reviews, and profile information. This action cannot be undone.
+                    </p>
+                  </div>
                 </CardContent>
               </Card>
               </div>
@@ -311,6 +381,19 @@ export default function TravelerProfilePage() {
           </main>
         </div>
       </div>
+
+      {/* Delete Account Confirmation Dialog */}
+      <ConfirmationDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        title="Delete Account"
+        description="Are you absolutely sure you want to delete your account? This will permanently remove all your data including trips, reviews, profile information, and payment history. This action cannot be undone and you will be immediately signed out."
+        confirmText="Delete Account"
+        cancelText="Keep Account"
+        onConfirm={handleDeleteAccount}
+        loading={deleting}
+        destructive={true}
+      />
     </SidebarProvider>
   );
 }
